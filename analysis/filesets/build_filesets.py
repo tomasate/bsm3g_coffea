@@ -18,8 +18,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # open dataset configs
-    filesets_dir = Path.home() / "public" / "higgscharm" / "analysis" / "filesets"
-    datasets_dir = filesets_dir / f"{args.year}_nanov12.yaml"
+    filesets_dir = Path.cwd() / "analysis" / "filesets"
+    datasets_dir = filesets_dir / f"{args.year}_nanov9.yaml"
     with open(datasets_dir, "r") as f:
         dataset_configs = yaml.safe_load(f)
     # read dataset queries
@@ -34,14 +34,7 @@ if __name__ == "__main__":
         # create a dataset_definition dict for each yeare
         dataset_definition = {}
         for dataset_key, query in das_queries.items():
-            dataset_definition[f"/{query}"] = {
-                "short_name": dataset_key,
-                "metadata": {
-                    "isMC": (
-                        True if dataset_configs[dataset_key]["era"] == "MC" else False
-                    )
-                },
-            }
+            dataset_definition[f"/{query}"] = {"short_name": dataset_key}
         # the dataset definition is passed to a DataDiscoveryCLI
         ddc = DataDiscoveryCLI()
         # set the allow sites to look for replicas
