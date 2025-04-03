@@ -18,7 +18,7 @@ def parse_args():
         "--workflow",
         type=str,
         required=True,
-        choices=["ttbar"],
+        choices=["2b1mu", "2b1e"],
         help="workflow config to run",
     )
     parser.add_argument(
