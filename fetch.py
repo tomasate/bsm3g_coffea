@@ -32,5 +32,5 @@ if __name__ == "__main__":
         cmd = "python3 analysis/filesets/build_sites.py"
         subprocess.run(cmd, shell=True)
 
-    cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/make_filesets.py --year {args.year}"
+    cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/build_filesets.py --year {args.year}"
     subprocess.run(cmd, shell=True)
