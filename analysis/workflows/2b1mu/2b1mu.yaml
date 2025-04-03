@@ -1,0 +1,247 @@
+object_selection:
+  muons:
+    field: events.Muon
+    cuts:
+      - events.Muon.pt > 35
+      - np.abs(events.Muon.eta) < 2.4
+      - working_points.muons_id(events, 'tight')
+      - working_points.muons_iso(events, 'tight')
+  electrons:
+    field: events.Electron
+    cuts:
+      - events.Electron.pt > 30
+      - np.abs(events.Electron.eta) < (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+      - working_points.electrons_id(events, 'wp90iso')
+      - delta_r_mask(events.Electron, objects['muons'], 0.4)
+  taus:
+    field: events.Tau
+    cuts:
+      - events.Tau.pt > 20
+      - np.abs(events.Tau.eta) < 2.3
+      - np.abs(events.Tau.dz) < 0.2
+      - working_points.taus_vs_jet(events, 'loose')
+      - working_points.taus_vs_ele(events, 'vvloose')
+      - working_points.taus_vs_mu(events, 'loose')
+      - working_points.taus_decaymode(events, '13')
+      - delta_r_mask(events.Tau, objects['electrons'], 0.3)
+      - delta_r_mask(events.Tau, objects['muons'], 0.3)
+  jets:
+    field: events.Jet
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.4
+      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_pileup_id(events, 'tight', year)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
+  bjets:
+    field: events.Jet
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.4
+      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_pileup_id(events, 'tight', year)
+      - working_points.jets_deepjet_b(events, 'medium', year)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
+  met:
+    field: events.MET
+event_selection:
+  hlt_paths:
+    - IsoMu27
+  selections:
+    goodvertex: events.PV.npvsGood > 0
+    lumi: get_lumi_mask(events, year)
+    trigger: get_trigger_mask(events, hlt_paths)
+    trigger_match: get_trigger_match_mask(events, hlt_paths)
+    metfilters: get_metfilters_mask(events, year)
+    hemcleaning: get_hemcleaning_mask(events, year)
+    exactly_two_bjets: ak.num(objects['bjets']) == 2
+    exactly_one_muon: ak.num(objects['muons']) == 1
+    electron_veto: ak.num(objects['electrons']) == 0
+    tau_veto: ak.num(objects['taus']) == 0
+  categories:
+    central:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - hemcleaning
+      - exactly_two_bjets
+      - electron_veto
+      - tau_veto
+      - exactly_one_muon
+corrections:
+  objects:
+    - jets
+    - muons
+    - taus
+    - met
+    - jets_veto
+  event_weights:
+    genWeight: true
+    pileupWeight: true
+    l1prefiring: true
+    pujetid: 
+      - id: tight
+    btagging: 
+      - id: medium
+      - full_run: true
+      - bc: true
+      - light: true
+    electron:
+      - id: false
+      - reco: false
+    muon:
+      - id: tight
+      - iso: tight
+      - reco: true
+      - trigger: true
+    tau:
+      - taus_vs_jet: false
+      - taus_vs_ele: false
+      - taus_vs_mu: false
+histogram_config:
+  add_syst_axis: true
+  add_weight: true
+  axes:
+    muon_pt:
+      type: Variable
+      edges:
+        - 30
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(\mu)$ [GeV]
+      expression: objects['muons'].pt
+    muon_eta:
+      type: Regular
+      bins: 50
+      start: -2.4
+      stop: 2.4
+      label: $\eta(\mu)$
+      expression: objects['muons'].eta
+    muon_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(\mu)$
+      expression: objects['muons'].phi
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(\text{b-jets})$ [GeV]
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].pt
+    jet_eta:
+      type: Regular
+      bins: 50
+      start: -2.4
+      stop: 2.4
+      label: $\eta(\text{b-jets})$
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].eta
+    jet_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(\text{b-jets})$
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].phi
+    met:
+      type: Variable
+      edges:
+        - 50
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+      label: $p_T^{miss}$ [GeV]
+      expression: objects['met'].pt
+    met_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(p_T^{miss})$ [GeV]
+      expression: objects['met'].phi
+    muon_met_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+        - 800
+      label: $m_T(\mu, p_T^{miss})$ [GeV]
+      expression: np.sqrt(2.0 * objects['muons'].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['muons'].delta_phi(objects['met']))))
+    muon_bjet_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+      label: $m(\mu, \text{Leading b-jet})$ [GeV]
+      expression: (objects['muons'] + ak.pad_none(objects['bjets'], target=2)[:, 0]).mass
+    muon_met_bjet_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+        - 800
+      label: $m_T^{tot}(\mu, p_T^{miss}, \text{Leading b-jet})$ [GeV]
+      expression: np.sqrt((objects['muons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + objects['met'].pt) ** 2 - (objects['muons'] + ak.pad_none(objects['bjets'], target=2)[:, 0] + objects['met']).pt ** 2)
+  layout:
+    mass:
+      - muon_met_bjet_mass
+      - muon_bjet_mass
+      - muon_met_mass
+      - met
+    muons:
+      - muon_pt
+      - muon_eta
+      - muon_phi
+    bjets:
+      - jet_pt
+      - jet_eta
+      - jet_phi

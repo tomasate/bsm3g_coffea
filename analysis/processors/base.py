@@ -1,10 +1,11 @@
 import copy
+import numpy as np
 import awkward as ak
 from coffea import processor
 from coffea.analysis_tools import PackedSelection, Weights
-from analysis.configs import ProcessorConfigBuilder
+from analysis.workflows import WorkflowConfigBuilder
 from analysis.histograms import HistBuilder, fill_histograms
-from analysis.corrections.correction_manager import (
+from analysis.corrections import (
     object_corrector_manager,
     weight_manager,
 )
@@ -31,7 +32,7 @@ def update(events, collections):
 class BaseProcessor(processor.ProcessorABC):
     def __init__(
         self,
-        processor: str = "ztojets",
+        workflow: str,
         year: str = "2017",
         flow: str = "True",
         do_systematics: bool = False,
@@ -40,14 +41,14 @@ class BaseProcessor(processor.ProcessorABC):
         self.flow = flow
         self.do_systematics = do_systematics
 
-        config_builder = ProcessorConfigBuilder(processor=processor, year=year)
-        self.processor_config = config_builder.build_processor_config()
-        self.histogram_config = self.processor_config.histogram_config
-        self.histograms = HistBuilder(self.processor_config).build_histogram()
+        config_builder = WorkflowConfigBuilder(workflow=workflow)
+        self.workflow_config = config_builder.build_workflow_config()
+        self.histogram_config = self.workflow_config.histogram_config
+        self.histograms = HistBuilder(self.workflow_config).build_histogram()
 
     def process(self, events):
         # correct objects
-        object_corrector_manager(events, self.year, self.processor_config, "nominal")
+        object_corrector_manager(events, self.year, self.workflow_config, "nominal")
         
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
@@ -102,8 +103,8 @@ class BaseProcessor(processor.ProcessorABC):
         # get dataset name
         dataset = events.metadata["dataset"]
         # get object and event selection configs
-        object_selection = self.processor_config.object_selection
-        event_selection = self.processor_config.event_selection
+        object_selection = self.workflow_config.object_selection
+        event_selection = self.workflow_config.event_selection
         hlt_paths = event_selection["hlt_paths"]
         # create copies of histogram objects
         histograms = copy.deepcopy(self.histograms)
@@ -118,7 +119,7 @@ class BaseProcessor(processor.ProcessorABC):
         # -------------------------------------------------------------
         # object selection
         # -------------------------------------------------------------
-        if "jets_veto" in self.processor_config.corrections_config["objects"]:
+        if "jets_veto" in self.workflow_config.corrections_config["objects"]:
             # apply jet veto maps and update MET field
             apply_jetvetomaps(events, year)
             
@@ -150,7 +151,7 @@ class BaseProcessor(processor.ProcessorABC):
                     pruned_ev[f"selected_{obj}"] = objects[obj][category_mask]
                 # get weights container
                 weights_container = weight_manager(
-                    pruned_ev, year, self.processor_config, variation="nominal"
+                    pruned_ev, year, self.workflow_config, variation="nominal"
                 )
 
                 if shift_name == "nominal":

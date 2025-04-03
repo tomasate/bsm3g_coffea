@@ -1,7 +1,7 @@
 import numpy as np
 import awkward as ak
-from analysis.selections import working_points
 from analysis.selections import delta_r_mask
+from analysis.working_points import working_points
 
 
 class ObjectSelector:
