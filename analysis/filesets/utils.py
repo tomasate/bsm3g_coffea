@@ -49,7 +49,7 @@ def divide_list(lst: list, nfiles: int = 20) -> list:
 
 
 def get_dataset_key(dataset):
-    datasets = ["SingleMuon", "EGamma"]
+    datasets = ["SingleMuon", "SingleElectron"]
     for dataset_key in datasets:
         if dataset.startswith(dataset_key):
             return dataset_key

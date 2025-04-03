@@ -3,23 +3,49 @@ import subprocess
 from pathlib import Path
 
 DATA_SAMPLES = {
-    "2016preVFP": [
-        "SingleMuonBver1",
-        "SingleMuonBver2",
-        "SingleMuonC",
-        "SingleMuonD",
-        "SingleMuonE",
-        "SingleMuonF",
-    ],
-    "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
-    "2017": [
-        "SingleMuonB",
-        "SingleMuonC",
-        "SingleMuonD",
-        "SingleMuonE",
-        "SingleMuonF",
-    ],
-    "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
+    "2b1mu": {
+        "2016preVFP": [
+            "SingleMuonBver1",
+            "SingleMuonBver2",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
+        "2017": [
+            "SingleMuonB",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
+    },
+    "2b1e": {
+        "2016preVFP": [
+            "SingleElectronBver1",
+            "SingleElectronBver2",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
+        "2017": [
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2018": [
+            "SingleElectronA",
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+        ],
+    },
 }
 MC_SAMPLES = [
     # DYJetsToLL
@@ -47,7 +73,7 @@ MC_SAMPLES = [
     # Diboson
     "WW",
     "WZ",
-    "ZZ"
+    "ZZ",
 ]
 
 
@@ -103,7 +129,7 @@ if __name__ == "__main__":
         subprocess.run(cmd, shell=True)
 
     # submit (or prepare) a job for each dataset using the given arguments
-    to_run = MC_SAMPLES + DATA_SAMPLES[args.year]
+    to_run = MC_SAMPLES + DATA_SAMPLES[args.workflow][args.year]
     cmd = ["python3", "submit_condor.py"]
     for dataset in to_run:
         cmd_args = [
