@@ -17,34 +17,59 @@ def trigger_match(leptons: ak.Array, trigobjs: ak.Array, trigger_path: str):
         "IsoMu24": {
             "pt": trigobjs.pt > 22,
             "filterbit": (trigobjs.filterBits & 8) > 0,
-            "id": abs(trigobjs.id) == 13,
+            "id": abs(trigobjs.id) == 13
         },
         "IsoMu27": {
             "pt": trigobjs.pt > 25,
             "filterbit": (trigobjs.filterBits & 8) > 0,
-            "id": abs(trigobjs.id) == 13,
-        },
-        "Ele35_WPTight_Gsf": {
-            "pt": trigobjs.pt > 33,
-            "filterbit": (trigobjs.filterBits & 2) > 0,
-            "id": abs(trigobjs.id) == 11,
+            "id": abs(trigobjs.id) == 13
         },
         "Mu50": {
             "pt": trigobjs.pt > 45,
             "filterbit": (trigobjs.filterBits & 1024) > 0,
-            "id": abs(trigobjs.id) == 13,
+            "id": abs(trigobjs.id) == 13
         },
         "OldMu100": {
             "pt": trigobjs.pt > 95,
             "filterbit": (trigobjs.filterBits & 2048) > 0,
-            "id": abs(trigobjs.id) == 13,
+            "id": abs(trigobjs.id) == 13
         },
         # same as OldMu100?
         # https://github.com/cms-sw/cmssw/blob/CMSSW_10_6_X/PhysicsTools/NanoAOD/python/triggerObjects_cff.py#L79
         "TkMu100": {
             "pt": trigobjs.pt > 95,
             "filterbit": (trigobjs.filterBits & 2048) > 0,
-            "id": abs(trigobjs.id) == 13,
+            "id": abs(trigobjs.id) == 13
+        },
+        "Ele35_WPTight_Gsf": {
+            "pt": trigobjs.pt > 33,
+            "filterbit": (trigobjs.filterBits & 2) > 0,
+            "id": abs(trigobjs.id) == 11
+        },
+        "Ele32_WPTight_Gsf": {
+            "pt": trigobjs.pt > 30,
+            "filterbit": (trigobjs.filterBits & 2) > 0,
+            "id": abs(trigobjs.id) == 11
+        },
+        "Ele27_WPTight_Gsf": {
+            "pt": trigobjs.pt > 25,
+            "filterbit": (trigobjs.filterBits & 2) > 0,
+            "id": abs(trigobjs.id) == 11
+        },
+        "Photon175": {
+            "pt": trigobjs.pt > 25,
+            "filterbit": (trigobjs.filterBits & 8192) > 0,
+            "id": abs(trigobjs.id) == 11
+        },
+        "Photon200": {
+            "pt": trigobjs.pt > 25,
+            "filterbit": (trigobjs.filterBits & 8192) > 0,
+            "id": abs(trigobjs.id) == 11
+        },
+        "IsoTkMu24": {
+            "pt": trigobjs.pt > 22,
+            "filterbit": (trigobjs.filterBits & 8) > 0,
+            "id": abs(trigobjs.id) == 13
         },
     }
     pass_pt = match_configs[trigger_path]["pt"]
