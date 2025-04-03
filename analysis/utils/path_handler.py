@@ -8,7 +8,7 @@ class Paths:
         if eos:
             # finds the /eos user directory
             user = os.environ["USER"]
-            self.root_path = pathlib.Path(f"/eos/user/{user[0]}/{user}/higgscharm")
+            self.root_path = pathlib.Path(f"/eos/user/{user[0]}/{user}/wprimeplusb")
         else:
             # finds the root path as the directory one level upwards of where this file is located
             self.root_path = pathlib.Path(__file__).resolve().parent.parent
