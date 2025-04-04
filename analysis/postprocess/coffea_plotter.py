@@ -347,8 +347,10 @@ class CoffeaPlotter:
         # set log scale
         if log:
             ax.set_yscale("log")
-            
-        ax.set_ylim(top=np.max(data_histogram.values()) * 1000)
+            ax.set_ylim(top=np.max(data_histogram.values()) * 100)
+        else:
+            ylim = ax.get_ylim()[1]
+            ax.set_ylim(0, ylim + 0.2 * ylim)
         ax.legend(
             frameon=True, 
             loc="upper right", 
