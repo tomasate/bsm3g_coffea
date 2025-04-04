@@ -94,7 +94,7 @@ corrections:
       - bc: true
       - light: true
     electron:
-      - id: true
+      - id: wp80iso
       - reco: true
     muon:
       - id: false
