@@ -13,6 +13,18 @@ object_selection:
       - np.abs(events.Electron.eta) < 2.5
       - working_points.electrons_id(events, 'wp80iso')
       - delta_r_mask(events.Electron, objects['muons'], 0.4)
+  taus:
+    field: events.Tau
+    cuts:
+      - events.Tau.pt > 20
+      - np.abs(events.Tau.eta) < 2.3
+      - np.abs(events.Tau.dz) < 0.2
+      - working_points.taus_vs_jet(events, 'loose')
+      - working_points.taus_vs_ele(events, 'vvloose')
+      - working_points.taus_vs_mu(events, 'loose')
+      - working_points.taus_decaymode(events, '13')
+      - delta_r_mask(events.Tau, objects['electrons'], 0.3)
+      - delta_r_mask(events.Tau, objects['muons'], 0.3)
   jets:
     field: events.Jet
     cuts:
@@ -22,10 +34,11 @@ object_selection:
       - working_points.jets_pileup_id(events, 'tight', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
   dimuons:
     field: select_dimuons
     cuts:
-      - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.02
+      - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.3
       - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
       - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass < 120.0)
   met:
@@ -39,10 +52,11 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
     two_muons: ak.num(objects['muons']) == 2
-    leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 33, False)
+    leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 30, False)
     subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 15, False)
     one_dimuon: ak.num(objects['dimuons']) == 1
     electron_veto: ak.num(objects['electrons']) == 0
+    tau_veto: ak.num(objects['taus']) == 0
   categories:
     base:
       - goodvertex
@@ -54,6 +68,7 @@ event_selection:
       - subleading_muon_pt
       - one_dimuon
       - electron_veto
+      - tau_veto
 corrections:
   objects:
     - jets
