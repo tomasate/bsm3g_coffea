@@ -68,7 +68,7 @@ MC_SAMPLES = [
     "WJetsToLNu_HT-2500ToInf",
     "WJetsToLNu_HT-400To600",
     "WJetsToLNu_HT-600To800",
-    "WJetsToLNu_HT-800To1200",,
+    "WJetsToLNu_HT-800To1200",
     # Diboson
     "WW",
     "WZ",
