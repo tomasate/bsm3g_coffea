@@ -9,7 +9,12 @@ from coffea.util import save, load
 from coffea.processor import accumulate
 from analysis.workflows import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
-from analysis.postprocess.coffea_postprocessor import save_process_histograms, load_processed_histograms, get_results_report, get_cutflow
+from analysis.postprocess.coffea_postprocessor import (
+    save_process_histograms,
+    load_processed_histograms,
+    get_results_report,
+    get_cutflow,
+)
 from analysis.postprocess.utils import (
     print_header,
     setup_logger,
@@ -138,7 +143,7 @@ if __name__ == "__main__":
                 output_dir=output_dir,
                 process_samples_map=process_samples_map,
                 process=process,
-                categories=categories
+                categories=categories,
             )
             gc.collect()
         processed_histograms = load_processed_histograms(
@@ -146,7 +151,7 @@ if __name__ == "__main__":
             output_dir=output_dir,
             process_samples_map=process_samples_map,
         )
-        
+
         for category in categories:
             logging.info(f"category: {category}")
             category_dir = Path(f"{output_dir}/{category}")
@@ -155,15 +160,15 @@ if __name__ == "__main__":
             cutflow_df = pd.DataFrame()
             for process in process_samples_map:
                 cutflow_file = category_dir / f"cutflow_{category}_{process}.csv"
-                cutflow_df = pd.concat([cutflow_df, pd.read_csv(cutflow_file, index_col=[0])], axis=1) 
-                
-            cutflow_df["Total Background"] = cutflow_df.drop(
-                columns="Data"
-            ).sum(axis=1)
+                cutflow_df = pd.concat(
+                    [cutflow_df, pd.read_csv(cutflow_file, index_col=[0])], axis=1
+                )
+
+            cutflow_df["Total Background"] = cutflow_df.drop(columns="Data").sum(axis=1)
 
             cutflow_index = ["initial"] + event_selection["categories"][category]
             cutflow_df = cutflow_df.loc[cutflow_index]
-            
+
             cutflow_df = cutflow_df[
                 ["Data", "Total Background"]
                 + [
@@ -195,7 +200,9 @@ if __name__ == "__main__":
             processed_histograms = load_histogram_file(postprocess_file)
             if processed_histograms is None:
                 cmd = f"python3 run_postprocess.py -w {args.workflow} -y {args.year} --postprocess"
-                raise ValueError(f"Postprocess file not found. Please run:\n  '{cmd}' first")
+                raise ValueError(
+                    f"Postprocess file not found. Please run:\n  '{cmd}' first"
+                )
 
         print_header("Plots")
         plotter = CoffeaPlotter(
