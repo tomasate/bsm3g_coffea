@@ -94,13 +94,13 @@ corrections:
       - bc: true
       - light: true
     electron:
-      - id: false
-      - reco: false
-    muon:
-      - id: tight
-      - iso: tight
+      - id: true
       - reco: true
-      - trigger: true
+    muon:
+      - id: false
+      - iso: false
+      - reco: false
+      - trigger: false
     tau:
       - taus_vs_jet: false
       - taus_vs_ele: false
