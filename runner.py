@@ -46,6 +46,49 @@ DATA_SAMPLES = {
             "SingleElectronD",
         ],
     },
+    "ztomumu": {
+        "2016preVFP": [
+            "SingleMuonBver1",
+            "SingleMuonBver2",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
+        "2017": [
+            "SingleMuonB",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
+    },
+    "ztoee": {
+        "2016preVFP": [
+            "SingleElectronBver1",
+            "SingleElectronBver2",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
+        "2017": [
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2018": [
+            "SingleElectronA",
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+        ],
+    },
 }
 MC_SAMPLES = [
     # DYJetsToLL
