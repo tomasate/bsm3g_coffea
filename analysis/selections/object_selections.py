@@ -1,7 +1,7 @@
 import numpy as np
 import awkward as ak
-from analysis.selections import delta_r_mask
 from analysis.working_points import working_points
+from analysis.selections import delta_r_mask, select_dileptons
 
 
 class ObjectSelector:
@@ -47,3 +47,15 @@ class ObjectSelector:
             mask = eval(str_mask)
             selection_mask = np.logical_and(selection_mask, mask)
         return selection_mask
+    
+    
+    def select_dimuons(self, obj_name):
+        if "muons" not in self.objects:
+            raise ValueError(f"'muons' object has not been defined!")
+        self.objects[obj_name] = select_dileptons(self.objects, "muons")
+
+        
+    def select_dielectrons(self, obj_name):
+        if "electrons" not in self.objects:
+            raise ValueError(f"'electrons' object has not been defined!")
+        self.objects[obj_name] = select_dileptons(self.objects, "electrons")
