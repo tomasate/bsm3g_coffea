@@ -101,7 +101,7 @@ if __name__ == "__main__":
         "--workflow",
         dest="workflow",
         type=str,
-        choices=["2b1e", "2b1mu"],
+        choices=["2b1e", "2b1mu", "ztomumu", "ztoee"],
         help="workflow config to run",
     )
     parser.add_argument(
