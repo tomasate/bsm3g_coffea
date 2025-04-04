@@ -13,6 +13,18 @@ object_selection:
       - np.abs(events.Electron.eta) < 2.4
       - working_points.electrons_id(events, 'wp80iso')
       - delta_r_mask(events.Electron, objects['muons'], 0.4)
+  taus:
+    field: events.Tau
+    cuts:
+      - events.Tau.pt > 20
+      - np.abs(events.Tau.eta) < 2.3
+      - np.abs(events.Tau.dz) < 0.2
+      - working_points.taus_vs_jet(events, 'loose')
+      - working_points.taus_vs_ele(events, 'vvloose')
+      - working_points.taus_vs_mu(events, 'loose')
+      - working_points.taus_decaymode(events, '13')
+      - delta_r_mask(events.Tau, objects['electrons'], 0.3)
+      - delta_r_mask(events.Tau, objects['muons'], 0.3)
   jets:
     field: events.Jet
     cuts:
@@ -22,6 +34,7 @@ object_selection:
       - working_points.jets_pileup_id(events, 'tight', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
   dielectrons:
     field: select_dielectrons
     cuts:
@@ -44,6 +57,7 @@ event_selection:
     subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
     one_dielectron: ak.num(objects['dielectrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
+    tau_veto: ak.num(objects['taus']) == 0
   categories:
     base:
       - goodvertex
@@ -55,6 +69,7 @@ event_selection:
       - subleading_electron_pt
       - one_dielectron
       - muon_veto
+      - tau_veto
 corrections:
   objects:
     - jets
