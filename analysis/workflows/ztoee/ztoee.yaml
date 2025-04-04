@@ -40,8 +40,8 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
     two_electrons: ak.num(objects['electrons']) == 2
-    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 33, False)
-    subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 15, False)
+    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 50, False)
+    subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
     one_dielectron: ak.num(objects['dielectrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
   categories:
