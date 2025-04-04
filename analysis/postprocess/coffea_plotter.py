@@ -10,7 +10,11 @@ from hist.intervals import poisson_interval
 from matplotlib.offsetbox import AnchoredText
 from analysis.histograms import VariableAxis
 from analysis.workflows import WorkflowConfigBuilder
-from analysis.postprocess.utils import setup_logger, divide_by_binwidth
+from analysis.postprocess.utils import (
+    setup_logger,
+    divide_by_binwidth,
+    get_variations_keys,
+)
 
 
 np.seterr(invalid="ignore")
@@ -44,7 +48,7 @@ class CoffeaPlotter:
         postprocess_dir = Path.cwd() / "analysis" / "postprocess"
         style_file = postprocess_dir / "style.yaml"
         luminosity_file = postprocess_dir / "luminosity.yaml"
-        
+
         with open(style_file, "r") as f:
             self.style = yaml.safe_load(f)
         with open(f"{Path.cwd()}/analysis/postprocess/luminosity.yaml", "r") as f:
@@ -91,23 +95,6 @@ class CoffeaPlotter:
             histogram = divide_by_binwidth(histogram)
         return histogram
 
-    def get_variations_keys(self):
-        variations = {}
-        for process, histogram_dict in self.processed_histograms.items():
-            for feature in histogram_dict:
-                helper_histogram = histogram_dict[feature]
-                variations = [
-                    var
-                    for var in helper_histogram.axes["variation"]
-                    if var != "nominal"
-                ]
-                break
-            break
-        variations = list(
-            set([var.replace("Up", "").replace("Down", "") for var in variations])
-        )
-        return variations
-
     def get_variations(
         self,
         process,
@@ -117,7 +104,7 @@ class CoffeaPlotter:
         histogram,
     ):
         """returns variation histogram by processes/variable/category"""
-        # get variable histogram for nominal variation and category    
+        # get variable histogram for nominal variation and category
         selectorup = {"variation": f"{variation}Up"}
         selectordown = {"variation": f"{variation}Down"}
         if "category" in histogram.axes.name:
@@ -162,7 +149,7 @@ class CoffeaPlotter:
                         if variable in histogram_dict[key].axes.name:
                             histogram = histogram_dict[key]
                             break
-                for variation in self.get_variations_keys():
+                for variation in get_variations_keys(self.processed_histograms):
                     var_cats = [v for v in histogram.axes["variation"]]
                     if not f"{variation}Up" in var_cats:
                         continue
@@ -194,7 +181,7 @@ class CoffeaPlotter:
         mcstat_err2 = self.nominal_variances
         err2_up = mcstat_err2
         err2_down = mcstat_err2
-        for variation in self.get_variations_keys():
+        for variation in get_variations_keys(self.processed_histograms):
             # Up/down variations for a single MC sample
             var_up = histogram_info["variations"][f"{variation}Up"].values()
             var_down = histogram_info["variations"][f"{variation}Down"].values()
@@ -342,7 +329,15 @@ class CoffeaPlotter:
             ylabel="Data / Pred",
             facecolor="white",
         )
-        at = AnchoredText(self.workflow + "\n" , loc="upper left", frameon=False)
+        text_map = {
+            "ztoee": r"$ Z \rightarrow ee$ events",
+            "ztomumu": r"$ Z \rightarrow \mu\mu$ events",
+        }
+        at = AnchoredText(
+            text_map.get(self.workflow, f"{self.workflow} events") + "\n",
+            loc="upper left",
+            frameon=False,
+        )
         ax.add_artist(at)
         # set log scale
         if log:
@@ -352,9 +347,9 @@ class CoffeaPlotter:
             ylim = ax.get_ylim()[1]
             ax.set_ylim(0, ylim + 0.2 * ylim)
         ax.legend(
-            frameon=True, 
-            loc="upper right", 
-            fontsize=13, 
+            frameon=True,
+            loc="upper right",
+            fontsize=13,
         )
         # add CMS info
         hep.cms.lumitext(
