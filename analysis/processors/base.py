@@ -3,7 +3,7 @@ import numpy as np
 import awkward as ak
 from coffea import processor
 from coffea.analysis_tools import PackedSelection, Weights
-from analysis.workflows import WorkflowConfigBuilder
+from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.histograms import HistBuilder, fill_histograms
 from analysis.corrections import (
     object_corrector_manager,
@@ -61,33 +61,12 @@ class BaseProcessor(processor.ProcessorABC):
         if self.do_systematics:
             shifts.extend(
                 [
-                    (
-                        {"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up},
-                        "JESUp",
-                    ),
-                    (
-                        {
-                            "Jet": events.Jet.JES_jes.down,
-                            "MET": events.MET.JES_jes.down,
-                        },
-                        "JESDown",
-                    ),
+                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, "JESUp"),
+                    ({"Jet": events.Jet.JES_jes.down,"MET": events.MET.JES_jes.down,},"JESDown"),
                     ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, "JERUp"),
-                    (
-                        {"Jet": events.Jet.JER.down, "MET": events.MET.JER.down},
-                        "JERDown",
-                    ),
-                    (
-                        {"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up},
-                        "UESUp",
-                    ),
-                    (
-                        {
-                            "Jet": events.Jet,
-                            "MET": events.MET.MET_UnclusteredEnergy.down,
-                        },
-                        "UESDown",
-                    ),
+                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down},"JERDown"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up},"UESUp"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, "UESDown"),
                 ]
             )
         return processor.accumulate(

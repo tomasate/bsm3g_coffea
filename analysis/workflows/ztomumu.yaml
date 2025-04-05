@@ -10,7 +10,7 @@ object_selection:
     field: events.Electron
     cuts:
       - events.Electron.pt > 10
-      - np.abs(events.Electron.eta) < 2.4
+      - np.abs(events.Electron.eta) < 2.5
       - working_points.electrons_id(events, 'wp80iso')
       - delta_r_mask(events.Electron, objects['muons'], 0.4)
   taus:
@@ -35,28 +35,28 @@ object_selection:
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
-  dielectrons:
-    field: select_dielectrons
+  dimuons:
+    field: select_dimuons
     cuts:
-      - objects['dielectrons'].l1.delta_r(objects['dielectrons'].l2) > 0.3
-      - objects['dielectrons'].l1.charge * objects['dielectrons'].l2.charge < 0
-      - (objects['dielectrons'].p4.mass > 60.0) & (objects['dielectrons'].p4.mass < 120.0)
+      - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.3
+      - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
+      - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass <
+        120.0)
   met:
     field: events.MET
 event_selection:
   hlt_paths:
-    - Ele35_WPTight_Gsf
-    - Photon200
+    - IsoMu27
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
     trigger: get_trigger_mask(events, hlt_paths)
-    trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
-    two_electrons: ak.num(objects['electrons']) == 2
-    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 38, False)
-    subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
-    one_dielectron: ak.num(objects['dielectrons']) == 1
-    muon_veto: ak.num(objects['muons']) == 0
+    trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
+    two_muons: ak.num(objects['muons']) == 2
+    leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 30, False)
+    subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 15, False)
+    one_dimuon: ak.num(objects['dimuons']) == 1
+    electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
   categories:
     base:
@@ -64,11 +64,11 @@ event_selection:
       - lumi
       - trigger
       - trigger_match
-      - two_electrons
-      - leading_electron_pt
-      - subleading_electron_pt
-      - one_dielectron
-      - muon_veto
+      - two_muons
+      - leading_muon_pt
+      - subleading_muon_pt
+      - one_dimuon
+      - electron_veto
       - tau_veto
 corrections:
   objects:
@@ -80,98 +80,98 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
-    pujetid: 
+    pujetid:
       - id: tight
     btagging: false
     electron:
-      - id: wp80iso
-      - reco: true
-    muon:
       - id: false
-      - iso: false
       - reco: false
-      - trigger: false
+    muon:
+      - id: tight
+      - iso: tight
+      - reco: true
+      - trigger: true
 histogram_config:
   add_syst_axis: true
   add_weight: true
   axes:
-    dielectron_mass:
+    dimuon_mass:
       type: Regular
-      bins: 100
-      start: 10
-      stop: 150
-      label: $m(ee)$ [GeV]
-      expression: objects['dielectrons'].p4.mass
-    dielectron_pt:
+      bins: 24
+      start: 60
+      stop: 120
+      label: $m(\mu\mu)$ [GeV]
+      expression: objects['dimuons'].p4.mass
+    dimuon_pt:
       type: Regular
       bins: 50
       start: 30
       stop: 300
-      label: $p_T(ee)$ [GeV]
-      expression: objects['dielectrons'].p4.pt
-    dielectron_dr:
+      label: $p_T(\mu\mu)$ [GeV]
+      expression: objects['dimuons'].p4.pt
+    dimuon_dr:
       type: Regular
       bins: 50
       start: 0
       stop: 5
-      label: $\Delta R(e_1, e_2)$
-      expression: objects['dielectrons'].l1.delta_r(objects['dielectrons'].l2)
-    dielectron_deta:
+      label: $\Delta R(\mu_1, \mu_2)$
+      expression: objects['dimuons'].l1.delta_r(objects['dimuons'].l2)
+    dimuon_deta:
       type: Regular
       bins: 50
       start: 0
       stop: 5
-      label: $|\Delta \eta(e_1, e_2)|$
-      expression: np.abs(objects['dielectrons'].l1.eta - objects['dielectrons'].l2.eta)
-    leading_electron_pt:
+      label: $|\Delta \eta(\mu_1, \mu_2)|$
+      expression: np.abs(objects['dimuons'].l1.eta - objects['dimuons'].l2.eta)
+    leading_muon_pt:
       type: Regular
       bins: 50
       start: 30
       stop: 300
-      label: $p_T(e_1)$ [GeV]
-      expression: objects['dielectrons'].l1.pt
-    subleading_electron_pt:
+      label: $p_T(\mu_1)$ [GeV]
+      expression: objects['dimuons'].l1.pt
+    subleading_muon_pt:
       type: Regular
       bins: 50
       start: 30
       stop: 300
-      label: $p_T(e_2)$ [GeV]
-      expression: objects['dielectrons'].l2.pt
-    leading_electron_eta:
+      label: $p_T(\mu_2)$ [GeV]
+      expression: objects['dimuons'].l2.pt
+    leading_muon_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(e_1)$
-      expression: objects['dielectrons'].l1.eta
-    subleading_electron_eta:
+      label: $\eta(\mu_1)$
+      expression: objects['dimuons'].l1.eta
+    subleading_muon_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(e_2)$
-      expression: objects['dielectrons'].l2.eta
-    electron_pt:
+      label: $\eta(\mu_2)$
+      expression: objects['dimuons'].l2.eta
+    muon_pt:
       type: Regular
       bins: 50
       start: 30
       stop: 300
-      label: $p_T(e)$ [GeV]
-      expression: objects['electrons'].pt
-    electron_eta:
+      label: $p_T(\mu)$ [GeV]
+      expression: objects['muons'].pt
+    muon_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(e)$
-      expression: objects['electrons'].eta
-    electron_phi:
+      label: $\eta(\mu)$
+      expression: objects['muons'].eta
+    muon_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(e)$
-      expression: objects['electrons'].phi
+      label: $\phi(\mu)$
+      expression: objects['muons'].phi
     jet_pt:
       type: Regular
       bins: 50
@@ -194,24 +194,9 @@ histogram_config:
       label: $\phi(j)$
       expression: objects['jets'].phi
     jet_multiplicity:
-      type: IntCategory
-      categories:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
-        - 6
-        - 7
-        - 8
-        - 9
-        - 10
-        - 11
-        - 12
-        - 13
-        - 14
-        - 15
+      type: Integer
+      start: 0
+      stop: 14
       label: $N(j)$
       expression: ak.num(objects['jets'])
     met:
@@ -259,24 +244,25 @@ histogram_config:
     npvs:
       type: Integer
       start: 0
-      stop: 100
+      stop: 60
       label: npvs
       expression: events.PV.npvsGood
   layout:
-    leading_electron:
-      - leading_electron_pt
-      - leading_electron_eta
-    subleading_electron:
-      - subleading_electron_pt
-      - subleading_electron_eta
-    electrons:
-      - electron_pt
-      - electron_eta
-      - electron_phi
-    dielectrons:
-      - dielectron_pt
-      - dielectron_mass
-      - dielectron_dr
+    leading_muon:
+      - leading_muon_pt
+      - leading_muon_eta
+    subleading_muon:
+      - subleading_muon_pt
+      - subleading_muon_eta
+    muons:
+      - muon_pt
+      - muon_eta
+      - muon_phi
+    dimuons:
+      - dimuon_pt
+      - dimuon_mass
+      - dimuon_dr
+      - dimuon_deta
     jets:
       - jet_pt
       - jet_eta
