@@ -134,6 +134,20 @@ histogram_config:
       stop: 150
       label: $m(\mu\mu)$ [GeV]
       expression: objects['dimuons'].p4.mass
+    jet_flav:
+      type: IntCategory
+      categories:
+        - 0
+        - 4
+        - 5
+      label: HadronFlavour
+      expression: objects['jets'].hadronFlavour
+    npvs:
+      type: Integer
+      start: 0
+      stop: 60
+      label: npvs
+      expression: events.PV.npvsGood
   layout:
     muon:
       - muon_pt
@@ -141,5 +155,7 @@ histogram_config:
       - muon_phi
     zcandidate:
       - dimuon_mass
+    vertex:
+      - npvs
 ```
 Note that the variable associated with the axis must be included through the `expression` field using the `objects` dictionary. Output histogram's layout is defined with the `layout` field. In the example above, our output dictionary will contain two histograms labelled `muon` and `zcandidate`, the first with the `muon_pt`, `muon_eta` and `muon_phi` axes, and the second only with the `dimuon_mass` axis (make sure to include axis with the same dimensions within a histogram). If you set `layout: individual` then the output dictionary will contain a histogram for each axis. Note that if you set `add_syst_axis: true`, a StrCategory axis `{"variable_name": {"type": "StrCategory", "categories": [], "growth": True}}` to store systematic variations will be added to each histogram.
