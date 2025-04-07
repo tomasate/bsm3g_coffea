@@ -57,6 +57,7 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
     metfilters: get_metfilters_mask(events, year)
+    met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
     exactly_two_bjets: ak.num(objects['bjets']) == 2
     exactly_one_muon: ak.num(objects['muons']) == 1
@@ -69,6 +70,7 @@ event_selection:
       - trigger
       - trigger_match
       - metfilters
+      - met_50
       - hemcleaning
       - exactly_two_bjets
       - electron_veto

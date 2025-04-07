@@ -1,4 +1,10 @@
 object_selection:
+  electrons:
+    field: events.Electron
+    cuts:
+      - events.Electron.pt > 55
+      - np.abs(events.Electron.eta) < (np.abs(events.Electron.eta) < 2.1) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+      - working_points.electrons_id(events, 'wp80iso')
   muons:
     field: events.Muon
     cuts:
@@ -6,13 +12,7 @@ object_selection:
       - np.abs(events.Muon.eta) < 2.4
       - working_points.muons_id(events, 'tight')
       - working_points.muons_iso(events, 'tight')
-  electrons:
-    field: events.Electron
-    cuts:
-      - events.Electron.pt > 55
-      - np.abs(events.Electron.eta) < (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-      - working_points.electrons_id(events, 'wp80iso')
-      - delta_r_mask(events.Electron, objects['muons'], 0.4)
+      - delta_r_mask(events.Muon, objects['electrons'], 0.4)
   taus:
     field: events.Tau
     cuts:
@@ -58,6 +58,7 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
     metfilters: get_metfilters_mask(events, year)
+    met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
     exactly_two_bjets: ak.num(objects['bjets']) == 2
     exactly_one_electron: ak.num(objects['electrons']) == 1
@@ -70,6 +71,7 @@ event_selection:
       - trigger
       - trigger_match
       - metfilters
+      - met_50
       - hemcleaning
       - exactly_two_bjets
       - muon_veto
