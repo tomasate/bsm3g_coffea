@@ -1,11 +1,18 @@
-# W'+b
+# W' + b
 
-Python package for analyzing H+c events. The package uses a columnar framework to process input tree-based NanoAOD V12 files using [Coffea](https://coffeateam.github.io/coffea/) and [scikit-hep](https://scikit-hep.org) Python libraries.
+[![Codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+<p align="left">
+  <img width="300" src="https://i.imgur.com/OWhX13O.jpg" />
+</p>
+
+Python package for analyzing W' + b in the electron and muon channels. The analysis uses a columnar framework to process input tree-based [NanoAOD](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD) v9 files using the [coffea](https://coffeateam.github.io/coffea/) and [scikit-hep](https://scikit-hep.org) Python libraries.
 
 - [Workflows](#Workflows)
 - [Input filesets](#Input-filesets)
 - [Submit Condor jobs](#Submit-Condor-jobs)
 - [Postprocessing](#Postprocessing)
+- [Luminosity](#Luminosity)
 
 ### Workflows
 
@@ -64,3 +71,59 @@ Once all jobs are done for a processor/year, you can get the results using the `
 python3 run_postprocess.py --workflow ztomumu --year 2017 --postprocess --plot --log
 ``` 
 Results will be saved to the same directory as the output files
+
+## Luminosity
+
+To obtain the integrated luminosity we use the [Brilcal tool](https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart). See luminosity recomendations for Run2 at https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2
+
+```
+# connect to lxplus
+ssh <your_username>@lxplus.cern.ch
+
+# Load the environment
+source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
+
+# Run brilcalc
+brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i <Goldenjson file>
+```
+
+* 2016
+```
+brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt
+```
+```
+#Summary:
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 144   | 393  | 234231 | 233406 | 38.184814445      | 36.313753344     |
++-------+------+--------+--------+-------------------+------------------+
+```
+
+**Note:** We created our own .txt files for 2016preVFP and 2016postVFP and we found: PreVFP: 19.501601622 /fb and PostVFP: 16.812151722 /fb
+
+* 2017
+```
+brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt
+```
+```
+#Summary:
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 175   | 457  | 206287 | 205294 | 44.069556521      | 41.479680528     |
++-------+------+--------+--------+-------------------+------------------+
+```
+
+* 2018
+```
+brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt
+```
+```
+#Summary:
++-------+------+--------+--------+-------------------+------------------+
+| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
++-------+------+--------+--------+-------------------+------------------+
+| 196   | 478  | 234527 | 234125 | 62.322923205      | 59.832422397     |
++-------+------+--------+--------+-------------------+------------------+
+```
