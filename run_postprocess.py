@@ -7,7 +7,7 @@ from pathlib import Path
 from collections import defaultdict
 from coffea.util import save, load
 from coffea.processor import accumulate
-from analysis.workflows import WorkflowConfigBuilder
+from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
 from analysis.postprocess.coffea_postprocessor import (
     save_process_histograms,
@@ -93,12 +93,12 @@ def load_2016_histograms(workflow):
     pre_file = (
         base_path
         / pre_year
-        / f"{workflow}_{pre_year}_processed_histograms{FILE_EXTENSION}"
+        / f"{pre_year}_processed_histograms{FILE_EXTENSION}"
     )
     post_file = (
         base_path
         / post_year
-        / f"{workflow}_{post_year}_processed_histograms{FILE_EXTENSION}"
+        / f"{post_year}_processed_histograms{FILE_EXTENSION}"
     )
     return accumulate([load(pre_file), load(post_file)])
 
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         if not args.postprocess and args.year != "2016":
             postprocess_file = (
                 output_dir
-                / f"{args.workflow}_{args.year}_processed_histograms{FILE_EXTENSION}"
+                / f"{args.year}_processed_histograms{FILE_EXTENSION}"
             )
             processed_histograms = load_histogram_file(postprocess_file)
             if processed_histograms is None:
