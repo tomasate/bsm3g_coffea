@@ -15,35 +15,6 @@ from analysis.corrections.utils import pog_years, get_pog_json
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 
-def get_id_wps(muons):
-    return {
-        # cutbased ID working points
-        "loose": muons.looseId,
-        "medium": muons.mediumId,
-        "tight": muons.tightId,
-    }
-
-
-def get_iso_wps(muons):
-    return {
-        "loose": (
-            muons.pfRelIso04_all < 0.25
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.25
-        ),
-        "medium": (
-            muons.pfRelIso04_all < 0.20
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.20
-        ),
-        "tight": (
-            muons.pfRelIso04_all < 0.15
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.15
-        ),
-    }
-
-
 class MuonCorrector:
     """
     Muon corrector class
@@ -154,11 +125,10 @@ class MuonCorrector:
         """
         add muon ID scale factors to weights container
         """
-        # get muons that pass the id wp, and within SF binning
+        # get muons within SF binning
         muon_pt_mask = (self.m.pt > 15.0) & (self.m.pt < 199.999)
         muon_eta_mask = np.abs(self.m.eta) < 2.39
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        in_muon_mask = muon_pt_mask & muon_eta_mask & muon_id_mask
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
@@ -167,31 +137,13 @@ class MuonCorrector:
 
         # 'id' scale factors names
         id_corrections = {
-            "2016preVFP": {
-                "loose": "NUM_LooseID_DEN_TrackerMuons",
-                "medium": "NUM_MediumID_DEN_TrackerMuons",
-                "tight": "NUM_TightID_DEN_TrackerMuons",
-            },
-            "2016postVFP": {
-                "loose": "NUM_LooseID_DEN_TrackerMuons",
-                "medium": "NUM_MediumID_DEN_TrackerMuons",
-                "tight": "NUM_TightID_DEN_TrackerMuons",
-            },
-            "2017": {
-                "loose": "NUM_LooseID_DEN_TrackerMuons",
-                "medium": "NUM_MediumID_DEN_TrackerMuons",
-                "tight": "NUM_TightID_DEN_TrackerMuons",
-            },
-            "2018": {
-                "loose": "NUM_LooseID_DEN_TrackerMuons",
-                "medium": "NUM_MediumID_DEN_TrackerMuons",
-                "tight": "NUM_TightID_DEN_TrackerMuons",
-            },
+            "loose": "NUM_LooseID_DEN_TrackerMuons",
+            "medium": "NUM_MediumID_DEN_TrackerMuons",
+            "tight": "NUM_TightID_DEN_TrackerMuons",
         }
-
         # get nominal scale factors
         nominal_sf = unflat_sf(
-            self.cset[id_corrections[self.year][self.id_wp]].evaluate(
+            self.cset[id_corrections[self.id_wp]].evaluate(
                 muon_eta, muon_pt, "nominal"
             ),
             in_muon_mask,
@@ -200,14 +152,14 @@ class MuonCorrector:
         if self.variation == "nominal":
             # get 'up' and 'down' scale factors
             up_sf = unflat_sf(
-                self.cset[id_corrections[self.year][self.id_wp]].evaluate(
+                self.cset[id_corrections[self.id_wp]].evaluate(
                     muon_eta, muon_pt, "systup"
                 ),
                 in_muon_mask,
                 self.n,
             )
             down_sf = unflat_sf(
-                self.cset[id_corrections[self.year][self.id_wp]].evaluate(
+                self.cset[id_corrections[self.id_wp]].evaluate(
                     muon_eta, muon_pt, "systdown"
                 ),
                 in_muon_mask,
@@ -233,9 +185,7 @@ class MuonCorrector:
         # get 'in-limits' muons
         muon_pt_mask = self.m.pt > 29.0
         muon_eta_mask = np.abs(self.m.eta) < 2.39
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
-        in_muon_mask = muon_pt_mask & muon_eta_mask & muon_id_mask & muon_iso_mask
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
@@ -369,27 +319,14 @@ class MuonCorrector:
             )
             trigger_match_mask = trigger_match_mask | trig_match
 
-        trigger_mask = np.zeros(len(self.events), dtype="bool")
-
-        for hlt_path in hlt_paths:
-            if hlt_path in self.events.HLT.fields:
-                trigger_mask = trigger_mask | self.events.HLT[hlt_path]
-
         # get 'in-limits' muons
         muon_pt_mask = (self.m.pt > 29.0) & (self.m.pt < 199.999)
         muon_eta_mask = np.abs(self.m.eta) < 2.399
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
-
-        trigger_mask = ak.flatten(ak.ones_like(self.muons.pt) * trigger_mask) > 0
         trigger_match_mask = ak.flatten(trigger_match_mask)
 
         in_muon_mask = (
             muon_pt_mask
             & muon_eta_mask
-            & muon_id_mask
-            & muon_iso_mask
-            & trigger_mask
             & trigger_match_mask
         )
         in_muons = self.m.mask[in_muon_mask]

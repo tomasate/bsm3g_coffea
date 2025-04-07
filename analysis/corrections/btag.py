@@ -112,12 +112,12 @@ class BTagCorrector:
 
         # select bc and light jets
         # hadron flavor definition: 5=b, 4=c, 0=udsg
-        self._bc_jets = events.selected_jets[events.selected_jets.hadronFlavour > 0]
+        self._bc_jets = events.selected_jets[events.selected_jets.hadronFlavour >= 4]
         self._light_jets = events.selected_jets[events.selected_jets.hadronFlavour == 0]
         self._jet_map = {"bc": self._bc_jets, "light": self._light_jets}
         self._jet_pass_btag = {
             "bc": working_points.jets_deepjet_b(events, self._wp, year)[
-                events.selected_jets.hadronFlavour > 0
+                events.selected_jets.hadronFlavour >= 4
             ],
             "light": working_points.jets_deepjet_b(events, self._wp, year)[
                 events.selected_jets.hadronFlavour == 0
