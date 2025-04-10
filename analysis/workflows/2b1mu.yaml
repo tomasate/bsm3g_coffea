@@ -10,7 +10,7 @@ object_selection:
     field: events.Electron
     cuts:
       - events.Electron.pt > 30
-      - np.abs(events.Electron.eta) < (np.abs(events.Electron.eta) < 2.1) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+      - (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
       - working_points.electrons_id(events, 'wp90iso')
       - delta_r_mask(events.Electron, objects['muons'], 0.4)
   taus:

@@ -3,7 +3,7 @@ object_selection:
     field: events.Electron
     cuts:
       - events.Electron.pt > 10
-      - np.abs(events.Electron.eta) < 2.1
+      - (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
       - working_points.electrons_id(events, 'wp80iso')
   muons:
     field: events.Muon
