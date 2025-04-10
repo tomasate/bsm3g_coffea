@@ -135,7 +135,7 @@ class BaseProcessor(processor.ProcessorABC):
 
                 if shift_name == "nominal":
                     # save cutflow to metadata
-                    output["metadata"][category] = {"cutflow": {"initial": len(events)}}
+                    output["metadata"][category] = {"cutflow": {}}
                     selections = []
                     for cut_name in category_cuts:
                         selections.append(cut_name)
