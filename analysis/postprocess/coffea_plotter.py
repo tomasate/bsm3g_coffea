@@ -9,7 +9,7 @@ from coffea.processor import accumulate
 from hist.intervals import poisson_interval
 from matplotlib.offsetbox import AnchoredText
 from analysis.histograms import VariableAxis
-from analysis.workflows import WorkflowConfigBuilder
+from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.utils import (
     setup_logger,
     divide_by_binwidth,
