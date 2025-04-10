@@ -8,7 +8,7 @@ from matplotlib import ticker
 from coffea.processor import accumulate
 from hist.intervals import poisson_interval
 from matplotlib.offsetbox import AnchoredText
-from analysis.histograms import VariableAxis
+from analysis.histograms import VariableAxis, IntegerAxis
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.utils import (
     setup_logger,
@@ -351,6 +351,14 @@ class CoffeaPlotter:
             loc="upper right",
             fontsize=13,
         )
+        if isinstance(self.histogram_config.axes[variable], IntegerAxis):
+            start = self.histogram_config.axes[variable].start
+            stop = self.histogram_config.axes[variable].stop
+            categories = np.arange(start, stop)
+            if len(categories) > 20:
+                for i, label in enumerate(rax.get_xticklabels()):
+                    if i % 5 != 0:  # Show only every 5th tick
+                        label.set_visible(False)
         # add CMS info
         hep.cms.lumitext(
             f"{self.luminosities[self.year] * 1e-3:.1f} fb$^{{-1}}$ ({self.year}, 13 TeV)",

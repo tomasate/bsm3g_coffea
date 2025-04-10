@@ -1,5 +1,6 @@
 import gc
 import yaml
+import glob
 import logging
 import argparse
 import pandas as pd
@@ -10,7 +11,8 @@ from coffea.processor import accumulate
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
 from analysis.postprocess.coffea_postprocessor import (
-    save_process_histograms,
+    save_process_histograms_by_process,
+    save_process_histograms_by_sample,
     load_processed_histograms,
     get_results_report,
     get_cutflow,
@@ -90,15 +92,9 @@ def load_2016_histograms(workflow):
     pre_year, post_year = aux_map["2016"]
     base_path = OUTPUT_DIR / workflow
 
-    pre_file = (
-        base_path
-        / pre_year
-        / f"{pre_year}_processed_histograms{FILE_EXTENSION}"
-    )
+    pre_file = base_path / pre_year / f"{pre_year}_processed_histograms{FILE_EXTENSION}"
     post_file = (
-        base_path
-        / post_year
-        / f"{post_year}_processed_histograms{FILE_EXTENSION}"
+        base_path / post_year / f"{post_year}_processed_histograms{FILE_EXTENSION}"
     )
     return accumulate([load(pre_file), load(post_file)])
 
@@ -134,11 +130,40 @@ if __name__ == "__main__":
         with open(fileset_path, "r") as f:
             dataset_configs = yaml.safe_load(f)
 
+        print_header(f"Reading outputs from: {output_dir}")
+
+        extension = ".coffea"
+        output_files = [
+            i
+            for i in glob.glob(f"{output_dir}/*/*{extension}", recursive=True)
+            if not i.split("/")[-1].startswith("cutflow")
+        ]
         process_samples_map = build_process_sample_map(dataset_configs)
 
-        print_header(f"Reading outputs from: {output_dir}")
+        # group output file paths by sample name
+        grouped_outputs = {}
+        for output_file in output_files:
+            sample_name = output_file.split("/")[-1].split(extension)[0]
+            if sample_name.rsplit("_")[-1].isdigit():
+                sample_name = "_".join(sample_name.rsplit("_")[:-1])
+            sample_name = sample_name.replace(f"{args.year}_", "")
+            if sample_name in grouped_outputs:
+                grouped_outputs[sample_name].append(output_file)
+            else:
+                grouped_outputs[sample_name] = [output_file]
+
+        for sample in grouped_outputs:
+            save_process_histograms_by_sample(
+                year=args.year,
+                output_dir=output_dir,
+                sample=sample,
+                grouped_outputs=grouped_outputs,
+                categories=categories,
+            )
+            gc.collect()
+
         for process in process_samples_map:
-            save_process_histograms(
+            save_process_histograms_by_process(
                 year=args.year,
                 output_dir=output_dir,
                 process_samples_map=process_samples_map,
@@ -146,6 +171,7 @@ if __name__ == "__main__":
                 categories=categories,
             )
             gc.collect()
+
         processed_histograms = load_processed_histograms(
             year=args.year,
             output_dir=output_dir,
@@ -194,8 +220,7 @@ if __name__ == "__main__":
     if args.plot:
         if not args.postprocess and args.year != "2016":
             postprocess_file = (
-                output_dir
-                / f"{args.year}_processed_histograms{FILE_EXTENSION}"
+                output_dir / f"{args.year}_processed_histograms{FILE_EXTENSION}"
             )
             processed_histograms = load_histogram_file(postprocess_file)
             if processed_histograms is None:
