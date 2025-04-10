@@ -123,34 +123,6 @@ histogram_config:
       stop: 5
       label: $|\Delta \eta(\mu_1, \mu_2)|$
       expression: np.abs(objects['dimuons'].l1.eta - objects['dimuons'].l2.eta)
-    leading_muon_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(\mu_1)$ [GeV]
-      expression: objects['dimuons'].l1.pt
-    subleading_muon_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(\mu_2)$ [GeV]
-      expression: objects['dimuons'].l2.pt
-    leading_muon_eta:
-      type: Regular
-      bins: 50
-      start: -2.5
-      stop: 2.5
-      label: $\eta(\mu_1)$
-      expression: objects['dimuons'].l1.eta
-    subleading_muon_eta:
-      type: Regular
-      bins: 50
-      start: -2.5
-      stop: 2.5
-      label: $\eta(\mu_2)$
-      expression: objects['dimuons'].l2.eta
     muon_pt:
       type: Regular
       bins: 50
@@ -248,12 +220,6 @@ histogram_config:
       label: npvs
       expression: events.PV.npvsGood
   layout:
-    leading_muon:
-      - leading_muon_pt
-      - leading_muon_eta
-    subleading_muon:
-      - subleading_muon_pt
-      - subleading_muon_eta
     muons:
       - muon_pt
       - muon_eta
@@ -261,8 +227,6 @@ histogram_config:
     dimuons:
       - dimuon_pt
       - dimuon_mass
-      - dimuon_dr
-      - dimuon_deta
     jets:
       - jet_pt
       - jet_eta

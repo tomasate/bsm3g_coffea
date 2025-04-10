@@ -124,34 +124,6 @@ histogram_config:
       stop: 5
       label: $|\Delta \eta(e_1, e_2)|$
       expression: np.abs(objects['dielectrons'].l1.eta - objects['dielectrons'].l2.eta)
-    leading_electron_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(e_1)$ [GeV]
-      expression: objects['dielectrons'].l1.pt
-    subleading_electron_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(e_2)$ [GeV]
-      expression: objects['dielectrons'].l2.pt
-    leading_electron_eta:
-      type: Regular
-      bins: 50
-      start: -2.5
-      stop: 2.5
-      label: $\eta(e_1)$
-      expression: objects['dielectrons'].l1.eta
-    subleading_electron_eta:
-      type: Regular
-      bins: 50
-      start: -2.5
-      stop: 2.5
-      label: $\eta(e_2)$
-      expression: objects['dielectrons'].l2.eta
     electron_pt:
       type: Regular
       bins: 50
@@ -249,12 +221,6 @@ histogram_config:
       label: npvs
       expression: events.PV.npvsGood
   layout:
-    leading_electron:
-      - leading_electron_pt
-      - leading_electron_eta
-    subleading_electron:
-      - subleading_electron_pt
-      - subleading_electron_eta
     electrons:
       - electron_pt
       - electron_eta
@@ -262,8 +228,6 @@ histogram_config:
     dielectrons:
       - dielectron_pt
       - dielectron_mass
-      - dielectron_dr
-      - dielectron_deta
     jets:
       - jet_pt
       - jet_eta
