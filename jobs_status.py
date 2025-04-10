@@ -41,10 +41,16 @@ def parse_args():
         choices=["coffea", "root"],
         help="Format of output histograms",
     )
+    parser.add_argument(
+        "--hours_ago",
+        type=int,
+        default=3,
+        help="use .err files that have been modified less than 'hours_ago' hours ago",
+    )
     return parser.parse_args()
 
 
-def get_jobs_info(job_dir, output_dir, log_dir, output_format):
+def get_jobs_info(job_dir, output_dir, log_dir, output_format, hours_ago=3):
     """
     Collect expected and completed job numbers per dataset, and gather error logs.
 
@@ -80,10 +86,10 @@ def get_jobs_info(job_dir, output_dir, log_dir, output_format):
         output_files = list((output_dir / dataset).glob(f"*.{output_format}"))
         jobnum_done[dataset] = [f.stem.replace(f"{dataset}_", "") for f in output_files]
 
-        # look for error files created at least 3 hours ago
-        two_hours_ago = datetime.now() - timedelta(hours=3)
+        # look for error files created within the last 3 hours
+        x_hours_ago = datetime.now() - timedelta(hours=hours_ago)
         for err_file in (log_dir / dataset).glob("*.err"):
-            if datetime.fromtimestamp(err_file.stat().st_mtime) > two_hours_ago:
+            if datetime.fromtimestamp(err_file.stat().st_mtime) > x_hours_ago:
                 error_file.append(err_file)
 
     return jobnum, jobnum_done, error_file
@@ -252,7 +258,7 @@ if __name__ == "__main__":
     fileset_dir = base_dir / "analysis" / "filesets"
 
     jobnum, jobnum_done, error_file = get_jobs_info(
-        job_dir, output_dir, log_dir, args.output_format
+        job_dir, output_dir, log_dir, args.output_format, args.hours_ago
     )
 
     jobnum_missing, datasets_with_missing_jobs = print_job_status(jobnum, jobnum_done)
