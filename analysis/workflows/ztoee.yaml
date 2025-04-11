@@ -58,7 +58,7 @@ event_selection:
     one_dielectron: ak.num(objects['dielectrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
-    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 38, False)
+    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 55, False)
     subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
   categories:
     base:
