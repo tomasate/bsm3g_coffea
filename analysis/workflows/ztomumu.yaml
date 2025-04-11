@@ -51,7 +51,6 @@ event_selection:
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
     lumi: get_lumi_mask(events, year)
     goodvertex: events.PV.npvsGood > 0
-    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     two_muons: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
     leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 30, False)
@@ -64,7 +63,6 @@ event_selection:
       - trigger_match
       - lumi
       - goodvertex
-      - dy_stitching
       - two_muons
       - one_dimuon
       - leading_muon_pt

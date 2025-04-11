@@ -53,12 +53,11 @@ event_selection:
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
     lumi: get_lumi_mask(events, year)
     goodvertex: events.PV.npvsGood > 0
-    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     two_electrons: ak.num(objects['electrons']) == 2
     one_dielectron: ak.num(objects['dielectrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
-    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 55, False)
+    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 38, False)
     subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
   categories:
     base:
@@ -66,7 +65,6 @@ event_selection:
       - trigger_match
       - lumi
       - goodvertex
-      - dy_stitching
       - one_dielectron
       - two_electrons
       - leading_electron_pt
