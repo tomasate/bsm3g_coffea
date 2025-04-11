@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
             cutflow_df["Total Background"] = cutflow_df.drop(columns="Data").sum(axis=1)
 
-            cutflow_index = ["initial"] + event_selection["categories"][category]
+            cutflow_index = event_selection["categories"][category]
             cutflow_df = cutflow_df.loc[cutflow_index]
 
             cutflow_df = cutflow_df[
