@@ -40,34 +40,35 @@ object_selection:
     cuts:
       - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.3
       - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
-      - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass <
-        120.0)
+      - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass < 120.0)
   met:
     field: events.MET
 event_selection:
   hlt_paths:
     - IsoMu27
   selections:
-    goodvertex: events.PV.npvsGood > 0
-    lumi: get_lumi_mask(events, year)
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
+    lumi: get_lumi_mask(events, year)
+    goodvertex: events.PV.npvsGood > 0
+    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     two_muons: ak.num(objects['muons']) == 2
+    one_dimuon: ak.num(objects['dimuons']) == 1
     leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 30, False)
     subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 15, False)
-    one_dimuon: ak.num(objects['dimuons']) == 1
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
   categories:
     base:
-      - goodvertex
-      - lumi
       - trigger
       - trigger_match
+      - lumi
+      - goodvertex
+      - dy_stitching
       - two_muons
+      - one_dimuon
       - leading_muon_pt
       - subleading_muon_pt
-      - one_dimuon
       - electron_veto
       - tau_veto
 corrections:
