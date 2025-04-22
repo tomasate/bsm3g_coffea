@@ -9,4 +9,5 @@ from analysis.corrections.l1prefiring import add_l1prefiring_weight
 from analysis.corrections.rochester import apply_rochester_corrections
 from analysis.corrections.tau_energy import apply_tau_energy_scale_corrections
 from analysis.corrections.met import apply_met_phi_corrections
+from analysis.corrections.muon_highpt import MuonHighPtCorrector
 from analysis.corrections.corrections_manager import object_corrector_manager, weight_manager

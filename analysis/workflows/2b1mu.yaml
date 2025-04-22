@@ -2,9 +2,9 @@ object_selection:
   muons:
     field: events.Muon
     cuts:
-      - events.Muon.pt > 35
+      - events.Muon.pt > 52
       - np.abs(events.Muon.eta) < 2.4
-      - working_points.muons_id(events, 'tight')
+      - working_points.muons_id(events, 'highpt')
       - working_points.muons_iso(events, 'tight')
   electrons:
     field: events.Electron
@@ -50,7 +50,9 @@ object_selection:
     field: events.MET
 event_selection:
   hlt_paths:
-    - IsoMu27
+    - Mu50
+    - OldMu100
+    - TkMu100
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
@@ -115,14 +117,14 @@ histogram_config:
     muon_pt:
       type: Variable
       edges:
-        - 30
-        - 60
-        - 90
-        - 120
-        - 150
+        - 50
+        - 80
+        - 110
+        - 140
         - 180
         - 210
         - 240
+        - 270
         - 300
         - 500
       label: $p_T(\mu)$ [GeV]

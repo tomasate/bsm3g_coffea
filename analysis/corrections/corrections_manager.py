@@ -5,6 +5,7 @@ from analysis.corrections import (
     BTagCorrector,
     MuonCorrector,
     ElectronCorrector,
+    MuonHighPtCorrector,
     add_pileup_weight,
     add_pujetid_weight,
     apply_jet_corrections,
@@ -105,7 +106,11 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
                     "id_wp": weights_config["muon"]["id"],
                     "iso_wp": weights_config["muon"]["iso"],
                 }
-                muon_corrector = MuonCorrector(**muon_corrector_args)
+                muon_corrector = (
+                    MuonHighPtCorrector(**muon_corrector_args)
+                    if weights_config["muon"]["id"] == "highpt"
+                    else MuonCorrector(**muon_corrector_args)
+                )
                 if "id" in weights_config["muon"]:
                     if weights_config["muon"]["id"]:
                         muon_corrector.add_id_weight()
