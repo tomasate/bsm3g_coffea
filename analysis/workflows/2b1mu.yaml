@@ -191,7 +191,7 @@ histogram_config:
         - 13
         - 14
         - 15
-      label: $N(\text{jet}$
+      label: $N(\text{jet})$
       expression: ak.num(objects['jets'])
     bjet_pt:
       type: Variable
