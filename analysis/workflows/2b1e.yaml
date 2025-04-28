@@ -23,8 +23,8 @@ object_selection:
       - working_points.taus_vs_ele(events, 'vvloose')
       - working_points.taus_vs_mu(events, 'loose')
       - working_points.taus_decaymode(events, '13')
-      - delta_r_mask(events.Tau, objects['electrons'], 0.3)
-      - delta_r_mask(events.Tau, objects['muons'], 0.3)
+      - delta_r_mask(events.Tau, objects['electrons'], 0.4)
+      - delta_r_mask(events.Tau, objects['muons'], 0.4)
   jets:
     field: events.Jet
     cuts:
@@ -72,12 +72,12 @@ event_selection:
       - trigger
       - trigger_match
       - metfilters
-      - met_50
-      - dy_stitching
       - hemcleaning
+      - dy_stitching
+      - met_50
       - exactly_two_bjets
-      - muon_veto
       - tau_veto
+      - muon_veto
       - exactly_one_electron
 corrections:
   objects:
