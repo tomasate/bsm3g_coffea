@@ -207,7 +207,7 @@ class WorkingPoints:
         return ak.where(
             events.Jet.pt < 50,
             wps[year][wp],
-            events.Jet.pt > 50,
+            events.Jet.pt >= 50,
         )
 
     def jets_deepjet_b(self, events, wp, year):
