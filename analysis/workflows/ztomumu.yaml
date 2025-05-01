@@ -57,12 +57,14 @@ event_selection:
     subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 15, False)
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
+    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
   categories:
     base:
       - trigger
       - trigger_match
       - lumi
       - goodvertex
+      - dy_stitching
       - two_muons
       - one_dimuon
       - leading_muon_pt

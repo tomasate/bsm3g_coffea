@@ -59,12 +59,14 @@ event_selection:
     tau_veto: ak.num(objects['taus']) == 0
     leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 38, False)
     subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
+    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
   categories:
     base:
       - trigger
       - trigger_match
       - lumi
       - goodvertex
+      - dy_stitching
       - one_dielectron
       - two_electrons
       - leading_electron_pt
