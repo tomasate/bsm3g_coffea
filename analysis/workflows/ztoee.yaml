@@ -77,14 +77,14 @@ corrections:
   objects:
     - jets
     - muons
+    - taus
     - met
     - jets_veto
   event_weights:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
-    pujetid:
-      - id: tight
+    pujetid: false
     btagging: false
     electron:
       - id: wp80iso
@@ -94,6 +94,10 @@ corrections:
       - iso: false
       - reco: false
       - trigger: false
+    tau:
+      - taus_vs_jet: false
+      - taus_vs_ele: false
+      - taus_vs_mu: false
 histogram_config:
   add_syst_axis: true
   add_weight: true
