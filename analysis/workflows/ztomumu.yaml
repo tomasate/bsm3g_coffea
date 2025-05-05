@@ -2,7 +2,7 @@ object_selection:
   muons:
     field: events.Muon
     cuts:
-      - events.Muon.pt > 10
+      - events.Muon.tunepRelPt * events.Muon.pt > 10
       - np.abs(events.Muon.eta) < 2.4
       - working_points.muons_iso(events, 'tight')
       - working_points.muons_id(events, 'tight')
@@ -108,10 +108,33 @@ histogram_config:
       label: $m(\mu\mu)$ [GeV]
       expression: objects['dimuons'].p4.mass
     dimuon_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
+      type: Variable
+      edges:
+        - 20
+        - 40
+        - 60
+        - 80
+        - 100
+        - 120
+        - 140
+        - 160
+        - 180
+        - 200
+        - 225
+        - 250
+        - 275
+        - 300
+        - 325
+        - 350
+        - 375
+        - 400
+        - 450
+        - 500
+        - 550
+        - 600
+        - 700
+        - 800
+        - 1000
       label: $p_T(\mu\mu)$ [GeV]
       expression: objects['dimuons'].p4.pt
     dimuon_dr:
@@ -129,10 +152,18 @@ histogram_config:
       label: $|\Delta \eta(\mu_1, \mu_2)|$
       expression: np.abs(objects['dimuons'].l1.eta - objects['dimuons'].l2.eta)
     muon_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
+      type: Variable
+      edges:
+        - 30
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
       label: $p_T(\mu)$ [GeV]
       expression: objects['muons'].pt
     muon_eta:
@@ -150,10 +181,18 @@ histogram_config:
       label: $\phi(\mu)$
       expression: objects['muons'].phi
     jet_pt:
-      type: Regular
-      bins: 50
-      start: 20
-      stop: 500
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
       label: $p_T(j)$ [GeV]
       expression: objects['jets'].pt
     jet_eta:
