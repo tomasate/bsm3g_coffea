@@ -57,20 +57,20 @@ event_selection:
     one_dielectron: ak.num(objects['dielectrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
-    leading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l1.pt) > 38, False)
-    subleading_electron_pt: ak.fill_none(ak.firsts(objects['dielectrons'].l2.pt) > 20, False)
+    leading_electron_pt: ak.firsts(objects['electrons'].pt) > 30 
+    subleading_electron_pt: ak.pad_none(objects['electrons'], target=2)[:, 1].pt > 27
     dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
   categories:
     base:
+      - goodvertex
+      - lumi
       - trigger
       - trigger_match
-      - lumi
-      - goodvertex
       - dy_stitching
-      - one_dielectron
       - two_electrons
       - leading_electron_pt
       - subleading_electron_pt
+      - one_dielectron
       - muon_veto
       - tau_veto
 corrections:
@@ -182,6 +182,20 @@ histogram_config:
       stop: 3.14159
       label: $\phi(e)$
       expression: objects['electrons'].phi
+    leading_electron_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(e_1)$ [GeV]
+      expression: objects['dielectrons'].l1.pt
+    subleading_electron_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(e_2)$ [GeV]
+      expression: objects['dielectrons'].l2.pt
     jet_pt:
       type: Variable
       edges:
@@ -270,6 +284,10 @@ histogram_config:
       - electron_pt
       - electron_eta
       - electron_phi
+    leading_electron_pt: 
+      - leading_electron_pt
+    subleading_electron_pt: 
+      - subleading_electron_pt
     dielectrons:
       - dielectron_pt
       - dielectron_mass
