@@ -2,7 +2,7 @@ object_selection:
   muons:
     field: events.Muon
     cuts:
-      - events.Muon.tunepRelPt * events.Muon.pt > 10
+      - events.Muon.pt > 10
       - np.abs(events.Muon.eta) < 2.4
       - working_points.muons_iso(events, 'tight')
       - working_points.muons_id(events, 'tight')
@@ -54,7 +54,9 @@ event_selection:
     two_muons: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
     leading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l1.pt) > 30, False)
-    subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 15, False)
+    subleading_muon_pt: ak.fill_none(ak.firsts(objects['dimuons'].l2.pt) > 27, False)
+    first_muon_pt: ak.firsts(objects['muons'].pt) > 30
+    second_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 27
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
     dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
@@ -69,6 +71,18 @@ event_selection:
       - one_dimuon
       - leading_muon_pt
       - subleading_muon_pt
+      - electron_veto
+      - tau_veto
+    muons:
+      - trigger
+      - trigger_match
+      - lumi
+      - goodvertex
+      - dy_stitching
+      - two_muons
+      - one_dimuon
+      - first_muon_pt
+      - second_muon_pt
       - electron_veto
       - tau_veto
 corrections:
@@ -180,6 +194,34 @@ histogram_config:
       stop: 3.14159
       label: $\phi(\mu)$
       expression: objects['muons'].phi
+    leading_muon_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(\mu_1)$ [GeV]
+      expression: objects['dimuons'].l1.pt
+    subleading_muon_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(\mu_2)$ [GeV]
+      expression: objects['dimuons'].l2.pt
+    first_muon_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(\mu_1)$ [GeV]
+      expression: ak.firsts(objects['muons'].pt)
+    second_muon_pt:
+      type: Regular
+      bins: 50
+      start: 30
+      stop: 300
+      label: $p_T(\mu_2)$ [GeV]
+      expression: ak.pad_none(objects['muons'], target=2)[:, 1].pt
     jet_pt:
       type: Variable
       edges:
@@ -268,6 +310,14 @@ histogram_config:
       - muon_pt
       - muon_eta
       - muon_phi
+    leading_muon_pt: 
+      - leading_muon_pt
+    subleading_muon_pt: 
+      - subleading_muon_pt
+    first_muon_pt: 
+      - leading_muon_pt
+    second_muon_pt: 
+      - subleading_muon_pt
     dimuons:
       - dimuon_pt
       - dimuon_mass
