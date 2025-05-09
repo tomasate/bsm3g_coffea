@@ -5,7 +5,7 @@ xroot_to_site =  {
     "root://eos.cms.rcac.purdue.edu": "T2_US_Purdue",
     "root://xrootd-local.unl.edu:1094": "T2_US_Nebraska",
     "root://dcache-cms-xrootd.desy.de:1094": "T2_DE_DESY",
-    "root://maite.iihe.ac.be:1095": "T2_BE_IIHE",
+    "root://maite.iihe.ac.be:1094": "T2_BE_IIHE",
     "root://eoscms.cern.ch": "T2_CH_CERN",
     "root://cmsdcache-kit-disk.gridka.de:1094": "T1_DE_KIT_Disk",
     "root://grid-cms-xrootd.physik.rwth-aachen.de:1094": "T2_DE_RWTH",
