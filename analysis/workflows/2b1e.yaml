@@ -59,7 +59,6 @@ event_selection:
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
-    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     hemcleaning: get_hemcleaning_mask(events, year)
     exactly_two_bjets: ak.num(objects['bjets']) == 2
     exactly_one_electron: ak.num(objects['electrons']) == 1
@@ -73,7 +72,6 @@ event_selection:
       - trigger_match
       - metfilters
       - hemcleaning
-      - dy_stitching
       - met_50
       - exactly_two_bjets
       - tau_veto
