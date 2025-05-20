@@ -7,7 +7,7 @@ from pathlib import Path
 from .utils import unflat_sf
 from coffea.analysis_tools import Weights
 from analysis.selections import trigger_match
-from analysis.corrections.utils import pog_years, get_pog_json
+from analysis.corrections.utils import pog_years, get_pog_json, get_muon_hlt_json
 
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2016
@@ -297,38 +297,19 @@ class MuonCorrector:
                 weight=nominal_sf,
             )
 
-    def add_triggeriso_weight(self, hlt_paths) -> None:
+    def add_triggeriso_weight(self) -> None:
         """
-        add muon Trigger Iso (IsoMu24 or IsoMu27) weights
-
-        trigger_mask:
-            mask array of events passing the analysis trigger
-        trigger_match_mask:
-            mask array of DeltaR matched trigger objects
+        add muon Trigger Iso (IsoMu24 or IsoMu27) weights for single/double muon events
         """
         assert (
             self.id_wp == "tight" and self.iso_wp == "tight"
         ), "there's only available muon trigger SF for 'tight' ID and Iso"
 
-        trigger_match_mask = np.zeros(len(self.events), dtype="bool")
-        for hlt_path in hlt_paths:
-            trig_match = trigger_match(
-                leptons=self.muons,
-                trigobjs=self.events.TrigObj,
-                trigger_path=hlt_path,
-            )
-            trigger_match_mask = trigger_match_mask | trig_match
-
         # get 'in-limits' muons
         muon_pt_mask = (self.m.pt > 29.0) & (self.m.pt < 199.999)
         muon_eta_mask = np.abs(self.m.eta) < 2.399
-        trigger_match_mask = ak.flatten(trigger_match_mask)
 
-        in_muon_mask = (
-            muon_pt_mask
-            & muon_eta_mask
-            & trigger_match_mask
-        )
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons transverse momentum and abs pseudorapidity (replace None values with some 'in-limit' value)
@@ -342,36 +323,80 @@ class MuonCorrector:
             "2017": "NUM_IsoMu27_DEN_CutBasedIdTight_and_PFIsoTight",
             "2018": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
         }
-        # get nominal scale factors
-        sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "nominal")
-        nominal_sf = unflat_sf(
-            sf,
-            in_muon_mask,
-            self.n,
-        )
+
+        kind = "single" if ak.all(ak.num(self.muons) == 1) else "double"
+        if kind == "single":
+            # for single muon events, compute SF from POG SF
+            single_sf = self.cset[sfs_keys[self.year]].evaluate(
+                muon_eta, muon_pt, "nominal"
+            )
+            nominal_sf = unflat_sf(
+                single_sf,
+                in_muon_mask,
+                self.n,
+            )
+        if kind == "double":
+            # for double muon events, compute SF from muons' efficiencies
+            double_cset = correctionlib.CorrectionSet.from_file(
+                get_muon_hlt_json(year=self.year)
+            )
+
+            data_eff = double_cset["Muon-HLT-DataEff"].evaluate(
+                self.variation,
+                sfs_keys[self.year],
+                muon_eta,
+                muon_pt,
+            )
+            data_eff = ak.where(in_muon_mask, data_eff, ak.ones_like(data_eff))
+            data_eff = ak.unflatten(data_eff, self.n)
+            data_eff_1 = ak.firsts(data_eff)
+            data_eff_2 = ak.pad_none(data_eff, target=2)[:, 1]
+            full_data_eff = data_eff_1 + data_eff_2 - data_eff_1 * data_eff_2
+
+            mc_eff = double_cset["Muon-HLT-McEff"].evaluate(
+                self.variation,
+                sfs_keys[self.year],
+                muon_eta,
+                muon_pt,
+            )
+            mc_eff = ak.where(in_muon_mask, mc_eff, ak.ones_like(mc_eff))
+            mc_eff = ak.unflatten(mc_eff, self.n)
+            mc_eff_1 = ak.firsts(mc_eff)
+            mc_eff_2 = ak.pad_none(mc_eff, target=2)[:, 1]
+            full_mc_eff = mc_eff_1 + mc_eff_2 - mc_eff_1 * mc_eff_2
+
+            nominal_sf = full_data_eff / full_mc_eff
+
         if self.variation == "nominal":
             # get 'up' and 'down' scale factors
-            up_sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "systup")
-            up_sf = unflat_sf(
-                up_sf,
-                in_muon_mask,
-                self.n,
-            )
-            down_sf = self.cset[sfs_keys[self.year]].evaluate(
-                muon_eta, muon_pt, "systdown"
-            )
-            down_sf = unflat_sf(
-                down_sf,
-                in_muon_mask,
-                self.n,
-            )
-            # add scale factors to weights container
-            self.weights.add(
-                name=f"muon_triggeriso",
-                weight=nominal_sf,
-                weightUp=up_sf,
-                weightDown=down_sf,
-            )
+            if kind == "single":
+                up_sf = self.cset[sfs_keys[self.year]].evaluate(
+                    muon_eta, muon_pt, "systup"
+                )
+                up_sf = unflat_sf(
+                    up_sf,
+                    in_muon_mask,
+                    self.n,
+                )
+                down_sf = self.cset[sfs_keys[self.year]].evaluate(
+                    muon_eta, muon_pt, "systdown"
+                )
+                down_sf = unflat_sf(
+                    down_sf,
+                    in_muon_mask,
+                    self.n,
+                )
+                self.weights.add(
+                    name=f"muon_triggeriso",
+                    weight=nominal_sf,
+                    weightUp=up_sf,
+                    weightDown=down_sf,
+                )
+            elif kind == "double":
+                self.weights.add(
+                    name=f"muon_triggeriso",
+                    weight=nominal_sf,
+                )
         else:
             self.weights.add(
                 name=f"muon_triggeriso",

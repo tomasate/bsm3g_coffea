@@ -7,6 +7,7 @@ import numpy as np
 import awkward as ak
 import importlib.resources
 from coffea import util
+from pathlib import Path
 from typing import Type, Tuple
 from coffea.lookup_tools import extractor
 from coffea.analysis_tools import Weights
@@ -55,6 +56,10 @@ def get_pog_json(json_name: str, year: str) -> str:
     else:
         print(f"No json for {json_name}")
     return f"{POG_CORRECTION_PATH}/POG/{pog_json[0]}/{pog_years[year]}/{pog_json[1]}"
+
+
+def get_muon_hlt_json(year: str) -> str:
+    return f"{Path.cwd()}/analysis/data/{year}_Muon_HLT_Eff.json"
 
 
 def unflat_sf(sf: ak.Array, in_limit_mask: ak.Array, n: ak.Array):

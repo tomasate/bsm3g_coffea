@@ -122,9 +122,7 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
                         muon_corrector.add_iso_weight()
                 if "trigger" in weights_config["muon"]:
                     if weights_config["muon"]["trigger"]:
-                        muon_corrector.add_triggeriso_weight(
-                            processor_config.event_selection["hlt_paths"]
-                        )
+                        muon_corrector.add_triggeriso_weight()
 
         if "tau" in weights_config:
             if "selected_taus" in pruned_ev.fields:
