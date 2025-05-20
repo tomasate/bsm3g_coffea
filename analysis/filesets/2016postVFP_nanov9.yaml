@@ -66,7 +66,7 @@ DYJetsToLL_inclusive_10to50:
 DYJetsToLL_inclusive_50:
   is_mc: true
   process: DYJetsToLL
-  query: DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
+  query: DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
   xsec: 6025.6
 ST_s-channel_4f_leptonDecays:
   is_mc: true
