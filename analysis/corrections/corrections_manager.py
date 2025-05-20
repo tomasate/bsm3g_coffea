@@ -56,28 +56,30 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
         if weights_config["pileupWeight"]:
             add_pileup_weight(pruned_ev, weights_container, year, variation)
 
-        if weights_config["pujetid"]:
-            add_pujetid_weight(
-                events=pruned_ev,
-                weights=weights_container,
-                year=year,
-                working_point=weights_config["pujetid"]["id"],
-                variation=variation,
-            )
-        if weights_config["btagging"]:
-            btag_corrector = BTagCorrector(
-                events=pruned_ev,
-                weights=weights_container,
-                sf_type="comb",
-                worging_point=weights_config["btagging"]["id"],
-                year=year,
-                full_run=weights_config["btagging"]["full_run"],
-                variation=variation,
-            )
-            if weights_config["btagging"]["bc"]:
-                btag_corrector.add_btag_weights(flavor="bc")
-            if weights_config["btagging"]["light"]:
-                btag_corrector.add_btag_weights(flavor="light")
+        if "pujetid" in weights_config:
+            if weights_config["pujetid"]:
+                add_pujetid_weight(
+                    events=pruned_ev,
+                    weights=weights_container,
+                    year=year,
+                    working_point=weights_config["pujetid"]["id"],
+                    variation=variation,
+                )
+        if "btagging" in weights_config:    
+            if weights_config["btagging"]:
+                btag_corrector = BTagCorrector(
+                    events=pruned_ev,
+                    weights=weights_container,
+                    sf_type="comb",
+                    worging_point=weights_config["btagging"]["id"],
+                    year=year,
+                    full_run=weights_config["btagging"]["full_run"],
+                    variation=variation,
+                )
+                if weights_config["btagging"]["bc"]:
+                    btag_corrector.add_btag_weights(flavor="bc")
+                if weights_config["btagging"]["light"]:
+                    btag_corrector.add_btag_weights(flavor="light")
 
         if "electron" in weights_config:
             if "selected_electrons" in pruned_ev.fields:
