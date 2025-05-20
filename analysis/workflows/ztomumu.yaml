@@ -43,8 +43,8 @@ event_selection:
     goodvertex: events.PV.npvsGood > 0
     two_muons: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
-    leading_muon_pt: ak.firsts(objects['muons'].pt) > 30 
-    subleading_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 27
+    leading_muon_pt: ak.firsts(objects['muons'].pt) > 30
+    subleading_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 15
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
   categories:
@@ -67,8 +67,6 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
-    pujetid: false
-    btagging: false
     electron:
       - id: false
       - reco: false
