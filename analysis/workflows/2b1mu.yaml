@@ -2,9 +2,9 @@ object_selection:
   muons:
     field: events.Muon
     cuts:
-      - events.Muon.pt > 52
+      - events.Muon.pt > 30
       - np.abs(events.Muon.eta) < 2.4
-      - working_points.muons_id(events, 'highpt')
+      - working_points.muons_id(events, 'tight')
       - working_points.muons_iso(events, 'tight')
   electrons:
     field: events.Electron
@@ -50,9 +50,7 @@ object_selection:
     field: events.MET
 event_selection:
   hlt_paths:
-    - Mu50
-    - OldMu100
-    - TkMu100
+    - IsoMu27
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
@@ -60,7 +58,6 @@ event_selection:
     trigger_match: get_trigger_match_mask(events, hlt_paths, 'Muon')
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
-    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     hemcleaning: get_hemcleaning_mask(events, year)
     exactly_two_bjets: ak.num(objects['bjets']) == 2
     exactly_one_muon: ak.num(objects['muons']) == 1
@@ -73,7 +70,6 @@ event_selection:
       - trigger
       - trigger_match
       - metfilters
-      - dy_stitching
       - met_50
       - hemcleaning
       - exactly_two_bjets
@@ -128,7 +124,7 @@ histogram_config:
         - 300
         - 500
       label: $p_T(\mu)$ [GeV]
-      expression: objects['muons'].pt
+      expression: objects['muons'].tunepRelPt
     muon_eta:
       type: Regular
       bins: 50
