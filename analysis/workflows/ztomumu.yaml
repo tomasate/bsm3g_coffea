@@ -70,6 +70,7 @@ event_selection:
 corrections:
   objects:
     - jets
+    - jets_veto
     - muons
     - taus
   event_weights:
@@ -208,6 +209,13 @@ histogram_config:
         - 500
       label: $p_T(j)$ [GeV]
       expression: objects['jets'].pt
+    jet_eta:
+      type: Regular
+      bins: 50
+      start: -2.5
+      stop: 2.5
+      label: $\eta(j)$
+      expression: objects['jets'].eta
     jet_phi:
       type: Regular
       bins: 50
@@ -251,6 +259,8 @@ histogram_config:
       - npvs
     jet_pt:
       - jet_pt
+    jet_eta:
+      - jet_eta
     jet_phi:
       - jet_phi
     jet_multiplicity:
