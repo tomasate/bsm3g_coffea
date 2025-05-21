@@ -31,6 +31,14 @@ object_selection:
       - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.3
       - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
       - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass < 120.0)
+  jets:
+    field: events.Jet
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.5
+      - working_points.jets_id(events, 'tightlepveto')
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
   met:
     field: events.MET
 event_selection:
@@ -61,6 +69,7 @@ event_selection:
       - tau_veto
 corrections:
   objects:
+    - jets
     - muons
     - taus
   event_weights:
@@ -184,6 +193,48 @@ histogram_config:
       stop: 60
       label: vertex multiplicity
       expression: events.PV.npvsGood
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(j)$ [GeV]
+      expression: objects['jets'].pt
+    jet_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(j)$
+      expression: objects['jets'].phi
+    jet_multiplicity:
+      type: Integer
+      start: 0
+      stop: 14
+      label: Jet multiplicity
+      expression: ak.num(objects['jets'])
+    jet_dr:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 5
+      label: $\Delta R(j_1, j_2)$
+      expression: ak.pad_none(objects['jets'], target=2)[:, 0].delta_r(ak.pad_none(objects['jets'], target=2)[:, 1])
+    jet_deta:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 5
+      label: $|\Delta \eta(j_1, j_2)|$
+      expression: np.abs(ak.pad_none(objects['jets'], target=2)[:, 0].eta - ak.pad_none(objects['jets'], target=2)[:, 1].eta)
   layout:
     muons:
       - muon_pt
@@ -198,3 +249,13 @@ histogram_config:
       - dimuon_mass
     vertex:
       - npvs
+    jet_pt:
+      - jet_pt
+    jet_phi:
+      - jet_phi
+    jet_multiplicity:
+      - jet_multiplicity
+    jet_dr: 
+      - jet_dr
+    jet_deta: 
+      - jet_deta
