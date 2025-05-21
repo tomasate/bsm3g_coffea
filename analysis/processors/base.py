@@ -49,7 +49,7 @@ class BaseProcessor(processor.ProcessorABC):
     def process(self, events):
         # correct objects
         object_corrector_manager(events, self.year, self.workflow_config, "nominal")
-        
+
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
@@ -61,12 +61,33 @@ class BaseProcessor(processor.ProcessorABC):
         if self.do_systematics:
             shifts.extend(
                 [
-                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, "JESUp"),
-                    ({"Jet": events.Jet.JES_jes.down,"MET": events.MET.JES_jes.down,},"JESDown"),
+                    (
+                        {"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up},
+                        "JESUp",
+                    ),
+                    (
+                        {
+                            "Jet": events.Jet.JES_jes.down,
+                            "MET": events.MET.JES_jes.down,
+                        },
+                        "JESDown",
+                    ),
                     ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, "JERUp"),
-                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down},"JERDown"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up},"UESUp"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, "UESDown"),
+                    (
+                        {"Jet": events.Jet.JER.down, "MET": events.MET.JER.down},
+                        "JERDown",
+                    ),
+                    (
+                        {"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up},
+                        "UESUp",
+                    ),
+                    (
+                        {
+                            "Jet": events.Jet,
+                            "MET": events.MET.MET_UnclusteredEnergy.down,
+                        },
+                        "UESDown",
+                    ),
                 ]
             )
         return processor.accumulate(
@@ -101,7 +122,7 @@ class BaseProcessor(processor.ProcessorABC):
         if "jets_veto" in self.workflow_config.corrections_config["objects"]:
             # apply jet veto maps and update MET field
             apply_jetvetomaps(events, year)
-            
+
         object_selector = ObjectSelector(object_selection, year)
         objects = object_selector.select_objects(events)
 
@@ -135,20 +156,29 @@ class BaseProcessor(processor.ProcessorABC):
 
                 if shift_name == "nominal":
                     # save cutflow to metadata
-                    output["metadata"][category] = {"cutflow": {}}
+                    output["metadata"][category] = {"cutflow": {"initial": sumw}}
                     selections = []
                     for cut_name in category_cuts:
                         selections.append(cut_name)
                         current_selection = selection_manager.all(*selections)
+                        pruned_ev_cutflow = events[current_selection]
+                        for obj in objects:
+                            pruned_ev_cutflow[f"selected_{obj}"] = objects[obj][
+                                current_selection
+                            ]
+                        weights_container_cutflow = weight_manager(
+                            pruned_ev_cutflow,
+                            year,
+                            self.workflow_config,
+                            variation="nominal",
+                        )
                         output["metadata"][category]["cutflow"][cut_name] = ak.sum(
-                            current_selection
+                            weights_container_cutflow.weight()
                         )
                     # save number of events after selection to metadata
                     weighted_final_nevents = ak.sum(weights_container.weight())
                     output["metadata"][category].update(
-                        {
-                            "weighted_final_nevents": weighted_final_nevents
-                        }
+                        {"weighted_final_nevents": weighted_final_nevents}
                     )
                 # get analysis variables and fill histograms
                 variables_map = {}
