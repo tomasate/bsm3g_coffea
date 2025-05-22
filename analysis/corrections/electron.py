@@ -30,8 +30,6 @@ class ElectronCorrector:
     -----------
     events:
         events collection
-    hlt:
-        high level trigger branch
     weights:
         Weights object from coffea.analysis_tools
     year:
@@ -66,44 +64,6 @@ class ElectronCorrector:
         self.year = year
         self.pog_year = pog_years[year]
 
-    def add_trigger_weight(self, trigger_mask, trigger_match_mask):
-        """
-        add electron Trigger weights
-
-        trigger_mask:
-            mask array of events passing the analysis trigger
-        trigger_match_mask:
-            mask array of DeltaR matched trigger objects
-        """
-        # get 'in-limits' electrons
-        electron_pt_mask = (self.e.pt > 10.0) & (self.e.pt < 499.999)
-        electron_eta_mask = np.abs(self.e.eta) < 2.4
-        trigger_mask = ak.flatten(ak.ones_like(self.electrons.pt) * trigger_mask) > 0
-        trigger_match_mask = ak.flatten(trigger_match_mask)
-
-        in_electron_mask = (
-            electron_pt_mask & electron_eta_mask & trigger_mask & trigger_match_mask
-        )
-        in_electrons = self.e.mask[in_electron_mask]
-
-        # get electrons transverse momentum and pseudorapidity (replace None values with some 'in-limit' value)
-        electron_pt = ak.fill_none(in_electrons.pt, 10.0)
-        electron_eta = ak.fill_none(in_electrons.eta, 0.0)
-
-        # get eletron trigger correction
-        cset = correctionlib.CorrectionSet.from_file(
-            f"wprime_plus_b/data/correction_electron_trigger_{self.year}.json.gz"
-        )
-        nominal_sf = unflat_sf(
-            cset["trigger_eff"].evaluate(electron_pt, electron_eta),
-            in_electron_mask,
-            self.n,
-        )
-        self.weights.add(
-            name=f"electron_trigger",
-            weight=nominal_sf,
-        )
-
     def add_id_weight(self, id_working_point: str) -> None:
         """
         add electron identification scale factors to weights container
@@ -113,23 +73,11 @@ class ElectronCorrector:
             id_working_point:
                 Working point {'Loose', 'Medium', 'Tight', 'wp80iso', 'wp80noiso', 'wp90iso', 'wp90noiso'}
         """
-        id_wps = {
-            # mva ID working points https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
-            "wp80iso": self.e.mvaFall17V2Iso_WP80,
-            "wp90iso": self.e.mvaFall17V2Iso_WP90,
-            "wp80noiso": self.e.mvaFall17V2noIso_WP80,
-            "wp90noiso": self.e.mvaFall17V2noIso_WP90,
-            # cutbased ID working points https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
-            "loose": self.e.cutBased == 2,
-            "medium": self.e.cutBased == 3,
-            "tight": self.e.cutBased == 4,
-        }
         # get 'in-limits' electrons
         electron_pt_mask = (self.e.pt > 10.0) & (
             self.e.pt < 499.999
         )  # potential problems with pt > 500 GeV
-        electron_id_mask = id_wps[id_working_point]
-        in_electron_mask = electron_pt_mask & electron_id_mask
+        in_electron_mask = electron_pt_mask
         in_electrons = self.e.mask[in_electron_mask]
 
         # get electrons transverse momentum and pseudorapidity (replace None values with some 'in-limit' value)
