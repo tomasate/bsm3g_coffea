@@ -98,12 +98,12 @@ def fill_histograms(
     histogram_config,
     variables_map,
     category,
-    variation,
+    shift_name,
     flow,
     is_mc,
     weights_container,
 ):
-    if is_mc:
+    if is_mc and (shift_name == "nominal"):
         variations = ["nominal"] + list(weights_container.variations)
         for variation in variations:
             if variation == "nominal":
@@ -119,14 +119,25 @@ def fill_histograms(
                 category=category,
                 flow=True,
             )
-    else:
+    elif is_mc and (shift_name != "nominal"):
         region_weight = weights_container.weight()
         fill_histogram(
             histograms=histograms,
             histogram_config=histogram_config,
             variables_map=variables_map,
             weights=region_weight,
-            variation="nominal",
+            variation=shift_name,
+            category=category,
+            flow=True,
+        )
+    elif not is_mc and (shift_name == "nominal"):
+        region_weight = weights_container.weight()
+        fill_histogram(
+            histograms=histograms,
+            histogram_config=histogram_config,
+            variables_map=variables_map,
+            weights=region_weight,
+            variation=shift_name,
             category=category,
             flow=True,
         )

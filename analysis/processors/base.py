@@ -189,7 +189,7 @@ class BaseProcessor(processor.ProcessorABC):
                     weights_container=weights_container,
                     variables_map=variables_map,
                     histograms=histograms,
-                    variation=shift_name,
+                    shift_name=shift_name,
                     category=category,
                     is_mc=is_mc,
                     flow=True,
