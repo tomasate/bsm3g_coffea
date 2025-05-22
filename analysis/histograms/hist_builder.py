@@ -29,7 +29,7 @@ class HistBuilder:
         histograms = {}
         for axis in self.histogram_config.axes:
             axes = [self.build_axis(axis)]
-            if len(histogram_config.categories) > 1:
+            if len(self.histogram_config.categories) > 1:
                 axes.append(self.cat_axis)
             if self.histogram_config.add_syst_axis:
                 axes.append(self.get_syst_axis())

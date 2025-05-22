@@ -55,10 +55,9 @@ def fill_histogram(
             if histogram_config.add_syst_axis:
                 fill_args.update({"variation": variation})
             if histogram_config.add_weight:
-                weights = fill_kwargs["weights"]
                 fill_args.update(
                     {
-                        "weights": (
+                        "weight": (
                             ak.flatten(ak.ones_like(variables_map[variable]) * weights)
                             if variables_map[variable].ndim == 2
                             else weights
