@@ -32,15 +32,23 @@ object_selection:
       - objects['dielectrons'].l1.charge * objects['dielectrons'].l2.charge < 0
       - (objects['dielectrons'].p4.mass > 60.0) &
         (objects['dielectrons'].p4.mass < 120.0)
+  jets:
+    field: events.Jet
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.5
+      - working_points.jets_id(events, 'tightlepveto')
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
   met:
     field: events.MET
 event_selection:
   hlt_paths:
-    - Ele35_WPTight_Gsf
-    - Photon200
+    SingleElectron:
+      - SingleEle
   selections:
-    trigger: get_trigger_mask(events, hlt_paths)
-    trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
+    trigger: get_trigger_mask(events, hlt_paths, dataset, year)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
     lumi: get_lumi_mask(events, year)
     goodvertex: events.PV.npvsGood > 0
     two_electrons: ak.num(objects['electrons']) == 2
@@ -127,16 +135,23 @@ histogram_config:
       bins: 50
       start: 0
       stop: 5
-      label: $\Delta R(e_1, e_2)$
+      label: $\Delta R(ee_1, ee_2)$
       expression: objects['dielectrons'].l1.delta_r(objects['dielectrons'].l2)
     dielectron_deta:
       type: Regular
       bins: 50
       start: 0
       stop: 5
-      label: $|\Delta \eta(e_1, e_2)|$
+      label: $|\Delta \eta(ee_1, ee_2)|$
       expression: np.abs(objects['dielectrons'].l1.eta - objects['dielectrons'].l2.eta)
-    electron_pt:
+    dielectron_dphi:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 10
+      label: $|\Delta \phi(ee_1, ee_2)|$
+      expression: np.abs(objects['dielectrons'].l1.phi - objects['dielectrons'].l2.phi)
+    leading_muon_pt:
       type: Variable
       edges:
         - 30
@@ -149,53 +164,153 @@ histogram_config:
         - 240
         - 300
         - 500
-      label: $p_T(e)$ [GeV]
-      expression: objects['electrons'].pt
-    electron_eta:
+      label: $p_T(ee_1)$ [GeV]
+      expression: objects['dielectrons'].l1.pt
+    subleading_muon_pt:
+      type: Variable
+      edges:
+        - 30
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(ee_2)$ [GeV]
+      expression: objects['dielectrons'].l2.pt
+    leading_muon_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(e)$
-      expression: objects['electrons'].eta
-    electron_phi:
+      label: $\eta(ee_1)$
+      expression: objects['dielectrons'].l1.eta
+    subleading_muon_eta:
+      type: Regular
+      bins: 50
+      start: -2.5
+      stop: 2.5
+      label: $\eta(ee_2)$
+      expression: objects['dielectrons'].l2.eta
+    leading_muon_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(e)$
-      expression: objects['electrons'].phi
-    leading_electron_pt:
+      label: $\phi(ee_1)$
+      expression: objects['dielectrons'].l1.phi
+    subleading_muon_phi:
       type: Regular
       bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(e_1)$ [GeV]
-      expression: objects['dielectrons'].l1.pt
-    subleading_electron_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(e_2)$ [GeV]
-      expression: objects['dielectrons'].l2.pt
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(ee_2)$
+      expression: objects['dielectrons'].l2.phi
     npvs:
       type: Integer
       start: 0
       stop: 60
-      label: npvs
+      label: vertex multiplicity
       expression: events.PV.npvsGood
-  layout:
-    electrons:
-      - electron_pt
-      - electron_eta
-      - electron_phi
-    leading_electron_pt: 
-      - leading_electron_pt
-    subleading_electron_pt: 
-      - subleading_electron_pt
-    dielectrons:
-      - dielectron_pt
-      - dielectron_mass
-    vertex:
-      - npvs
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(j)$ [GeV]
+      expression: objects['jets'].pt
+    jet_eta:
+      type: Regular
+      bins: 50
+      start: -2.5
+      stop: 2.5
+      label: $\eta(j)$
+      expression: objects['jets'].eta
+    jet_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(j)$
+      expression: objects['jets'].phi
+    jet_multiplicity:
+      type: Integer
+      start: 0
+      stop: 14
+      label: Jet multiplicity
+      expression: ak.num(objects['jets'])
+    jet_dr:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 5
+      label: $\Delta R(j_1, j_2)$
+      expression: ak.pad_none(objects['jets'], target=2)[:, 0].delta_r(ak.pad_none(objects['jets'], target=2)[:, 1])
+    jet_deta:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 5
+      label: $|\Delta \eta(j_1, j_2)|$
+      expression: np.abs(ak.pad_none(objects['jets'], target=2)[:, 0].eta - ak.pad_none(objects['jets'], target=2)[:, 1].eta)
+    met_pt:
+      type: Variable
+      edges:
+        - 0
+        - 10
+        - 20
+        - 30
+        - 40
+        - 50
+        - 60
+        - 70
+        - 80
+        - 90
+        - 100
+        - 110
+        - 120
+        - 140
+        - 160
+        - 170
+        - 180
+        - 190
+        - 200
+        - 210
+        - 220
+        - 230
+        - 240
+        - 250
+        - 260
+        - 270
+        - 280
+        - 290
+        - 300
+        - 320
+        - 340
+        - 360
+        - 380
+        - 400
+        - 450
+        - 500
+        - 1000
+      label: $p_T^{miss}$ [GeV]
+      expression: objects['met'].pt
+    met_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(p_T^{miss})$
+      expression: objects['met'].phi
+  layout: individual

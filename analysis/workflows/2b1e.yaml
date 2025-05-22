@@ -50,13 +50,13 @@ object_selection:
     field: events.MET
 event_selection:
   hlt_paths:
-    - Ele35_WPTight_Gsf
-    - Photon200
+    SingleElectron:
+      - SingleEle
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
-    trigger: get_trigger_mask(events, hlt_paths)
-    trigger_match: get_trigger_match_mask(events, hlt_paths, 'Electron')
+    trigger: get_trigger_mask(events, hlt_paths, dataset, year)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
