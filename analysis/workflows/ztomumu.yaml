@@ -145,7 +145,14 @@ histogram_config:
       stop: 5
       label: $|\Delta \eta(\mu_1, \mu_2)|$
       expression: np.abs(objects['dimuons'].l1.eta - objects['dimuons'].l2.eta)
-    muon_pt:
+    dimuon_dphi:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 10
+      label: $|\Delta \phi(\mu_1, \mu_2)|$
+      expression: np.abs(objects['dimuons'].l1.phi - objects['dimuons'].l2.phi)
+    leading_muon_pt:
       type: Variable
       edges:
         - 30
@@ -158,36 +165,51 @@ histogram_config:
         - 240
         - 300
         - 500
-      label: $p_T(\mu)$ [GeV]
-      expression: objects['muons'].pt
-    muon_eta:
+      label: $p_T(\mu_1)$ [GeV]
+      expression: objects['dimuons'].l1.pt
+    subleading_muon_pt:
+      type: Variable
+      edges:
+        - 30
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(\mu_2)$ [GeV]
+      expression: objects['dimuons'].l2.pt
+    leading_muon_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(\mu)$
-      expression: objects['muons'].eta
-    muon_phi:
+      label: $\eta(\mu_1)$
+      expression: objects['dimuons'].l1.eta
+    subleading_muon_eta:
+      type: Regular
+      bins: 50
+      start: -2.5
+      stop: 2.5
+      label: $\eta(\mu_2)$
+      expression: objects['dimuons'].l2.eta
+    leading_muon_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(\mu)$
-      expression: objects['muons'].phi
-    leading_muon_pt:
+      label: $\phi(\mu_1)$
+      expression: objects['dimuons'].l1.phi
+    subleading_muon_phi:
       type: Regular
       bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(\mu_1)$ [GeV]
-      expression: objects['dimuons'].l1.pt
-    subleading_muon_pt:
-      type: Regular
-      bins: 50
-      start: 30
-      stop: 300
-      label: $p_T(\mu_2)$ [GeV]
-      expression: objects['dimuons'].l2.pt
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(\mu_2)$
+      expression: objects['dimuons'].l2.phi
     npvs:
       type: Integer
       start: 0
@@ -244,19 +266,28 @@ histogram_config:
       label: $|\Delta \eta(j_1, j_2)|$
       expression: np.abs(ak.pad_none(objects['jets'], target=2)[:, 0].eta - ak.pad_none(objects['jets'], target=2)[:, 1].eta)
   layout:
-    muons:
-      - muon_pt
-      - muon_eta
-      - muon_phi
     leading_muon_pt: 
       - leading_muon_pt
     subleading_muon_pt: 
       - subleading_muon_pt
-    dimuons:
+    leading_muon_eta: 
+      - leading_muon_eta
+    subleading_muon_eta: 
+      - subleading_muon_eta
+    leading_muon_phi: 
+      - leading_muon_phi
+    subleading_muon_phi: 
+      - subleading_muon_phi
+    dimuon_pt:
       - dimuon_pt
+    dimuon_mass:
       - dimuon_mass
-    vertex:
-      - npvs
+    dimuon_dr:
+      - dimuon_dr
+    dimuon_deta:
+      - dimuon_deta
+    dimuon_dphi:
+      - dimuon_dphi
     jet_pt:
       - jet_pt
     jet_eta:
@@ -269,3 +300,5 @@ histogram_config:
       - jet_dr
     jet_deta: 
       - jet_deta
+    vertex:
+      - npvs
