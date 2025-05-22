@@ -6,7 +6,6 @@ from typing import Type
 from pathlib import Path
 from .utils import unflat_sf
 from coffea.analysis_tools import Weights
-from analysis.selections import trigger_match
 from analysis.corrections.utils import pog_years, get_pog_json, get_muon_hlt_json
 
 

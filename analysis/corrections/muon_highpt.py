@@ -6,7 +6,6 @@ from typing import Type
 from pathlib import Path
 from .utils import unflat_sf
 from coffea.analysis_tools import Weights
-from analysis.selections import trigger_match
 from analysis.corrections.utils import pog_years, get_pog_json
 
 
@@ -63,13 +62,13 @@ class MuonHighPtCorrector:
         add muon RECO scale factors to weights container
         """
         # get muons within SF binning
-        muon_pt_mask = self.m.pt >= 50.0
+        muon_pt_mask = self.m.tunepRelPt >= 50.0
         muon_eta_mask = np.abs(self.m.eta) < 2.4
         in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
-        muon_pt = ak.fill_none(in_muons.pt, 50.0)
+        muon_pt = ak.fill_none(in_muons.tunepRelPt, 50.0)
         muon_eta = np.abs(ak.fill_none(in_muons.eta, 0.0))
 
         # 'id' scale factors names
@@ -121,14 +120,14 @@ class MuonHighPtCorrector:
         add muon ID scale factors to weights container
         """
         # get muons that pass the id wp, and within SF binning
-        muon_pt_mask = self.m.pt > 50.0
+        muon_pt_mask = self.m.tunepRelPt > 50.0
         muon_eta_mask = np.abs(self.m.eta) < 2.39
         muon_id_mask = self.m.highPtId == 2
         in_muon_mask = muon_pt_mask & muon_eta_mask & muon_id_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
-        muon_pt = ak.fill_none(in_muons.pt, 50.0)
+        muon_pt = ak.fill_none(in_muons.tunepRelPt, 50.0)
         muon_eta = np.abs(ak.fill_none(in_muons.eta, 0.0))
 
         # 'id' scale factors names
@@ -181,7 +180,7 @@ class MuonHighPtCorrector:
         add muon Iso (LooseRelIso with mediumID) scale factors to weights container
         """
         # get 'in-limits' muons
-        muon_pt_mask = self.m.pt > 50.0
+        muon_pt_mask = self.m.tunepRelPt > 50.0
         muon_eta_mask = np.abs(self.m.eta) < 2.39
         muon_id_mask = self.m.highPtId == 2
         muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
@@ -189,7 +188,7 @@ class MuonHighPtCorrector:
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
-        muon_pt = ak.fill_none(in_muons.pt, 50.0)
+        muon_pt = ak.fill_none(in_muons.tunepRelPt, 50.0)
         muon_eta = np.abs(ak.fill_none(in_muons.eta, 0.0))
 
         iso_corrections = {
@@ -274,12 +273,12 @@ class MuonHighPtCorrector:
                 trigger_mask = trigger_mask | self.events.HLT[hlt_path]
 
         # get 'in-limits' muons
-        muon_pt_mask = self.m.pt > 50.0
+        muon_pt_mask = self.m.tunepRelPt > 50.0
         muon_eta_mask = np.abs(self.m.eta) < 2.399
         muon_id_mask = self.m.highPtId == 2
         muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
 
-        trigger_mask = ak.flatten(ak.ones_like(self.muons.pt) * trigger_mask) > 0
+        trigger_mask = ak.flatten(ak.ones_like(self.muons.tunepRelPt) * trigger_mask) > 0
         trigger_match_mask = ak.flatten(trigger_match_mask)
 
         in_muon_mask = (
@@ -293,7 +292,7 @@ class MuonHighPtCorrector:
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons transverse momentum and abs pseudorapidity (replace None values with some 'in-limit' value)
-        muon_pt = ak.fill_none(in_muons.pt, 50.0)
+        muon_pt = ak.fill_none(in_muons.tunepRelPt, 50.0)
         muon_eta = np.abs(ak.fill_none(in_muons.eta, 0.0))
 
         # scale factors keys
