@@ -17,7 +17,7 @@ def save_process_histograms_by_sample(
     categories,
 ):
     print_header(f"Processing {sample} outputs")
-        
+
     fileset_file = Path.cwd() / "analysis" / "filesets" / f"{year}_nanov9.yaml"
     with open(fileset_file, "r") as f:
         dataset_config = yaml.safe_load(f)
@@ -73,7 +73,6 @@ def save_process_histograms_by_sample(
     logging.info(f"saving histograms")
     save(scaled_histograms, f"{output_dir}/{sample}.coffea")
 
-    
     scaled_cutflow = {}
     for category in categories:
         logging.info(f"saving cutflow for category {category}\n")
@@ -233,16 +232,18 @@ def get_results_report(processed_histograms, category):
         else:
             mcs.append(process)
             results[process]["stat err"] = mcstat_err[process]
-            results[process]["syst err"] = (
-                bin_error_up[process] + bin_error_down[process]
-            ) / 2
+            results[process]["syst err up"] = bin_error_up[process]
+            results[process]["syst err down"] = bin_error_down[process]
     df = pd.DataFrame(results)
     df["Total background"] = df.loc[["events"], mcs].sum(axis=1)
     df.loc["stat err", "Total background"] = np.sqrt(
         np.sum(df.loc["stat err", mcs] ** 2)
     )
-    df.loc["syst err", "Total background"] = np.sqrt(
-        np.sum(df.loc["syst err", mcs] ** 2)
+    df.loc["syst err up", "Total background"] = np.sqrt(
+        np.sum(df.loc["syst err up", mcs] ** 2)
+    )
+    df.loc["syst err down", "Total background"] = np.sqrt(
+        np.sum(df.loc["syst err down", mcs] ** 2)
     )
     df = df.T
     df.loc["Data/Total background"] = (

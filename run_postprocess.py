@@ -25,7 +25,8 @@ from analysis.postprocess.utils import (
     clear_output_directory,
     combine_event_tables,
     combine_cutflows,
-    df_to_latex,
+    df_to_latex_average,
+    df_to_latex_asymmetric,
 )
 
 
@@ -228,9 +229,12 @@ if __name__ == "__main__":
             combined_results.to_csv(category_dir / f"results_{category}.csv")
 
             # save latex table
-            latex_table = df_to_latex(combined_results)
-            with open(category_dir / f"results_{category}.txt", "w") as f:
-                f.write(latex_table)
+            latex_table_asymmetric = df_to_latex_asymmetric(combined_results)
+            with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
+                f.write(latex_table_asymmetric)
+            latex_table_average = df_to_latex_average(combined_results)
+            with open(category_dir / f"results_{category}_average.txt", "w") as f:
+                f.write(latex_table_average)
 
             # load and combine cutflow tables
             print_header(f"Cutflow")
@@ -356,9 +360,12 @@ if __name__ == "__main__":
             logging.info("\n")
             results_df.to_csv(f"{category_dir}/results_{category}.csv")
 
-            latex_table = df_to_latex(results_df)
-            with open(category_dir / f"results_{category}.txt", "w") as f:
-                f.write(latex_table)
+            latex_table_asymmetric = df_to_latex_asymmetric(results_df)
+            with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
+                f.write(latex_table_asymmetric)
+            latex_table_average = df_to_latex_average(results_df)
+            with open(category_dir / f"results_{category}_average.txt", "w") as f:
+                f.write(latex_table_average)
 
     if args.plot:
         if not args.postprocess and args.year != "2016":

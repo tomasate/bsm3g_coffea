@@ -64,7 +64,7 @@ def combine_cutflows(df1, df2):
     return combined
 
 
-def df_to_latex(df, table_title="Events"):
+def df_to_latex_asymmetric(df, table_title="Events"):
     output = rf"""\begin{{table}}[h!]
 \centering
 \begin{{tabular}}{{@{{}} l c @{{}}}}
@@ -73,41 +73,91 @@ def df_to_latex(df, table_title="Events"):
 \hline
 """
 
-    total_background_value = None
-    data_value = None
-
     for label, row in df.iterrows():
         events = row["events"]
-        stat_err = row["stat err"] if pd.notna(row["stat err"]) else None
-        syst_err = row["syst err"] if pd.notna(row["syst err"]) else None
+        stat_err = row.get("stat err", None)
+        syst_err_up = row.get("syst err up", None)
+        syst_err_down = row.get("syst err down", None)
 
         events_f = f"{float(events):.2f}"
-        stat_err_f = f"{float(stat_err):.2f}" if stat_err is not None else "nan"
-        syst_err_f = f"{float(syst_err):.2f}" if syst_err is not None else "nan"
+        stat_err_f = f"{float(stat_err):.2f}" if pd.notna(stat_err) else "nan"
+        syst_err_up_f = f"{float(syst_err_up):.2f}" if pd.notna(syst_err_up) else "nan"
+        syst_err_down_f = (
+            f"{float(syst_err_down):.2f}" if pd.notna(syst_err_down) else "nan"
+        )
 
         if label not in ["Data", "Total background", "Data/Total background"]:
-            output += f"{label} & ${events_f} \\pm {stat_err_f} \\, (\\text{{stat}}) \\pm {syst_err_f} \\, (\\text{{syst}})$\\\\\n"
-
-    output += r"\hline" + "\n"
+            output += (
+                f"{label} & $\\displaystyle {events_f} \\pm {stat_err_f}"
+                f"^{{\\scriptstyle +{syst_err_up_f}}}_{{\\scriptstyle -{syst_err_down_f}}}$\\\\\n"
+            )
 
     # Total background
     bg = df.loc["Total background"]
-    total_background_value = bg["events"]
-    stat_err_bg = bg["stat err"]
-    syst_err_bg = bg["syst err"]
-
-    output += f"Total Background & ${float(total_background_value):.2f} \\pm {float(stat_err_bg):.2f} \\, (\\text{{stat}}) \\pm {float(syst_err_bg):.2f} \\, (\\text{{syst}})$ \\\\ \n"
+    output += (
+        f"Total Background & $\\displaystyle {bg['events']:.2f} \\pm {bg['stat err']:.2f}"
+        f"^{{\\scriptstyle +{bg['syst err up']:.2f}}}_{{\\scriptstyle -{bg['syst err down']:.2f}}}$ \\\\\n"
+    )
 
     # Data
-    data_value = df.loc["Data"]["events"]
-    output += f"Data & ${float(data_value):.0f}$ \\\\ \n"
+    output += f"Data & ${float(df.loc['Data']['events']):.0f}$ \\\\\n"
 
     output += r"\hline" + "\n"
 
-    # Data/Total Background
-    if total_background_value and data_value:
-        ratio = data_value / total_background_value
-        output += f"Data/Total Background & ${ratio:.2f}$ \\\\ \n"
+    # Ratio
+    ratio = df.loc["Data"]["events"] / df.loc["Total background"]["events"]
+    output += f"Data/Total Background & ${ratio:.2f}$ \\\\\n"
+
+    output += r"""\hline
+\end{tabular}
+\end{table}"""
+    return output
+
+
+def df_to_latex_average(df, table_title="Events"):
+    output = rf"""\begin{{table}}[h!]
+\centering
+\begin{{tabular}}{{@{{}} l c @{{}}}}
+\hline
+ & \textbf{{{table_title}}} \\
+\hline
+"""
+
+    for label, row in df.iterrows():
+        events = row["events"]
+        stat_err = row.get("stat err", None)
+        syst_err_up = row.get("syst err up", None)
+        syst_err_down = row.get("syst err down", None)
+
+        events_f = f"{float(events):.2f}"
+        stat_err_f = f"{float(stat_err):.2f}" if pd.notna(stat_err) else "nan"
+        if pd.notna(syst_err_up) and pd.notna(syst_err_down):
+            syst_avg = (syst_err_up + syst_err_down) / 2
+            syst_err_f = f"{syst_avg:.2f}"
+        else:
+            syst_err_f = "nan"
+
+        if label not in ["Data", "Total background", "Data/Total background"]:
+            output += (
+                f"{label} & ${events_f} \\pm {stat_err_f} \\pm {syst_err_f} \\ $\\\\\n"
+            )
+
+    # Total background
+    bg = df.loc["Total background"]
+    syst_avg_bg = (bg["syst err up"] + bg["syst err down"]) / 2
+    output += (
+        f"Total Background & ${bg['events']:.2f} \\pm {bg['stat err']:.2f} \\ "
+        f"\\pm {syst_avg_bg:.2f} \\$ \\\\\n"
+    )
+
+    # Data
+    output += f"Data & ${float(df.loc['Data']['events']):.0f}$ \\\\\n"
+
+    output += r"\hline" + "\n"
+
+    # Ratio
+    ratio = df.loc["Data"]["events"] / df.loc["Total background"]["events"]
+    output += f"Data/Total Background & ${ratio:.2f}$ \\\\\n"
 
     output += r"""\hline
 \end{tabular}
