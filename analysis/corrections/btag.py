@@ -109,7 +109,6 @@ class BTagCorrector:
         self._cset = correctionlib.CorrectionSet.from_file(
             get_pog_json(json_name="btag", year=year)
         )
-
         # select bc and light jets
         # hadron flavor definition: 5=b, 4=c, 0=udsg
         self._bc_jets = events.selected_jets[events.selected_jets.hadronFlavour >= 4]
@@ -123,7 +122,6 @@ class BTagCorrector:
                 events.selected_jets.hadronFlavour == 0
             ],
         }
-
         self.var_naming_map = {
             "bc": "CMS_btag_heavy",
             "light": "CMS_btag_light",
@@ -145,53 +143,72 @@ class BTagCorrector:
         passbtag = self._jet_pass_btag[flavor]
 
         # nominal scale factors
-        jets_sf = self.get_scale_factors(flavor=flavor, syst="central")
+        btag_sf = self.get_scale_factors(flavor=flavor, syst="central")
 
         # nominal weights
-        jets_weight = self.get_btag_weight(eff, jets_sf, passbtag)
+        btag_weight = self.get_btag_weight(eff, btag_sf, passbtag)
 
         if self._variation == "nominal":
             # systematics
-            if self._full_run:
-                # If the fullRunII data is analyzed, 'up/down_correlated' and 'up/down_uncorrelated' systematics are provided to be used instead of the 'up/down' ones, which are supposed to be correlated/decorrelated between the different data years
-                for var in ["correlated", "uncorrelated"]:
-                    # up and down scale factors
-                    jets_sf_up = self.get_scale_factors(flavor=flavor, syst=f"up_{var}")
-                    jets_sf_down = self.get_scale_factors(
-                        flavor=flavor, syst=f"down_{var}"
-                    )
-
-                    jets_weight_up = self.get_btag_weight(eff, jets_sf_up, passbtag)
-                    jets_weight_down = self.get_btag_weight(eff, jets_sf_down, passbtag)
-
-                    # add weights to Weights container
-                    self._weights.add(
-                        name=f"{self.var_naming_map[flavor]}_{var}_{self._year}",
-                        weight=jets_weight,
-                        weightUp=jets_weight_up,
-                        weightDown=jets_weight_down,
-                    )
-            else:
-                syst_up = "up"
-                syst_down = "down"
+            if not self._full_run:
                 # up and down scale factors
-                jets_sf_up = self.get_scale_factors(flavor=flavor, syst=syst_up)
-                jets_sf_down = self.get_scale_factors(flavor=flavor, syst=syst_down)
-
-                jets_weight_up = self.get_btag_weight(eff, jets_sf_up, passbtag)
-                jets_weight_down = self.get_btag_weight(eff, jets_sf_down, passbtag)
-
+                btag_sf_up = self.get_scale_factors(flavor=flavor, syst="up")
+                btag_sf_down = self.get_scale_factors(flavor=flavor, syst="down")
+                btag_weight_up = self.get_btag_weight(eff, btag_sf_up, passbtag)
+                btag_weight_down = self.get_btag_weight(eff, btag_sf_down, passbtag)
                 # add weights to Weights container
                 self._weights.add(
                     name=self.var_naming_map[flavor],
-                    weight=jets_weight,
-                    weightUp=jets_weight_up,
-                    weightDown=jets_weight_down,
+                    weight=btag_weight,
+                    weightUp=btag_weight_up,
+                    weightDown=btag_weight_down,
+                )
+            else:
+                # If the fullRunII data is analyzed, 'up/down_correlated' and 'up/down_uncorrelated' systematics are provided to be used instead of the 'up/down' ones, which are supposed to be correlated/decorrelated between the different data years
+
+                # up and down correlated scale factors
+                btag_sf_up_correlated = self.get_scale_factors(
+                    flavor=flavor, syst="up_correlated"
+                )
+                btag_sf_down_correlated = self.get_scale_factors(
+                    flavor=flavor, syst="down_correlated"
+                )
+                btag_weight_up_correlated = self.get_btag_weight(
+                    eff, btag_sf_up_correlated, passbtag
+                )
+                btag_weight_down_correlated = self.get_btag_weight(
+                    eff, btag_sf_down_correlated, passbtag
+                )
+                # up and down uncorrelated scale factors
+                btag_sf_up_uncorrelated = self.get_scale_factors(
+                    flavor=flavor, syst="up_uncorrelated"
+                )
+                btag_sf_down_uncorrelated = self.get_scale_factors(
+                    flavor=flavor, syst="down_uncorrelated"
+                )
+                btag_weight_up_uncorrelated = self.get_btag_weight(
+                    eff, btag_sf_up_uncorrelated, passbtag
+                )
+                btag_weight_down_uncorrelated = self.get_btag_weight(
+                    eff, btag_sf_down_uncorrelated, passbtag
+                )
+                # add weights to Weights container
+                self._weights.add(
+                    name=f"{self.var_naming_map[flavor]}_correlated",
+                    weight=btag_weight,
+                    weightUp=btag_weight_up_correlated,
+                    weightDown=btag_weight_down_correlated,
+                )
+                self._weights.add(
+                    name=f"{self.var_naming_map[flavor]}_uncorrelated_{self._year}",
+                    weight=ak.ones_like(btag_weight),
+                    weightUp=btag_weight_up_uncorrelated,
+                    weightDown=btag_weight_down_uncorrelated,
                 )
         else:
             self._weights.add(
                 name=self.var_naming_map[flavor],
-                weight=jets_weight,
+                weight=btag_weight,
             )
 
     def efficiency(self, flavor: str, fill_value=1) -> ak.Array:
