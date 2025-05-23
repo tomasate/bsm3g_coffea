@@ -48,13 +48,13 @@ def add_pileup_weight(
         down_sf = cset[year_to_corr[year]].evaluate(ak.to_numpy(nti), "down")
         # add pileup scale factors to weights container
         weights_container.add(
-            name=f"CMS_pileup_{year}",
+            name=f"CMS_pileup",
             weight=nominal_sf,
             weightUp=up_sf,
             weightDown=down_sf,
         )
     else:
         weights_container.add(
-            name == f"CMS_pileup_{year}",
+            name == f"CMS_pileup",
             weight=nominal_sf,
         )
