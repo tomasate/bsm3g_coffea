@@ -3,6 +3,8 @@ import yaml
 import glob
 import logging
 import argparse
+import subprocess
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from collections import defaultdict
@@ -21,6 +23,9 @@ from analysis.postprocess.utils import (
     print_header,
     setup_logger,
     clear_output_directory,
+    combine_event_tables,
+    combine_cutflows,
+    df_to_latex,
 )
 
 
@@ -44,7 +49,7 @@ def parse_arguments():
         "-y",
         "--year",
         required=True,
-        choices=["2016preVFP", "2016postVFP", "2017", "2018"],
+        choices=["2016", "2016preVFP", "2016postVFP", "2017", "2018"],
         help="Dataset year",
     )
     parser.add_argument(
@@ -105,11 +110,67 @@ def load_histogram_file(path: Path):
     return load(path)
 
 
+def uncertainty_table(processed_histograms, workflow, year):
+    to_accumulate = []
+    for process in processed_histograms:
+        if process != "Data":
+            to_accumulate.append(processed_histograms[process])
+    helper_histo = accumulate(to_accumulate)
+    for key in helper_histo:
+        for var in helper_histo[key].axes.name:
+            if var != "variation":
+                helper_key = var
+                break
+        break
+    helper_histo = helper_histo[key].project(var, "variation")
+
+    # get histogram per variation
+    variation_hists = {}
+    for variation in helper_histo.axes["variation"]:
+        if variation == "nominal":
+            nominal = helper_histo[{"variation": variation}]
+        else:
+            variation_hists[variation] = helper_histo[{"variation": variation}]
+
+    # get variations names
+    variations_keys = []
+    for variation in variation_hists:
+        if variation == "nominal":
+            continue
+        # get variation key
+        variation_key = variation.replace("Up", "").replace("Down", "")
+        if variation_key not in variations_keys:
+            variations_keys.append(variation_key)
+
+    variation_impact = {}
+    nom = nominal.values()
+    for variation in variations_keys:
+        # up/down yields by bin
+        varup = variation_hists[f"{variation}Up"].values()
+        vardown = variation_hists[f"{variation}Down"].values()
+        # concatenate σxup−nominal, σxdown−nominal, and 0
+        up_and_down = np.stack([varup - nom, vardown - nom, np.zeros_like(nom)], axis=0)
+        # max(σxup−nominal, σxdown−nominal, 0.) / nominal
+        max_up_and_down = np.max(up_and_down, axis=0) / nom
+        # min(σxup−nominal,σ xdown−nominal,0.) / nominal
+        min_up_and_down = np.min(up_and_down, axis=0) / nom
+        # integate over all bins
+        variation_impact[variation] = [
+            np.sqrt(np.sum(max_up_and_down**2)),
+            np.sqrt(np.sum(min_up_and_down**2)),
+        ]
+
+    syst_df = pd.DataFrame(variation_impact).T * 100
+    syst_df = syst_df.rename({0: "Up", 1: "Down"}, axis=1)
+    return syst_df
+
+
 if __name__ == "__main__":
     args = parse_arguments()
 
     output_dir = OUTPUT_DIR / args.workflow / args.year
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     clear_output_directory(str(output_dir), TXT_EXT)
     setup_logger(output_dir)
@@ -121,7 +182,79 @@ if __name__ == "__main__":
     processed_histograms = None
 
     if args.year == "2016":
+        # load and accumulate processed 2016preVFP and 2016postVFP histograms
         processed_histograms = load_2016_histograms(args.workflow)
+        identifier = "VFP"
+
+        print_header(f"Systematic uncertainty impact")
+        syst_df = uncertainty_table(processed_histograms, args.workflow, args.year)
+        print(f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv")
+        syst_df.to_csv(
+            f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv"
+        )
+        logging.info(syst_df)
+        logging.info("\n")
+
+        for category in categories:
+            logging.info(f"category: {category}")
+            # load and combine results tables
+            results_pre = pd.read_csv(
+                OUTPUT_DIR
+                / args.workflow
+                / f"{args.year}pre{identifier}"
+                / category
+                / f"results_{category}.csv",
+                index_col=0,
+            )
+            results_post = pd.read_csv(
+                OUTPUT_DIR
+                / args.workflow
+                / f"{args.year}post{identifier}"
+                / category
+                / f"results_{category}.csv",
+                index_col=0,
+            )
+            combined_results = combine_event_tables(results_pre, results_post)
+
+            print_header(f"Results")
+            logging.info(
+                combined_results.applymap(lambda x: f"{x:.5f}" if pd.notnull(x) else "")
+            )
+            logging.info("\n")
+
+            category_dir = OUTPUT_DIR / args.workflow / args.year / category
+            if not category_dir.exists():
+                category_dir.mkdir(parents=True, exist_ok=True)
+            combined_results.to_csv(category_dir / f"results_{category}.csv")
+
+            # save latex table
+            latex_table = df_to_latex(combined_results)
+            with open(category_dir / f"results_{category}.txt", "w") as f:
+                f.write(latex_table)
+
+            # load and combine cutflow tables
+            print_header(f"Cutflow")
+            cutflow_pre = pd.read_csv(
+                OUTPUT_DIR
+                / args.workflow
+                / f"{args.year}pre{identifier}"
+                / category
+                / f"cutflow_{category}.csv",
+                index_col=0,
+            )
+            cutflow_post = pd.read_csv(
+                OUTPUT_DIR
+                / args.workflow
+                / f"{args.year}post{identifier}"
+                / category
+                / f"cutflow_{category}.csv",
+                index_col=0,
+            )
+            combined_cutflow = combine_cutflows(cutflow_pre, cutflow_post)
+            combined_cutflow.to_csv(category_dir / f"cutflow_{category}.csv")
+            logging.info(
+                combined_cutflow.applymap(lambda x: f"{x:.2f}" if pd.notnull(x) else "")
+            )
 
     if args.postprocess:
         logging.info(workflow_config.to_yaml())
@@ -178,6 +311,12 @@ if __name__ == "__main__":
             process_samples_map=process_samples_map,
         )
 
+        print_header(f"Systematic uncertainty impact")
+        syst_df = uncertainty_table(processed_histograms, args.workflow, args.year)
+        syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
+        logging.info(syst_df)
+        logging.info("\n")
+
         for category in categories:
             logging.info(f"category: {category}")
             category_dir = Path(f"{output_dir}/{category}")
@@ -217,6 +356,10 @@ if __name__ == "__main__":
             logging.info("\n")
             results_df.to_csv(f"{category_dir}/results_{category}.csv")
 
+            latex_table = df_to_latex(results_df)
+            with open(category_dir / f"results_{category}.txt", "w") as f:
+                f.write(latex_table)
+
     if args.plot:
         if not args.postprocess and args.year != "2016":
             postprocess_file = (
@@ -248,3 +391,7 @@ if __name__ == "__main__":
                     log=args.log,
                     extension=args.extension,
                 )
+            subprocess.run(
+                f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",
+                shell=True,
+            )
