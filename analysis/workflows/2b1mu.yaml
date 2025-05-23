@@ -125,7 +125,7 @@ histogram_config:
         - 300
         - 500
       label: $p_T(\mu)$ [GeV]
-      expression: objects['muons'].tunepRelPt
+      expression: objects['muons'].pt
     muon_eta:
       type: Regular
       bins: 50
