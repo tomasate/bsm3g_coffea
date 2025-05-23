@@ -61,33 +61,12 @@ class BaseProcessor(processor.ProcessorABC):
         if self.do_systematics:
             shifts.extend(
                 [
-                    (
-                        {"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up},
-                        "JESUp",
-                    ),
-                    (
-                        {
-                            "Jet": events.Jet.JES_jes.down,
-                            "MET": events.MET.JES_jes.down,
-                        },
-                        "JESDown",
-                    ),
-                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, "JERUp"),
-                    (
-                        {"Jet": events.Jet.JER.down, "MET": events.MET.JER.down},
-                        "JERDown",
-                    ),
-                    (
-                        {"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up},
-                        "UESUp",
-                    ),
-                    (
-                        {
-                            "Jet": events.Jet,
-                            "MET": events.MET.MET_UnclusteredEnergy.down,
-                        },
-                        "UESDown",
-                    ),
+                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, f"CMS_scale_j_{self.year}Up"),
+                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down}, f"CMS_scale_j_{self.year}Down"),
+                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, f"CMS_res_j_{self.year}Up"),
+                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down}, f"CMS_res_j_{self.year}Down"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up}, f"CMS_met_unclustered_{self.year}Up"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, f"CMS_met_unclustered_{self.year}Down"),
                 ]
             )
         return processor.accumulate(
