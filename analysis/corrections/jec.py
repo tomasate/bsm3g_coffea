@@ -24,7 +24,9 @@ def apply_jet_corrections(events: NanoEventsArray, year: str) -> None:
     """
     if hasattr(events, "genWeight"):
         # load jet and MET factories with JEC/JER corrections
-        with importlib.resources.path("analysis.data", "mc_jec_compiled.pkl.gz") as path:
+        with importlib.resources.path(
+            "analysis.data", "mc_jec_compiled.pkl.gz"
+        ) as path:
             with gzip.open(path) as fin:
                 factories = cloudpickle.load(fin)
 

@@ -278,7 +278,9 @@ class MuonHighPtCorrector:
         muon_id_mask = self.m.highPtId == 2
         muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
 
-        trigger_mask = ak.flatten(ak.ones_like(self.muons.tunepRelPt) * trigger_mask) > 0
+        trigger_mask = (
+            ak.flatten(ak.ones_like(self.muons.tunepRelPt) * trigger_mask) > 0
+        )
         trigger_match_mask = ak.flatten(trigger_match_mask)
 
         in_muon_mask = (

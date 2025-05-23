@@ -65,7 +65,7 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
                     working_point=weights_config["pujetid"]["id"],
                     variation=variation,
                 )
-        if "btagging" in weights_config:    
+        if "btagging" in weights_config:
             if weights_config["btagging"]:
                 btag_corrector = BTagCorrector(
                     events=pruned_ev,

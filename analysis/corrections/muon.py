@@ -109,14 +109,14 @@ class MuonCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"muon_reco",
+                name=f"CMS_eff_m_reco_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"muon_reco",
+                name=f"CMS_eff_m_reco_{self.year}",
                 weight=nominal_sf,
             )
 
@@ -166,14 +166,14 @@ class MuonCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"muon_id_{self.id_wp}",
+                name="CMS_eff_m_id_2017",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"muon_id_{self.id_wp}",
+                name="CMS_eff_m_id_2017",
                 weight=nominal_sf,
             )
 
@@ -285,14 +285,14 @@ class MuonCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"muon_iso_{self.iso_wp}",
+                name=f"CMS_eff_m_iso_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"muon_iso_{self.iso_wp}",
+                name=f"CMS_eff_m_iso_{self.year}",
                 weight=nominal_sf,
             )
 
@@ -386,18 +386,18 @@ class MuonCorrector:
                     self.n,
                 )
                 self.weights.add(
-                    name=f"muon_triggeriso",
+                    name=f"CMS_eff_m_trigger_{self.year}",
                     weight=nominal_sf,
                     weightUp=up_sf,
                     weightDown=down_sf,
                 )
             elif kind == "double":
                 self.weights.add(
-                    name=f"muon_triggeriso",
+                    name=f"CMS_eff_m_trigger_{self.year}",
                     weight=nominal_sf,
                 )
         else:
             self.weights.add(
-                name=f"muon_triggeriso",
+                name=f"CMS_eff_m_trigger_{self.year}",
                 weight=nominal_sf,
             )

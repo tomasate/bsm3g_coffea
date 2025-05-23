@@ -142,14 +142,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"tau_vs_electron_{self.tau_vs_ele}",
+                name=f"CMS_eff_tau_idDeepTauVSe_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"tau_vs_electron_{self.tau_vs_ele}",
+                name=f"CMS_eff_tau_idDeepTauVSe_{self.year}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -202,14 +202,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"tau_vs_muon_{self.tau_vs_mu}",
+                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"tau_vs_muon_{self.tau_vs_mu}",
+                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -240,7 +240,7 @@ class TauCorrector:
         )
         # GenMatch = 0 or 6 = unmatched or jet, 1 or 3 = electron, 2 or 4 = muon, 5 = real tau
         tau_genMatch_mask = self.taus_genMatch == 5
-        in_tau_mask = tau_dm_mask & tau_genMatch_mask 
+        in_tau_mask = tau_dm_mask & tau_genMatch_mask
         # get 'in-limits' taus
         in_limit_taus = self.taus.mask[in_tau_mask]
         # get pt and eta
@@ -293,14 +293,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"tau_vs_jet_{self.tau_vs_jet}_{flag}",
+                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"tau_vs_jet_{self.tau_vs_jet}_{flag}",
+                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -375,14 +375,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"tau_trigger_{trigtype}",
+                name=f"CMS_eff_t_trigger_{self.year}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"tau_trigger_{trigtype}",
+                name=f"CMS_eff_t_trigger_{self.year}",
                 weight=nominal_sf,
             )
         return nominal_sf

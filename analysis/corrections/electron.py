@@ -113,7 +113,7 @@ class ElectronCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"electron_id_{id_working_point}",
+                name="CMS_eff_e_2017",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
@@ -133,6 +133,10 @@ class ElectronCorrector:
         electron_pt_mask = {
             "RecoAbove20": (self.e.pt > 20) & (self.e.pt < 499.999),
             "RecoBelow20": (self.e.pt > 10) & (self.e.pt < 20),
+        }
+        var_naming_map = {
+            "RecoAbove20": f"CMS_eff_e_reco_above20_{self.year}",
+            "RecoBelow20": f"CMS_eff_e_reco_below20_{self.year}",
         }
         # get 'in-limits' electrons
         in_electron_mask = electron_pt_mask[reco]
@@ -172,13 +176,13 @@ class ElectronCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"electron_{reco}",
+                name=var_naming_map[reco],
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"electron_{reco}",
+                name=var_naming_map[reco],
                 weight=nominal_sf,
             )

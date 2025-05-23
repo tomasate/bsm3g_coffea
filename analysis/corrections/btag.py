@@ -124,6 +124,11 @@ class BTagCorrector:
             ],
         }
 
+        self.var_naming_map = {
+            "bc": "CMS_btag_heavy",
+            "light": "CMS_btag_light",
+        }
+
     def add_btag_weights(self, flavor: str) -> None:
         """
         Add b-tagging weights (nominal, up and down) to weights container for bc or light jets
@@ -147,26 +152,45 @@ class BTagCorrector:
 
         if self._variation == "nominal":
             # systematics
-            syst_up = "up_correlated" if self._full_run else "up"
-            syst_down = "down_correlated" if self._full_run else "down"
+            if self._full_run:
+                # If the fullRunII data is analyzed, 'up/down_correlated' and 'up/down_uncorrelated' systematics are provided to be used instead of the 'up/down' ones, which are supposed to be correlated/decorrelated between the different data years
+                for var in ["correlated", "uncorrelated"]:
+                    # up and down scale factors
+                    jets_sf_up = self.get_scale_factors(flavor=flavor, syst=f"up_{var}")
+                    jets_sf_down = self.get_scale_factors(
+                        flavor=flavor, syst=f"down_{var}"
+                    )
 
-            # up and down scale factors
-            jets_sf_up = self.get_scale_factors(flavor=flavor, syst=syst_up)
-            jets_sf_down = self.get_scale_factors(flavor=flavor, syst=syst_down)
+                    jets_weight_up = self.get_btag_weight(eff, jets_sf_up, passbtag)
+                    jets_weight_down = self.get_btag_weight(eff, jets_sf_down, passbtag)
 
-            jets_weight_up = self.get_btag_weight(eff, jets_sf_up, passbtag)
-            jets_weight_down = self.get_btag_weight(eff, jets_sf_down, passbtag)
+                    # add weights to Weights container
+                    self._weights.add(
+                        name=f"{self.var_naming_map[flavor]}_{var}_{self._year}",
+                        weight=jets_weight,
+                        weightUp=jets_weight_up,
+                        weightDown=jets_weight_down,
+                    )
+            else:
+                syst_up = "up"
+                syst_down = "down"
+                # up and down scale factors
+                jets_sf_up = self.get_scale_factors(flavor=flavor, syst=syst_up)
+                jets_sf_down = self.get_scale_factors(flavor=flavor, syst=syst_down)
 
-            # add weights to Weights container
-            self._weights.add(
-                name=f"btag_{flavor}",
-                weight=jets_weight,
-                weightUp=jets_weight_up,
-                weightDown=jets_weight_down,
-            )
+                jets_weight_up = self.get_btag_weight(eff, jets_sf_up, passbtag)
+                jets_weight_down = self.get_btag_weight(eff, jets_sf_down, passbtag)
+
+                # add weights to Weights container
+                self._weights.add(
+                    name=self.var_naming_map[flavor],
+                    weight=jets_weight,
+                    weightUp=jets_weight_up,
+                    weightDown=jets_weight_down,
+                )
         else:
             self._weights.add(
-                name=f"btag_{flavor}",
+                name=self.var_naming_map[flavor],
                 weight=jets_weight,
             )
 

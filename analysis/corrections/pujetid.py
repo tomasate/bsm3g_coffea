@@ -99,11 +99,11 @@ def add_pujetid_weight(
         )
         # add nominal, up and down scale factors to weights container
         weights.add(
-            name="pujetid",
+            name=f"CMS_eff_j_PUJET_id_{year}",
             weight=nominal_sf,
             weightUp=up_sf,
             weightDown=down_sf,
         )
     else:
         # add nominal scale factors to weights container
-        weights.add(name="pujetid", weight=nominal_sf)
+        weights.add(name=f"CMS_eff_j_PUJET_id_{year}", weight=nominal_sf)
