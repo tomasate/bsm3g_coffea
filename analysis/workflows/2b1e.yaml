@@ -92,7 +92,7 @@ corrections:
       - id: tight
     btagging: 
       - id: medium
-      - full_run: true
+      - full_run: false
       - bc: true
       - light: true
     electron:
