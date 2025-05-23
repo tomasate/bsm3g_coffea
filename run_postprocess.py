@@ -26,7 +26,7 @@ from analysis.postprocess.utils import (
     combine_event_tables,
     combine_cutflows,
     df_to_latex_average,
-    df_to_latex_asymmetric,
+    df_to_latex_asymmetric
 )
 
 
@@ -128,11 +128,11 @@ def uncertainty_table(processed_histograms, workflow, year):
     # get histogram per variation
     variation_hists = {}
     for variation in helper_histo.axes["variation"]:
-        if variation == "nominal":
+        if variation == "nominal": 
             nominal = helper_histo[{"variation": variation}]
         else:
             variation_hists[variation] = helper_histo[{"variation": variation}]
-
+    
     # get variations names
     variations_keys = []
     for variation in variation_hists:
@@ -156,12 +156,9 @@ def uncertainty_table(processed_histograms, workflow, year):
         # min(σxup−nominal,σ xdown−nominal,0.) / nominal
         min_up_and_down = np.min(up_and_down, axis=0) / nom
         # integate over all bins
-        variation_impact[variation] = [
-            np.sqrt(np.sum(max_up_and_down**2)),
-            np.sqrt(np.sum(min_up_and_down**2)),
-        ]
-
-    syst_df = pd.DataFrame(variation_impact).T * 100
+        variation_impact[variation] = [np.sqrt(np.sum(max_up_and_down**2)),np.sqrt(np.sum(min_up_and_down**2))]
+    
+    syst_df = pd.DataFrame(variation_impact).T*100
     syst_df = syst_df.rename({0: "Up", 1: "Down"}, axis=1)
     return syst_df
 
@@ -189,13 +186,10 @@ if __name__ == "__main__":
 
         print_header(f"Systematic uncertainty impact")
         syst_df = uncertainty_table(processed_histograms, args.workflow, args.year)
-        print(f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv")
-        syst_df.to_csv(
-            f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv"
-        )
+        syst_df.to_csv(f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv")
         logging.info(syst_df)
         logging.info("\n")
-
+        
         for category in categories:
             logging.info(f"category: {category}")
             # load and combine results tables
@@ -320,7 +314,7 @@ if __name__ == "__main__":
         syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
         logging.info(syst_df)
         logging.info("\n")
-
+        
         for category in categories:
             logging.info(f"category: {category}")
             category_dir = Path(f"{output_dir}/{category}")
@@ -398,7 +392,4 @@ if __name__ == "__main__":
                     log=args.log,
                     extension=args.extension,
                 )
-            subprocess.run(
-                f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",
-                shell=True,
-            )
+            subprocess.run(f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}", shell=True)
