@@ -42,15 +42,24 @@ def clear_output_directory(output_dir, ext):
 
 
 def combine_event_tables(df1, df2):
-    assert all(df1.index == df2.index), "Los índices de los DataFrames no coinciden."
+    assert all(df1.index == df2.index), "index does not match!"
     combined = pd.DataFrame(index=df1.index)
     combined["events"] = df1["events"] + df2["events"]
     combined["stat err"] = np.sqrt(df1["stat err"] ** 2 + df2["stat err"] ** 2)
-    combined["syst err"] = np.sqrt(df1["syst err"] ** 2 + df2["syst err"] ** 2)
+    combined["syst err up"] = np.sqrt(df1["syst err up"] ** 2 + df2["syst err up"] ** 2)
+    combined["syst err down"] = np.sqrt(
+        df1["syst err down"] ** 2 + df2["syst err down"] ** 2
+    )
+    print(combined)
     data = combined.loc["Data", "events"]
     total_bkg = combined.loc["Total background", "events"]
-    combined.loc["Data/Total background", ["events", "stat err", "syst err"]] = [
+    print(data)
+    print(total_bkg)
+    combined.loc[
+        "Data/Total background", ["events", "stat err", "syst err up", "syst err down"]
+    ] = [
         data / total_bkg,
+        np.nan,
         np.nan,
         np.nan,
     ]
