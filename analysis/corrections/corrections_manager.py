@@ -6,13 +6,17 @@ from analysis.corrections import (
     MuonCorrector,
     ElectronCorrector,
     MuonHighPtCorrector,
+    add_lhepdf_weight,
     add_pileup_weight,
     add_pujetid_weight,
+    add_scalevar_weight,
     apply_jet_corrections,
     add_l1prefiring_weight,
+    add_partonshower_weight,
     apply_met_phi_corrections,
     apply_rochester_corrections,
     apply_tau_energy_scale_corrections,
+
 )
 
 
@@ -56,6 +60,23 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
         if weights_config["pileupWeight"]:
             add_pileup_weight(pruned_ev, weights_container, year, variation)
 
+        if weights_config["partonshowerWeight"]:
+            if "PSWeight" in pruned_ev.fields:
+                add_partonshower_weight(
+                    events=pruned_ev,
+                    weights_container=weights_container,
+                )
+        if weights_config["lhepdfWeight"]:
+            if "LHEPdfWeight" in pruned_ev.fields:
+                add_lhepdf_weight(
+                    events=pruned_ev,
+                    weights_container=weights_container,
+                )
+        if weights_config["lhescaleWeight"]:
+            if "LHEScaleWeight" in pruned_ev.fields:
+                add_scalevar_weight(
+                    events=pruned_ev, weights_container=weights_container
+                )
         if "pujetid" in weights_config:
             if weights_config["pujetid"]:
                 add_pujetid_weight(
