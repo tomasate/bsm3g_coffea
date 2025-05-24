@@ -88,9 +88,9 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
-    lhepdfWeight: true
-    lhescaleWeight: true
-    partonshowerWeight: true
+    lhepdfWeight: false
+    lhescaleWeight: false
+    partonshowerWeight: false
     pujetid: 
       - id: tight
     btagging: 
