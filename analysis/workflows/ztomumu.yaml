@@ -79,6 +79,9 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
+    lhepdfWeight: false
+    lhescaleWeight: false
+    partonshowerWeight: true
     electron:
       - id: false
       - reco: false

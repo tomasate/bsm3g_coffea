@@ -90,7 +90,7 @@ corrections:
     l1prefiring: true
     lhepdfWeight: false
     lhescaleWeight: false
-    partonshowerWeight: false
+    partonshowerWeight: true
     pujetid: 
       - id: tight
     btagging: 

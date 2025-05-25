@@ -80,9 +80,13 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiring: true
+    lhepdfWeight: false
+    lhescaleWeight: false
+    partonshowerWeight: true
     electron:
       - id: wp80iso
       - reco: true
+      - trigger: true
     muon:
       - id: false
       - iso: false

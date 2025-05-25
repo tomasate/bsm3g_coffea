@@ -90,7 +90,7 @@ corrections:
     l1prefiring: true
     lhepdfWeight: false
     lhescaleWeight: false
-    partonshowerWeight: false
+    partonshowerWeight: true
     pujetid: 
       - id: tight
     btagging: 
@@ -101,6 +101,7 @@ corrections:
     electron:
       - id: wp80iso
       - reco: true
+      - trigger: true
     muon:
       - id: false
       - iso: false
