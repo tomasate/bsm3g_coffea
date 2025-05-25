@@ -16,7 +16,6 @@ from analysis.corrections import (
     apply_met_phi_corrections,
     apply_rochester_corrections,
     apply_tau_energy_scale_corrections,
-
 )
 
 
@@ -118,6 +117,11 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
                     if weights_config["electron"]["reco"]:
                         electron_corrector.add_reco_weight("RecoAbove20")
                         electron_corrector.add_reco_weight("RecoBelow20")
+                if "trigger" in weights_config["electron"]:
+                    if weights_config["electron"]["trigger"]:
+                        electron_corrector.add_hlt_weights(
+                            id_wp=weights_config["electron"]["id"],
+                        )
 
         if "muon" in weights_config:
             if "selected_muons" in pruned_ev.fields:

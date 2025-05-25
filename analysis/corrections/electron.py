@@ -8,7 +8,7 @@ from typing import Type
 from pathlib import Path
 from .utils import unflat_sf
 from coffea.analysis_tools import Weights
-from analysis.corrections.utils import pog_years, get_pog_json
+from analysis.corrections.utils import pog_years, get_pog_json, get_electron_hlt_json
 
 
 # ----------------------------------
@@ -186,3 +186,89 @@ class ElectronCorrector:
                 name=var_naming_map[reco],
                 weight=nominal_sf,
             )
+
+    def add_hlt_weights(self, id_wp):
+        """
+        Compute electron HLT weights
+        """
+        # get electron correction set
+        assert (
+            id_wp == "wp80iso"
+        ), "there's only available muon trigger SF for 'wp80iso' ID"
+
+        hlt_paths = {
+            "2016preVFP": "Ele27_WPTight_Gsf_OR_Photon175",
+            "2016postVFP": "Ele27_WPTight_Gsf_OR_Photon175",
+            "2017": "Ele35_WPTight_Gsf_OR_Photon200",
+            "2018": "Ele32_WPTight_Gsf",
+        }
+        # get electrons within SF binning
+        pt_limits = {
+            "2016preVFP": (27.0, 499.9),
+            "2016postVFP": (27.0, 499.9),
+            "2017": (35.0, 499.9),
+            "2018": (32.0, 499.9),
+        }
+        electron_pt_mask = (self.e.pt > pt_limits[self.year][0]) & (
+            self.e.pt < pt_limits[self.year][1]
+        )
+        eta_mask = np.abs(self.e.eta + self.e.deltaEtaSC) < 2.5
+        in_electrons_mask = electron_pt_mask & eta_mask
+        in_electrons = self.e.mask[in_electrons_mask]
+
+        # get electrons pT and abseta (replace None values with some 'in-limit' value)
+        electron_pt = ak.fill_none(in_electrons.pt, 40)
+        electron_eta = ak.fill_none(self.e.eta + self.e.deltaEtaSC, 0)
+
+        # check whether there are single or double electron events
+        kind = "single" if ak.all(ak.num(self.electrons) == 1) else "double"
+        if kind == "single":
+            cset = correctionlib.CorrectionSet.from_file(
+                get_electron_hlt_json("SF", self.year)
+            )
+            sf = cset[f"HLT_SF_{hlt_paths[self.year]}_MVAiso80ID"].evaluate(
+                electron_eta, electron_pt
+            )
+            sf = ak.where(in_electrons_mask, sf, ak.ones_like(sf))
+            sf = ak.fill_none(ak.unflatten(sf, self.n), value=1)
+            nominal_sf = ak.firsts(sf)
+
+        elif kind == "double":
+            cset = correctionlib.CorrectionSet.from_file(
+                get_electron_hlt_json("DataEff", self.year)
+            )
+            data_eff = cset[f"HLT_DataEff_{hlt_paths[self.year]}_MVAiso80ID"].evaluate(
+                electron_eta, electron_pt
+            )
+            data_eff = ak.where(in_electrons_mask, data_eff, ak.ones_like(data_eff))
+            data_eff = ak.unflatten(data_eff, self.n)
+            data_eff_leading = ak.firsts(data_eff)
+            data_eff_subleading = ak.pad_none(data_eff, target=2)[:, 1]
+            full_data_eff = (
+                data_eff_leading
+                + data_eff_subleading
+                - data_eff_leading * data_eff_subleading
+            )
+            full_data_eff = ak.fill_none(full_data_eff, 1)
+
+            cset = correctionlib.CorrectionSet.from_file(
+                get_electron_hlt_json("MCEff", self.year)
+            )
+            mc_eff = cset[f"HLT_MCEff_{hlt_paths[self.year]}_MVAiso80ID"].evaluate(
+                electron_eta, electron_pt
+            )
+            mc_eff = ak.where(in_electrons_mask, mc_eff, ak.ones_like(mc_eff))
+            mc_eff = ak.unflatten(mc_eff, self.n)
+            mc_eff_leading = ak.firsts(mc_eff)
+            mc_eff_subleading = ak.pad_none(mc_eff, target=2)[:, 1]
+            full_mc_eff = (
+                mc_eff_leading + mc_eff_subleading - mc_eff_leading * mc_eff_subleading
+            )
+            full_mc_eff = ak.fill_none(full_mc_eff, 1)
+
+            nominal_sf = full_data_eff / full_mc_eff
+
+        self.weights.add(
+            name=f"CMS_eff_e_trigger_{self.year}",
+            weight=nominal_sf,
+        )

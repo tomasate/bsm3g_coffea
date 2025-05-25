@@ -62,6 +62,13 @@ def get_muon_hlt_json(year: str) -> str:
     return f"{Path.cwd()}/analysis/data/{year}_Muon_HLT_Eff.json"
 
 
+def get_electron_hlt_json(
+    kind: str,
+    year: str,
+) -> str:
+    return f"{Path.cwd()}/analysis/data/EGamma_HLT_{kind}_{year}.json.gz"
+
+
 def unflat_sf(sf: ak.Array, in_limit_mask: ak.Array, n: ak.Array):
     """
     get scale factors for in-limit objects (otherwise assign 1).
