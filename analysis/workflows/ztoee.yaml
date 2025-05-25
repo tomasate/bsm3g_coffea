@@ -142,21 +142,21 @@ histogram_config:
       bins: 50
       start: 0
       stop: 5
-      label: $\Delta R(ee_1, ee_2)$
+      label: $\Delta R(e_1, e_2)$
       expression: objects['dielectrons'].l1.delta_r(objects['dielectrons'].l2)
     dielectron_deta:
       type: Regular
       bins: 50
       start: 0
       stop: 5
-      label: $|\Delta \eta(ee_1, ee_2)|$
+      label: $|\Delta \eta(e_1, e_2)|$
       expression: np.abs(objects['dielectrons'].l1.eta - objects['dielectrons'].l2.eta)
     dielectron_dphi:
       type: Regular
       bins: 50
       start: 0
       stop: 10
-      label: $|\Delta \phi(ee_1, ee_2)|$
+      label: $|\Delta \phi(e_1, e_2)|$
       expression: np.abs(objects['dielectrons'].l1.phi - objects['dielectrons'].l2.phi)
     leading_electron_pt:
       type: Variable
@@ -171,7 +171,7 @@ histogram_config:
         - 240
         - 300
         - 500
-      label: $p_T(ee_1)$ [GeV]
+      label: $p_T(e_1)$ [GeV]
       expression: objects['dielectrons'].l1.pt
     subleading_electron_pt:
       type: Variable
@@ -186,35 +186,35 @@ histogram_config:
         - 240
         - 300
         - 500
-      label: $p_T(ee_2)$ [GeV]
+      label: $p_T(e_2)$ [GeV]
       expression: objects['dielectrons'].l2.pt
     leading_electron_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(ee_1)$
+      label: $\eta(e_1)$
       expression: objects['dielectrons'].l1.eta
     subleading_electron_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
-      label: $\eta(ee_2)$
+      label: $\eta(e_2)$
       expression: objects['dielectrons'].l2.eta
     leading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(ee_1)$
+      label: $\phi(e_1)$
       expression: objects['dielectrons'].l1.phi
     subleading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(ee_2)$
+      label: $\phi(e_2)$
       expression: objects['dielectrons'].l2.phi
     npvs:
       type: Integer
