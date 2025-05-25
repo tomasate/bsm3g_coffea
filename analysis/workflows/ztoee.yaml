@@ -158,7 +158,7 @@ histogram_config:
       stop: 10
       label: $|\Delta \phi(ee_1, ee_2)|$
       expression: np.abs(objects['dielectrons'].l1.phi - objects['dielectrons'].l2.phi)
-    leading_muon_pt:
+    leading_electron_pt:
       type: Variable
       edges:
         - 30
@@ -173,7 +173,7 @@ histogram_config:
         - 500
       label: $p_T(ee_1)$ [GeV]
       expression: objects['dielectrons'].l1.pt
-    subleading_muon_pt:
+    subleading_electron_pt:
       type: Variable
       edges:
         - 30
@@ -188,28 +188,28 @@ histogram_config:
         - 500
       label: $p_T(ee_2)$ [GeV]
       expression: objects['dielectrons'].l2.pt
-    leading_muon_eta:
+    leading_electron_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
       label: $\eta(ee_1)$
       expression: objects['dielectrons'].l1.eta
-    subleading_muon_eta:
+    subleading_electron_eta:
       type: Regular
       bins: 50
       start: -2.5
       stop: 2.5
       label: $\eta(ee_2)$
       expression: objects['dielectrons'].l2.eta
-    leading_muon_phi:
+    leading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
       label: $\phi(ee_1)$
       expression: objects['dielectrons'].l1.phi
-    subleading_muon_phi:
+    subleading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
@@ -320,4 +320,33 @@ histogram_config:
       stop: 3.14159
       label: $\phi(p_T^{miss})$
       expression: objects['met'].phi
-  layout: individual
+  layout:
+    vertex:
+      - npvs
+    isr:
+      - dielectron_pt
+      - jet_multiplicity
+    dielectron_mass:
+      - dielectron_mass
+    dielectron_delta:
+      - dielectron_dr
+      - dielectron_deta 
+      - dielectron_dphi
+    leading_electron:
+      - leading_electron_pt
+      - leading_electron_eta
+      - leading_electron_phi
+    subleading_electron:
+      - subleading_electron_pt
+      - subleading_electron_eta
+      - subleading_electron_phi
+    jet:
+      - jet_pt
+      - jet_eta
+      - jet_phi
+    jet_delta:
+      - jet_dr
+      - jet_deta
+    met:
+      - met_pt
+      - met_phi
