@@ -294,7 +294,17 @@ histogram_config:
       stop: 100
       label: NPVS
       expression: events.PV.npvsGood
+    st:
+      type: Regular
+      bins: 50
+      start: 20
+      stop: 1000
+      label: $S_T(e, p_T^{miss}, b)$ [GeV]
+      expression: objects['met'].pt + objects['electrons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
   layout:
+    st:
+      - st
+      - jet_multiplicity
     mass:
       - electron_met_bjet_mass
       - electron_bjet_mass
@@ -308,8 +318,6 @@ histogram_config:
       - jet_pt
       - jet_eta
       - jet_phi
-    njets:
-      - jet_multiplicity
     bjets:
       - bjet_pt
       - bjet_eta

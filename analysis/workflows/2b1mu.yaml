@@ -191,7 +191,7 @@ histogram_config:
         - 13
         - 14
         - 15
-      label: $N(\text{jet})$
+      label: jet multiplicity
       expression: ak.num(objects['jets'])
     bjet_pt:
       type: Variable
@@ -293,7 +293,17 @@ histogram_config:
       stop: 100
       label: NPVS
       expression: events.PV.npvsGood
+    st:
+      type: Regular
+      bins: 50
+      start: 20
+      stop: 1000
+      label: $S_T(\mu, p_T^{miss}, b)$ [GeV]
+      expression: objects['met'].pt + objects['muons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
   layout:
+    st:
+      - st
+      - jet_multiplicity
     mass:
       - muon_met_bjet_mass
       - muon_bjet_mass
@@ -307,8 +317,6 @@ histogram_config:
       - jet_pt
       - jet_eta
       - jet_phi
-    njets:
-      - jet_multiplicity
     bjets:
       - bjet_pt
       - bjet_eta
