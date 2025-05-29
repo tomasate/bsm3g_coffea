@@ -52,32 +52,40 @@ def weight_manager(pruned_ev, year, processor_config, variation):
     weights_container = Weights(len(pruned_ev), storeIndividual=True)
     # add weights
     if hasattr(pruned_ev, "genWeight"):
-        if weights_config["genWeight"]:
-            weights_container.add("genweight", pruned_ev.genWeight)
+        if "genWeight" in weights_config:
+            if weights_config["genWeight"]:
+                weights_container.add("genweight", pruned_ev.genWeight)
 
-        if weights_config["l1prefiringWeight"]:
-            add_l1prefiring_weight(pruned_ev, weights_container, year, variation)
+        if "l1prefiringWeight" in weights_config:
+            if weights_config["l1prefiringWeight"]:
+                add_l1prefiring_weight(pruned_ev, weights_container, year, variation)
 
-        if weights_config["pileupWeight"]:
-            add_pileup_weight(pruned_ev, weights_container, year, variation)
+        if "pileupWeight" in weights_config:
+            if weights_config["pileupWeight"]:
+                add_pileup_weight(pruned_ev, weights_container, year, variation)
 
-        if weights_config["partonshowerWeight"]:
-            if "PSWeight" in pruned_ev.fields:
-                add_partonshower_weight(
-                    events=pruned_ev,
-                    weights_container=weights_container,
-                )
-        if weights_config["lhepdfWeight"]:
-            if "LHEPdfWeight" in pruned_ev.fields:
-                add_lhepdf_weight(
-                    events=pruned_ev,
-                    weights_container=weights_container,
-                )
-        if weights_config["lhescaleWeight"]:
-            if "LHEScaleWeight" in pruned_ev.fields:
-                add_scalevar_weight(
-                    events=pruned_ev, weights_container=weights_container
-                )
+        if "partonshowerWeight" in weights_config:
+            if weights_config["partonshowerWeight"]:
+                if "PSWeight" in pruned_ev.fields:
+                    add_partonshower_weight(
+                        events=pruned_ev,
+                        weights_container=weights_container,
+                    )
+        if "lhepdfWeight" in weights_config:
+            if weights_config["lhepdfWeight"]:
+                if "LHEPdfWeight" in pruned_ev.fields:
+                    add_lhepdf_weight(
+                        events=pruned_ev,
+                        weights_container=weights_container,
+                    )
+
+        if "lhescaleWeight" in weights_config:
+            if weights_config["lhescaleWeight"]:
+                if "LHEScaleWeight" in pruned_ev.fields:
+                    add_scalevar_weight(
+                        events=pruned_ev, weights_container=weights_container
+                    )
+                    
         if "pujetid" in weights_config:
             if weights_config["pujetid"]:
                 add_pujetid_weight(
