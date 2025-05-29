@@ -9,12 +9,12 @@ def add_electron_boost_weight(events, weights, year, variation):
     met_pt = events.selected_met.pt
     electrons_pt = ak.firsts(events.selected_electrons).pt
 
-    jets = events.selected_jets
-    leading_bjet_pt = ak.pad_none(jets, target=2)[:, 0].pt
-    subleading_bjet_pt = ak.pad_none(jets, target=2)[:, 1].pt
+    bjets = events.selected_bjets
+    leading_bjet_pt = ak.pad_none(bjets, target=2)[:, 0].pt
+    subleading_bjet_pt = ak.pad_none(bjets, target=2)[:, 1].pt
 
     st = electrons_pt + met_pt + leading_bjet_pt + subleading_bjet_pt
-    njet = ak.num(jets)
+    njet = ak.num(events.selected_jets)
 
     in_binning = (st > 196.4) & (st < 1000.0) & (njet > 1) & (njet < 9)
     selected_st = st.mask[in_binning]
