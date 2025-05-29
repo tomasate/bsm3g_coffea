@@ -13,6 +13,7 @@ from analysis.corrections import (
     apply_jet_corrections,
     add_l1prefiring_weight,
     add_partonshower_weight,
+    add_muon_boost_weight,
     add_electron_boost_weight,
     apply_met_phi_corrections,
     apply_rochester_corrections,
@@ -105,6 +106,15 @@ def weight_manager(pruned_ev, year, processor_config, variation):
         if "EleBoostWeight" in weights_config:
             if weights_config["EleBoostWeight"]:
                 add_electron_boost_weight(
+                    events=pruned_ev,
+                    weights=weights_container,
+                    year=year,
+                    variation=variation,
+                )
+
+        if "MuBoostWeight" in weights_config:
+            if weights_config["MuBoostWeight"]:
+                add_muon_boost_weight(
                     events=pruned_ev,
                     weights=weights_container,
                     year=year,

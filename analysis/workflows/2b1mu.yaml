@@ -87,17 +87,18 @@ corrections:
   event_weights:
     genWeight: true
     pileupWeight: true
-    l1prefiring: true
+    l1prefiringWeight: true
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
+    MuBoostWeight: true
     pujetid: 
       - id: tight
     btagging: 
       - id: medium
       - bc: true
       - light: true
-      - full_run: true
+      - full_run: false
     electron:
       - id: false
       - reco: false
@@ -300,7 +301,31 @@ histogram_config:
       stop: 1000
       label: $S_T(\mu, p_T^{miss}, b)$ [GeV]
       expression: objects['met'].pt + objects['muons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
+    nmuons:
+      type: Integer
+      start: 0
+      stop: 5
+      label: nmuons
+      expression: ak.num(objects['muons'])
+    nelectrons:
+      type: Integer
+      start: 0
+      stop: 5
+      label: nelectrons
+      expression: ak.num(objects['electrons'])
+    nbjets:
+      type: Integer
+      start: 0
+      stop: 5
+      label: nbjets
+      expression: ak.num(objects['bjets'])
   layout:
+    nmuons:
+      - nmuons
+    nelectrons:
+      - nelectrons
+    nbjets:
+      - nbjets
     st:
       - st
       - jet_multiplicity

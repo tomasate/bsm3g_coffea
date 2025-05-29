@@ -14,6 +14,7 @@ from analysis.corrections.tau_energy import apply_tau_energy_scale_corrections
 from analysis.corrections.met import apply_met_phi_corrections
 from analysis.corrections.muon_highpt import MuonHighPtCorrector
 from analysis.corrections.electron_boost_weight import add_electron_boost_weight
+from analysis.corrections.muon_boost_weight import add_muon_boost_weight
 from analysis.corrections.corrections_manager import (
     object_corrector_manager,
     weight_manager,
