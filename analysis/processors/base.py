@@ -130,9 +130,8 @@ class BaseProcessor(processor.ProcessorABC):
                     pruned_ev[f"selected_{obj}"] = objects[obj][category_mask]
                 # get weights container
                 weights_container = weight_manager(
-                    pruned_ev, year, self.workflow_config, variation="nominal"
+                    pruned_ev, year, self.workflow_config, variation=shift_name
                 )
-
                 if shift_name == "nominal":
                     # save cutflow to metadata
                     output["metadata"][category] = {"cutflow": {"initial": sumw}}
