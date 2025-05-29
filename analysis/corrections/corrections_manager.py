@@ -13,13 +13,14 @@ from analysis.corrections import (
     apply_jet_corrections,
     add_l1prefiring_weight,
     add_partonshower_weight,
+    add_electron_boost_weight,
     apply_met_phi_corrections,
     apply_rochester_corrections,
     apply_tau_energy_scale_corrections,
 )
 
 
-def object_corrector_manager(events, year, processor_config, variation="nominal"):
+def object_corrector_manager(events, year, processor_config, variation):
     """apply object level corrections"""
     objcorr_config = processor_config.corrections_config["objects"]
     if "jets" in objcorr_config:
@@ -42,7 +43,7 @@ def object_corrector_manager(events, year, processor_config, variation="nominal"
         )
 
 
-def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
+def weight_manager(pruned_ev, year, processor_config, variation):
     """apply event level corrections (weights)"""
     # get weights config info
     weights_config = processor_config.corrections_config["event_weights"]
@@ -53,7 +54,7 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
         if weights_config["genWeight"]:
             weights_container.add("genweight", pruned_ev.genWeight)
 
-        if weights_config["l1prefiring"]:
+        if weights_config["l1prefiringWeight"]:
             add_l1prefiring_weight(pruned_ev, weights_container, year, variation)
 
         if weights_config["pileupWeight"]:
@@ -101,6 +102,15 @@ def weight_manager(pruned_ev, year, processor_config, variation="nominal"):
                 if weights_config["btagging"]["light"]:
                     btag_corrector.add_btag_weights(flavor="light")
 
+        if "EleBoostWeight" in weights_config:
+            if weights_config["EleBoostWeight"]:
+                add_electron_boost_weight(
+                    events=pruned_ev,
+                    weights=weights_container,
+                    year=year,
+                    variation=variation,
+                )
+                
         if "electron" in weights_config:
             if "selected_electrons" in pruned_ev.fields:
                 electron_corrector = ElectronCorrector(
