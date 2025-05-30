@@ -114,13 +114,32 @@ class BTagCorrector:
         self._bc_jets = events.selected_jets[events.selected_jets.hadronFlavour >= 4]
         self._light_jets = events.selected_jets[events.selected_jets.hadronFlavour == 0]
         self._jet_map = {"bc": self._bc_jets, "light": self._light_jets}
+
+        btag_wps = {
+            "2016preVFP": {
+                "loose": 0.0508,
+                "medium": 0.2598,
+                "tight": 0.6502,
+            },
+            "2016postVFP": {
+                "loose": 0.048,
+                "medium": 0.2489,
+                "tight": 0.6377,
+            },
+            "2017": {
+                "loose": 0.0532,
+                "medium": 0.304,
+                "tight": 0.7476,
+            },
+            "2018": {
+                "loose": 0.049,
+                "medium": 0.2783,
+                "tight": 0.71,
+            }
+        }
         self._jet_pass_btag = {
-            "bc": working_points.jets_deepjet_b(events, self._wp, year)[
-                events.selected_jets.hadronFlavour >= 4
-            ],
-            "light": working_points.jets_deepjet_b(events, self._wp, year)[
-                events.selected_jets.hadronFlavour == 0
-            ],
+            "bc": self._jet_map["bc"]["btagDeepFlavB"] > btag_wps[year][self._wp],
+            "light": self._jet_map["light"]["btagDeepFlavB"] > btag_wps[year][self._wp],
         }
         self.var_naming_map = {
             "bc": "CMS_btag_heavy",
