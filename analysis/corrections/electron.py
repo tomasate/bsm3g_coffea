@@ -113,7 +113,7 @@ class ElectronCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name="CMS_eff_e_2017",
+                name=f"CMS_eff_e",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
@@ -135,8 +135,8 @@ class ElectronCorrector:
             "RecoBelow20": (self.e.pt > 10) & (self.e.pt < 20),
         }
         var_naming_map = {
-            "RecoAbove20": f"CMS_eff_e_reco_above20_{self.year}",
-            "RecoBelow20": f"CMS_eff_e_reco_below20_{self.year}",
+            "RecoAbove20": f"CMS_eff_e_reco_above20",
+            "RecoBelow20": f"CMS_eff_e_reco_below20",
         }
         # get 'in-limits' electrons
         in_electron_mask = electron_pt_mask[reco]
@@ -269,6 +269,6 @@ class ElectronCorrector:
             nominal_sf = full_data_eff / full_mc_eff
 
         self.weights.add(
-            name=f"CMS_eff_e_trigger_{self.year}",
+            name=f"CMS_eff_e_trigger",
             weight=nominal_sf,
         )

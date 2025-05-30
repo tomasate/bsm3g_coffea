@@ -24,13 +24,13 @@ def add_l1prefiring_weight(
     if year in ("2016preVFP", "2016postVFP", "2017"):
         if variation == "nominal":
             weights_container.add(
-                name=f"CMS_l1_ecal_prefiring_{year}",
+                name=f"CMS_l1_ecal_prefiring",
                 weight=events.L1PreFiringWeight.Nom,
                 weightUp=events.L1PreFiringWeight.Up,
                 weightDown=events.L1PreFiringWeight.Dn,
             )
         else:
             weights_container.add(
-                name=f"CMS_l1_ecal_prefiring_{year}",
+                name=f"CMS_l1_ecal_prefiring",
                 weight=events.L1PreFiringWeight.Nom,
             )

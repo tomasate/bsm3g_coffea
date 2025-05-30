@@ -200,7 +200,7 @@ class BTagCorrector:
                     weightDown=btag_weight_down_correlated,
                 )
                 self._weights.add(
-                    name=f"{self.var_naming_map[flavor]}_uncorrelated_{self._year}",
+                    name=f"{self.var_naming_map[flavor]}_uncorrelated",
                     weight=ak.ones_like(btag_weight),
                     weightUp=btag_weight_up_uncorrelated,
                     weightDown=btag_weight_down_uncorrelated,
