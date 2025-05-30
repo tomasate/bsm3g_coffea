@@ -70,6 +70,7 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     add_partonshower_weight(
                         events=pruned_ev,
                         weights_container=weights_container,
+                        variation=variation,
                     )
         if "lhepdfWeight" in weights_config:
             if weights_config["lhepdfWeight"]:
@@ -77,15 +78,18 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     add_lhepdf_weight(
                         events=pruned_ev,
                         weights_container=weights_container,
+                        variation=variation,
                     )
 
         if "lhescaleWeight" in weights_config:
             if weights_config["lhescaleWeight"]:
                 if "LHEScaleWeight" in pruned_ev.fields:
                     add_scalevar_weight(
-                        events=pruned_ev, weights_container=weights_container
+                        events=pruned_ev,
+                        weights_container=weights_container,
+                        variation=variation,
                     )
-                    
+
         if "pujetid" in weights_config:
             if weights_config["pujetid"]:
                 add_pujetid_weight(
@@ -128,13 +132,14 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     year=year,
                     variation=variation,
                 )
-                
+
         if "electron" in weights_config:
             if "selected_electrons" in pruned_ev.fields:
                 electron_corrector = ElectronCorrector(
                     events=pruned_ev,
                     weights=weights_container,
                     year=year,
+                    variation=variation,
                 )
                 if "id" in weights_config["electron"]:
                     if weights_config["electron"]["id"]:
