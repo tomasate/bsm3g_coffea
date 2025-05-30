@@ -35,7 +35,7 @@ class BaseProcessor(processor.ProcessorABC):
         workflow: str,
         year: str = "2017",
         flow: str = "True",
-        do_systematics: bool = True,
+        do_systematics: bool = False,
     ):
         self.year = year
         self.flow = flow
