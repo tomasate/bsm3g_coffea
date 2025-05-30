@@ -98,7 +98,7 @@ corrections:
       - id: medium
       - bc: true
       - light: true
-      - full_run: true
+      - full_run: false
     electron:
       - id: wp80iso
       - reco: true
