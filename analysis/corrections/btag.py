@@ -69,6 +69,10 @@ class BTagCorrector:
         self._variation = variation
         self._tagger = "deepJet"
 
+        self._year_key = year
+        if year.startswith("2016"):
+            self._year_key = "2016"
+
         # check available btag SFs
         self._taggers = {"deepJet": {"tight": "T", "medium": "M", "loose": "L"}}
         if self._wp not in self._taggers[self._tagger]:
@@ -219,7 +223,7 @@ class BTagCorrector:
                     weightDown=btag_weight_down_correlated,
                 )
                 self._weights.add(
-                    name=f"{self.var_naming_map[flavor]}_uncorrelated",
+                    name=f"{self.var_naming_map[flavor]}_uncorrelated_{self._year_key}",
                     weight=ak.ones_like(btag_weight),
                     weightUp=btag_weight_up_uncorrelated,
                     weightDown=btag_weight_down_uncorrelated,

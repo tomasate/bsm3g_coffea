@@ -59,14 +59,17 @@ class BaseProcessor(processor.ProcessorABC):
         # define Jet/MET shifts
         shifts = [({"Jet": events.Jet, "MET": events.MET}, "nominal")]
         if self.do_systematics:
+            year_key = self.year
+            if self.year.startswith("2016"):
+                year_key = "2016"
             shifts.extend(
                 [
-                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, f"CMS_scale_jUp"),
-                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down}, f"CMS_scale_jDown"),
-                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, f"CMS_res_jUp"),
-                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down}, f"CMS_res_jDown"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up}, f"CMS_met_unclusteredUp"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, f"CMS_met_unclustered}Down"),
+                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, f"CMS_scale_j_{year_key}Up"),
+                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down}, f"CMS_scale_j_{year_key}Down"),
+                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, f"CMS_res_j_{year_key}Up"),
+                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down}, f"CMS_res_j_{year_key}Down"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up}, f"CMS_met_unclustered_{year_key}Up"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, f"CMS_met_unclustered_{year_key}Down"),
                 ]
             )
         return processor.accumulate(

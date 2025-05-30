@@ -64,6 +64,10 @@ class ElectronCorrector:
         self.year = year
         self.pog_year = pog_years[year]
 
+        self.year_key = year
+        if self.year.startswith("2016"):
+            self.year_key = "2016"
+
     def add_id_weight(self, id_working_point: str) -> None:
         """
         add electron identification scale factors to weights container
@@ -113,14 +117,14 @@ class ElectronCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"CMS_eff_e",
+                name=f"CMS_eff_e_{self.year_key}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"electron_id_{id_working_point}",
+                name=f"CMS_eff_e_{self.year_key}",
                 weight=nominal_sf,
             )
 
@@ -135,8 +139,8 @@ class ElectronCorrector:
             "RecoBelow20": (self.e.pt > 10) & (self.e.pt < 20),
         }
         var_naming_map = {
-            "RecoAbove20": f"CMS_eff_e_reco_above20",
-            "RecoBelow20": f"CMS_eff_e_reco_below20",
+            "RecoAbove20": f"CMS_eff_e_reco_above20_{self.year_key}",
+            "RecoBelow20": f"CMS_eff_e_reco_below20_{self.year_key}",
         }
         # get 'in-limits' electrons
         in_electron_mask = electron_pt_mask[reco]
@@ -269,6 +273,6 @@ class ElectronCorrector:
             nominal_sf = full_data_eff / full_mc_eff
 
         self.weights.add(
-            name=f"CMS_eff_e_trigger",
+            name=f"CMS_eff_e_trigger_{self.year_key}",
             weight=nominal_sf,
         )

@@ -31,6 +31,9 @@ def add_pujetid_weight(
             if 'nominal' (default) add 'nominal', 'up' and 'down'
             variations to weights container. else, add only 'nominal' weights.
     """
+    year_key = year
+    if year.startswith("2016"):
+        year_key = "2016"
     puid_wps = {
         "2016preVFP": {
             "loose": 1,
@@ -99,11 +102,14 @@ def add_pujetid_weight(
         )
         # add nominal, up and down scale factors to weights container
         weights.add(
-            name=f"CMS_eff_j_PUJET_id",
+            name=f"CMS_eff_j_PUJET_id_{year_key}",
             weight=nominal_sf,
             weightUp=up_sf,
             weightDown=down_sf,
         )
     else:
         # add nominal scale factors to weights container
-        weights.add(name=f"CMS_eff_j_PUJET_id", weight=nominal_sf)
+        weights.add(
+            name=f"CMS_eff_j_PUJET_id_{year_key}",
+            weight=nominal_sf
+        )
