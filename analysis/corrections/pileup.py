@@ -55,6 +55,6 @@ def add_pileup_weight(
         )
     else:
         weights_container.add(
-            name == f"CMS_pileup",
+            name=f"CMS_pileup",
             weight=nominal_sf,
         )
