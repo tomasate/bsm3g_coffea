@@ -152,9 +152,9 @@ def uncertainty_table(processed_histograms, workflow, year):
         # concatenate σxup−nominal, σxdown−nominal, and 0
         up_and_down = np.stack([varup - nom, vardown - nom, np.zeros_like(nom)], axis=0)
         # max(σxup−nominal, σxdown−nominal, 0.) / nominal
-        max_up_and_down = np.max(up_and_down, axis=0) / nom
+        max_up_and_down = np.max(up_and_down, axis=0) / (nom+1e-5)
         # min(σxup−nominal,σ xdown−nominal,0.) / nominal
-        min_up_and_down = np.min(up_and_down, axis=0) / nom
+        min_up_and_down = np.min(up_and_down, axis=0) / (nom+1e-5)
         # integate over all bins
         variation_impact[variation] = [np.sqrt(np.sum(max_up_and_down**2)),np.sqrt(np.sum(min_up_and_down**2))]
     
