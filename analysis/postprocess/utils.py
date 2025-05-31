@@ -5,6 +5,7 @@ import pickle
 import logging
 import numpy as np
 import pandas as pd
+from coffea.processor import accumulate
 
 
 def setup_logger(output_dir):
@@ -174,7 +175,7 @@ def df_to_latex_average(df, table_title="Events"):
     return output
 
 
-def get_variations_keys(processed_histograms):
+def get_variations_keys(processed_histograms: dict):
     variations = {}
     for process, histogram_dict in processed_histograms.items():
         for feature in histogram_dict:
@@ -188,3 +189,54 @@ def get_variations_keys(processed_histograms):
         set([var.replace("Up", "").replace("Down", "") for var in variations])
     )
     return variations
+
+
+def uncertainty_table(processed_histograms, workflow):
+    to_accumulate = []
+    for process in processed_histograms:
+        if process != "Data":
+            to_accumulate.append(processed_histograms[process])
+    helper_histo = accumulate(to_accumulate)
+
+    var = "electron_met_mass" if workflow == "2b1e" else "muon_met_mass"
+    helper_histo = helper_histo["mass"].project(var, "variation")
+
+    # get histogram per variation
+    variation_hists = {}
+    for variation in helper_histo.axes["variation"]:
+        if variation == "nominal":
+            nominal = helper_histo[{"variation": variation}]
+        else:
+            variation_hists[variation] = helper_histo[{"variation": variation}]
+
+    # get variations names
+    variations_keys = []
+    for variation in variation_hists:
+        if variation == "nominal":
+            continue
+        # get variation key
+        variation_key = variation.replace("Up", "").replace("Down", "")
+        if variation_key not in variations_keys:
+            variations_keys.append(variation_key)
+
+    variation_impact = {}
+    nom = nominal.values()
+    for variation in variations_keys:
+        # up/down yields by bin
+        varup = variation_hists[f"{variation}Up"].values()
+        vardown = variation_hists[f"{variation}Down"].values()
+        # concatenate σxup−nominal, σxdown−nominal, and 0
+        up_and_down = np.stack([varup - nom, vardown - nom, np.zeros_like(nom)], axis=0)
+        # max(σxup−nominal, σxdown−nominal, 0.) / nominal
+        max_up_and_down = np.max(up_and_down, axis=0) / (nom + 1e-5)
+        # min(σxup−nominal,σ xdown−nominal,0.) / nominal
+        min_up_and_down = np.min(up_and_down, axis=0) / (nom + 1e-5)
+        # integate over all bins
+        variation_impact[variation] = [
+            np.sqrt(np.sum(max_up_and_down**2)),
+            np.sqrt(np.sum(min_up_and_down**2)),
+        ]
+
+    syst_df = pd.DataFrame(variation_impact).T * 100
+    syst_df = syst_df.rename({0: "Up", 1: "Down"}, axis=1)
+    return syst_df

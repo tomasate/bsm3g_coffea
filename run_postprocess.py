@@ -26,7 +26,8 @@ from analysis.postprocess.utils import (
     combine_event_tables,
     combine_cutflows,
     df_to_latex_average,
-    df_to_latex_asymmetric
+    df_to_latex_asymmetric,
+    uncertainty_table,
 )
 
 
@@ -111,58 +112,6 @@ def load_histogram_file(path: Path):
     return load(path)
 
 
-def uncertainty_table(processed_histograms, workflow, year):
-    to_accumulate = []
-    for process in processed_histograms:
-        if process != "Data":
-            to_accumulate.append(processed_histograms[process])
-    helper_histo = accumulate(to_accumulate)
-    for key in helper_histo:
-        for var in helper_histo[key].axes.name:
-            if var != "variation":
-                helper_key = var
-                break
-        break
-    helper_histo = helper_histo[key].project(var, "variation")
-
-    # get histogram per variation
-    variation_hists = {}
-    for variation in helper_histo.axes["variation"]:
-        if variation == "nominal": 
-            nominal = helper_histo[{"variation": variation}]
-        else:
-            variation_hists[variation] = helper_histo[{"variation": variation}]
-    
-    # get variations names
-    variations_keys = []
-    for variation in variation_hists:
-        if variation == "nominal":
-            continue
-        # get variation key
-        variation_key = variation.replace("Up", "").replace("Down", "")
-        if variation_key not in variations_keys:
-            variations_keys.append(variation_key)
-
-    variation_impact = {}
-    nom = nominal.values()
-    for variation in variations_keys:
-        # up/down yields by bin
-        varup = variation_hists[f"{variation}Up"].values()
-        vardown = variation_hists[f"{variation}Down"].values()
-        # concatenate σxup−nominal, σxdown−nominal, and 0
-        up_and_down = np.stack([varup - nom, vardown - nom, np.zeros_like(nom)], axis=0)
-        # max(σxup−nominal, σxdown−nominal, 0.) / nominal
-        max_up_and_down = np.max(up_and_down, axis=0) / (nom+1e-5)
-        # min(σxup−nominal,σ xdown−nominal,0.) / nominal
-        min_up_and_down = np.min(up_and_down, axis=0) / (nom+1e-5)
-        # integate over all bins
-        variation_impact[variation] = [np.sqrt(np.sum(max_up_and_down**2)),np.sqrt(np.sum(min_up_and_down**2))]
-    
-    syst_df = pd.DataFrame(variation_impact).T*100
-    syst_df = syst_df.rename({0: "Up", 1: "Down"}, axis=1)
-    return syst_df
-
-
 if __name__ == "__main__":
     args = parse_arguments()
 
@@ -184,12 +133,15 @@ if __name__ == "__main__":
         processed_histograms = load_2016_histograms(args.workflow)
         identifier = "VFP"
 
-        print_header(f"Systematic uncertainty impact")
-        syst_df = uncertainty_table(processed_histograms, args.workflow, args.year)
-        syst_df.to_csv(f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv")
-        logging.info(syst_df)
-        logging.info("\n")
-        
+        if args.workflow in ["2b1e", "2b1mu"]:
+            print_header(f"Systematic uncertainty impact")
+            syst_df = uncertainty_table(processed_histograms, args.workflow)
+            syst_df.to_csv(
+                f"{OUTPUT_DIR / args.workflow / args.year}/uncertainty_table.csv"
+            )
+            logging.info(syst_df)
+            logging.info("\n")
+
         for category in categories:
             logging.info(f"category: {category}")
             # load and combine results tables
@@ -309,12 +261,13 @@ if __name__ == "__main__":
             process_samples_map=process_samples_map,
         )
 
-        print_header(f"Systematic uncertainty impact")
-        syst_df = uncertainty_table(processed_histograms, args.workflow, args.year)
-        syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
-        logging.info(syst_df)
-        logging.info("\n")
-        
+        if args.workflow in ["2b1e", "2b1mu"]:
+            print_header(f"Systematic uncertainty impact")
+            syst_df = uncertainty_table(processed_histograms, args.workflow)
+            syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
+            logging.info(syst_df)
+            logging.info("\n")
+
         for category in categories:
             logging.info(f"category: {category}")
             category_dir = Path(f"{output_dir}/{category}")
@@ -392,4 +345,7 @@ if __name__ == "__main__":
                     log=args.log,
                     extension=args.extension,
                 )
-            subprocess.run(f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}", shell=True)
+            subprocess.run(
+                f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",
+                shell=True,
+            )
