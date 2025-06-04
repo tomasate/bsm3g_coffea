@@ -91,12 +91,13 @@ corrections:
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
-    EleBoostWeight: false
+    EleBoostWeight: true
     pujetid: 
       - id: tight
     btagging: 
       - id: medium
-      - bc: true
+      - b: true
+      - c: true
       - light: true
       - full_run: false
     electron:

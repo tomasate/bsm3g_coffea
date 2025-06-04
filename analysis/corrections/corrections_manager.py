@@ -110,8 +110,10 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     full_run=weights_config["btagging"]["full_run"],
                     variation=variation,
                 )
-                if weights_config["btagging"]["bc"]:
-                    btag_corrector.add_btag_weights(flavor="bc")
+                if weights_config["btagging"]["b"]:
+                    btag_corrector.add_btag_weights(flavor="b")
+                if weights_config["btagging"]["c"]:
+                    btag_corrector.add_btag_weights(flavor="c")
                 if weights_config["btagging"]["light"]:
                     btag_corrector.add_btag_weights(flavor="light")
 
