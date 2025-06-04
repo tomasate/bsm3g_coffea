@@ -34,17 +34,15 @@ class BaseProcessor(processor.ProcessorABC):
         self,
         workflow: str,
         year: str = "2017",
-        flow: str = "True",
-        do_systematics: bool = False,
     ):
         self.year = year
-        self.flow = flow
-        self.do_systematics = do_systematics
 
         config_builder = WorkflowConfigBuilder(workflow=workflow)
         self.workflow_config = config_builder.build_workflow_config()
         self.histogram_config = self.workflow_config.histogram_config
         self.histograms = HistBuilder(self.workflow_config).build_histogram()
+
+        self.apply_obj_syst = self.workflow_config.corrections_config["apply_obj_syst"]
 
     def process(self, events):
         # correct objects
@@ -58,7 +56,7 @@ class BaseProcessor(processor.ProcessorABC):
 
         # define Jet/MET shifts
         shifts = [({"Jet": events.Jet, "MET": events.MET}, "nominal")]
-        if self.do_systematics:
+        if self.apply_obj_syst:
             year_key = self.year
             if self.year.startswith("2016"):
                 year_key = "2016"

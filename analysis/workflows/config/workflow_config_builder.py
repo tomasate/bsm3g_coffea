@@ -51,6 +51,7 @@ class WorkflowConfigBuilder:
     def parse_corrections_config(self):
         corrections = {}
         corrections["objects"] = self.config["corrections"]["objects"]
+        corrections["apply_obj_syst"] = self.config["corrections"]["apply_obj_syst"]
         corrections["event_weights"] = {}
         for name, vals in self.config["corrections"]["event_weights"].items():
             if isinstance(vals, bool):

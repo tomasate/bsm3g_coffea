@@ -76,6 +76,7 @@ corrections:
     - muons
     - taus
     - met
+  apply_obj_syst: false
   event_weights:
     genWeight: true
     pileupWeight: true
