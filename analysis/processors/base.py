@@ -44,7 +44,7 @@ class BaseProcessor(processor.ProcessorABC):
 
         self.flow = self.histogram_config.flow
         self.apply_obj_syst = self.workflow_config.corrections_config["apply_obj_syst"]
-        
+
     def process(self, events):
         # correct objects
         object_corrector_manager(events, self.year, self.workflow_config, "nominal")
@@ -106,7 +106,6 @@ class BaseProcessor(processor.ProcessorABC):
 
         object_selector = ObjectSelector(object_selection, year)
         objects = object_selector.select_objects(events)
-
         # -------------------------------------------------------------
         # event selection
         # -------------------------------------------------------------
@@ -115,7 +114,6 @@ class BaseProcessor(processor.ProcessorABC):
         # add all selections to selector manager
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
-
         # --------------------------------------------------------------
         # Histogram filling
         # --------------------------------------------------------------
@@ -132,7 +130,11 @@ class BaseProcessor(processor.ProcessorABC):
                     pruned_ev[f"selected_{obj}"] = objects[obj][category_mask]
                 # get weights container
                 weights_container = weight_manager(
-                    pruned_ev, year, self.workflow_config, variation=shift_name
+                    pruned_ev=pruned_ev,
+                    year=year,
+                    workflow_config=self.workflow_config,
+                    variation=shift_name,
+                    dataset=dataset,
                 )
                 if shift_name == "nominal":
                     # save cutflow to metadata
@@ -147,10 +149,11 @@ class BaseProcessor(processor.ProcessorABC):
                                 current_selection
                             ]
                         weights_container_cutflow = weight_manager(
-                            pruned_ev_cutflow,
-                            year,
-                            self.workflow_config,
+                            pruned_ev=pruned_ev_cutflow,
+                            year=year,
+                            workflow_config=self.workflow_config,
                             variation="nominal",
+                            dataset=dataset,
                         )
                         output["metadata"][category]["cutflow"][cut_name] = ak.sum(
                             weights_container_cutflow.weight()

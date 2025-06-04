@@ -21,9 +21,9 @@ from analysis.corrections import (
 )
 
 
-def object_corrector_manager(events, year, processor_config, variation):
+def object_corrector_manager(events, year, workflow_config, variation):
     """apply object level corrections"""
-    objcorr_config = processor_config.corrections_config["objects"]
+    objcorr_config = workflow_config.corrections_config["objects"]
     if "jets" in objcorr_config:
         # apply JEC/JER corrections to jets (in data, the corrections are already applied)
         apply_jet_corrections(events, year)
@@ -44,7 +44,7 @@ def object_corrector_manager(events, year, processor_config, variation):
         )
 
 
-def weight_manager(pruned_ev, year, processor_config, variation):
+def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
     """apply event level corrections (weights)"""
     nevents = len(pruned_ev)
     year_key = year
@@ -52,7 +52,7 @@ def weight_manager(pruned_ev, year, processor_config, variation):
         year_key = "2016"
 
     # get weights config info
-    weights_config = processor_config.corrections_config["event_weights"]
+    weights_config = workflow_config.corrections_config["event_weights"]
     # initialize weights container
     weights_container = Weights(len(pruned_ev), storeIndividual=True)
     # add weights
@@ -129,6 +129,7 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     weights=weights_container,
                     year=year,
                     variation=variation,
+                    dataset=dataset,
                 )
 
         if "MuBoostWeight" in weights_config:
@@ -138,6 +139,7 @@ def weight_manager(pruned_ev, year, processor_config, variation):
                     weights=weights_container,
                     year=year,
                     variation=variation,
+                    dataset=dataset,
                 )
 
         if "electron" in weights_config:
