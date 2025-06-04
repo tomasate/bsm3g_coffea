@@ -98,8 +98,9 @@ corrections:
       - taus_vs_ele: false
       - taus_vs_mu: false
 histogram_config:
-  add_syst_axis: true
+  flow: true
   add_weight: true
+  add_syst_axis: true
   axes:
     dielectron_mass:
       type: Regular

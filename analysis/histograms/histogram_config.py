@@ -136,11 +136,14 @@ class HistogramConfig:
             if True histograms will include a StrCategory axis for systematics
         add_weight:
             if True hist.storage.Weight() will be added to the histograms
+        flow:
+            wether to add the underflow/overflow bins or not
     """
     axes: Dict[str, Any]
     layout: Union[str, Dict[str, List[str]]]
     add_weight: bool = True
     add_syst_axis: bool = True
+    flow: bool = True
 
     def __post_init__(self):
         # set variables attribute
@@ -176,4 +179,5 @@ class HistogramConfig:
             "add_weight": self.add_weight,
             "axes": self.dict_axes,
             "layout": self.layout,
+            "flow": self.flow
         }

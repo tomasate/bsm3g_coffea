@@ -42,8 +42,9 @@ class BaseProcessor(processor.ProcessorABC):
         self.histogram_config = self.workflow_config.histogram_config
         self.histograms = HistBuilder(self.workflow_config).build_histogram()
 
+        self.flow = self.histogram_config.flow
         self.apply_obj_syst = self.workflow_config.corrections_config["apply_obj_syst"]
-
+        
     def process(self, events):
         # correct objects
         object_corrector_manager(events, self.year, self.workflow_config, "nominal")
@@ -171,7 +172,7 @@ class BaseProcessor(processor.ProcessorABC):
                     shift_name=shift_name,
                     category=category,
                     is_mc=is_mc,
-                    flow=True,
+                    flow=self.flow,
                 )
         # define output dictionary accumulator
         output["histograms"] = histograms
