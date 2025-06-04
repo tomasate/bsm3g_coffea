@@ -46,6 +46,11 @@ def object_corrector_manager(events, year, processor_config, variation):
 
 def weight_manager(pruned_ev, year, processor_config, variation):
     """apply event level corrections (weights)"""
+    nevents = len(pruned_ev)
+    year_key = year
+    if year.startswith("2016"):
+        year_key = "2016"
+
     # get weights config info
     weights_config = processor_config.corrections_config["event_weights"]
     # initialize weights container
@@ -137,75 +142,151 @@ def weight_manager(pruned_ev, year, processor_config, variation):
 
         if "electron" in weights_config:
             if "selected_electrons" in pruned_ev.fields:
-                electron_corrector = ElectronCorrector(
-                    events=pruned_ev,
-                    weights=weights_container,
-                    year=year,
-                    variation=variation,
-                )
-                if "id" in weights_config["electron"]:
-                    if weights_config["electron"]["id"]:
-                        electron_corrector.add_id_weight(
-                            id_working_point=weights_config["electron"]["id"]
-                        )
-                if "reco" in weights_config["electron"]:
-                    if weights_config["electron"]["reco"]:
-                        electron_corrector.add_reco_weight("RecoAbove20")
-                        electron_corrector.add_reco_weight("RecoBelow20")
-                if "trigger" in weights_config["electron"]:
-                    if weights_config["electron"]["trigger"]:
-                        electron_corrector.add_hlt_weights(
-                            id_wp=weights_config["electron"]["id"],
-                        )
+                if weights_config["electron"]:
+                    electron_corrector = ElectronCorrector(
+                        events=pruned_ev,
+                        weights=weights_container,
+                        year=year,
+                        variation=variation,
+                    )
+                    if "id" in weights_config["electron"]:
+                        if weights_config["electron"]["id"]:
+                            electron_corrector.add_id_weight(
+                                id_working_point=weights_config["electron"]["id"]
+                            )
+                    if "reco" in weights_config["electron"]:
+                        if weights_config["electron"]["reco"]:
+                            electron_corrector.add_reco_weight("RecoAbove20")
+                            electron_corrector.add_reco_weight("RecoBelow20")
+                    if "trigger" in weights_config["electron"]:
+                        if weights_config["electron"]["trigger"]:
+                            electron_corrector.add_hlt_weights(
+                                id_wp=weights_config["electron"]["id"],
+                            )
+                else:
+                    weights_container.add(
+                        name=f"CMS_eff_e_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_e_reco_above20_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_e_reco_below20_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_e_trigger_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
 
         if "muon" in weights_config:
             if "selected_muons" in pruned_ev.fields:
-                muon_corrector_args = {
-                    "events": pruned_ev,
-                    "weights": weights_container,
-                    "year": year,
-                    "variation": variation,
-                    "id_wp": weights_config["muon"]["id"],
-                    "iso_wp": weights_config["muon"]["iso"],
-                }
-                muon_corrector = (
-                    MuonHighPtCorrector(**muon_corrector_args)
-                    if weights_config["muon"]["id"] == "highpt"
-                    else MuonCorrector(**muon_corrector_args)
-                )
-                if "id" in weights_config["muon"]:
-                    if weights_config["muon"]["id"]:
-                        muon_corrector.add_id_weight()
-                if "reco" in weights_config["muon"]:
-                    if weights_config["muon"]["reco"]:
-                        muon_corrector.add_reco_weight()
-                if "iso" in weights_config["muon"]:
-                    if weights_config["muon"]["iso"]:
-                        muon_corrector.add_iso_weight()
-                if "trigger" in weights_config["muon"]:
-                    if weights_config["muon"]["trigger"]:
-                        muon_corrector.add_triggeriso_weight()
+                if weights_config["muon"]:
+                    muon_corrector = MuonCorrector(
+                        events=pruned_ev,
+                        weights=weights_container,
+                        year=year,
+                        variation=variation,
+                        id_wp=weights_config["muon"]["id"],
+                        iso_wp=weights_config["muon"]["iso"],
+                    )
+                    if "id" in weights_config["muon"]:
+                        if weights_config["muon"]["id"]:
+                            muon_corrector.add_id_weight()
+
+                    if "reco" in weights_config["muon"]:
+                        if weights_config["muon"]["reco"]:
+                            muon_corrector.add_reco_weight()
+
+                    if "iso" in weights_config["muon"]:
+                        if weights_config["muon"]["iso"]:
+                            muon_corrector.add_iso_weight()
+
+                    if "trigger" in weights_config["muon"]:
+                        if weights_config["muon"]["trigger"]:
+                            muon_corrector.add_triggeriso_weight()
+                else:
+                    weights_container.add(
+                        name=f"CMS_eff_m_id_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_m_reco_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_m_iso_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_m_trigger_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
 
         if "tau" in weights_config:
             if "selected_taus" in pruned_ev.fields:
-                tau_corrector = TauCorrector(
-                    events=pruned_ev,
-                    weights=weights_container,
-                    year=year,
-                    tau_vs_jet=weights_config["tau"]["taus_vs_jet"],
-                    tau_vs_ele=weights_config["tau"]["taus_vs_ele"],
-                    tau_vs_mu=weights_config["tau"]["taus_vs_mu"],
-                    variation=variation,
-                )
-                if "taus_vs_jet" in weights_config["tau"]:
-                    if weights_config["tau"]["taus_vs_jet"]:
-                        tau_corrector.add_id_weight_deeptauvsjet()
-                if "taus_vs_ele" in weights_config["tau"]:
-                    if weights_config["tau"]["taus_vs_ele"]:
-                        tau_corrector.add_id_weight_deeptauvse()
-                if "taus_vs_mu" in weights_config["tau"]:
-                    if weights_config["tau"]["taus_vs_mu"]:
-                        tau_corrector.add_id_weight_deeptauvsmu()
+                if weights_config["tau"]:
+                    tau_corrector = TauCorrector(
+                        events=pruned_ev,
+                        weights=weights_container,
+                        year=year,
+                        tau_vs_jet=weights_config["tau"]["taus_vs_jet"],
+                        tau_vs_ele=weights_config["tau"]["taus_vs_ele"],
+                        tau_vs_mu=weights_config["tau"]["taus_vs_mu"],
+                        variation=variation,
+                    )
+                    if "taus_vs_jet" in weights_config["tau"]:
+                        if weights_config["tau"]["taus_vs_jet"]:
+                            tau_corrector.add_id_weight_deeptauvsjet()
+                    if "taus_vs_ele" in weights_config["tau"]:
+                        if weights_config["tau"]["taus_vs_ele"]:
+                            tau_corrector.add_id_weight_deeptauvse()
+                    if "taus_vs_mu" in weights_config["tau"]:
+                        if weights_config["tau"]["taus_vs_mu"]:
+                            tau_corrector.add_id_weight_deeptauvsmu()
+                else:
+                    weights_container.add(
+                        name=f"CMS_eff_tau_idDeepTauVSe_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_tau_idDeepTauVSmu_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_tau_idDeepTauVSjet_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
+                    weights_container.add(
+                        name=f"CMS_eff_t_trigger_{year_key}",
+                        weight=np.ones(nevents),
+                        weightUp=np.ones(nevents),
+                        weightDown=np.ones(nevents),
+                    )
 
     else:
         weights_container.add("weight", np.ones(len(pruned_ev)))

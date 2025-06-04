@@ -83,19 +83,11 @@ corrections:
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
-    electron:
-      - id: false
-      - reco: false
-      - trigger: false
     muon:
       - id: tight
       - iso: tight
       - reco: true
       - trigger: true
-    tau:
-      - taus_vs_jet: false
-      - taus_vs_ele: false
-      - taus_vs_mu: false
 histogram_config:
   flow: true
   add_weight: true

@@ -88,15 +88,6 @@ corrections:
       - id: wp80iso
       - reco: true
       - trigger: true
-    muon:
-      - id: false
-      - iso: false
-      - reco: false
-      - trigger: false
-    tau:
-      - taus_vs_jet: false
-      - taus_vs_ele: false
-      - taus_vs_mu: false
 histogram_config:
   flow: true
   add_weight: true

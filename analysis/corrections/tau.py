@@ -75,7 +75,9 @@ class TauCorrector:
 
         self.weights = weights
         self.year = year
-
+        self.year_key = year
+        if year.startswith("2016"):
+            self.year_key = "2016"
         # DeepTau working points
         self.tau_vs_jet = tau_vs_jet
         self.tau_vs_ele = tau_vs_ele
@@ -142,14 +144,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSe_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSe_{self.year_key}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSe_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSe_{self.year_key}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -202,14 +204,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year_key}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSmu_{self.year_key}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -293,14 +295,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year_key}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year}",
+                name=f"CMS_eff_tau_idDeepTauVSjet_{self.year_key}",
                 weight=nominal_sf,
             )
         return nominal_sf
@@ -375,14 +377,14 @@ class TauCorrector:
             )
             # add scale factors to weights container
             self.weights.add(
-                name=f"CMS_eff_t_trigger_{self.year}",
+                name=f"CMS_eff_t_trigger_{self.year_key}",
                 weight=nominal_sf,
                 weightUp=up_sf,
                 weightDown=down_sf,
             )
         else:
             self.weights.add(
-                name=f"CMS_eff_t_trigger_{self.year}",
+                name=f"CMS_eff_t_trigger_{self.year_key}",
                 weight=nominal_sf,
             )
         return nominal_sf
