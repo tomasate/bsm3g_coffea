@@ -4,30 +4,37 @@ JOBID=$1
 BASEDIR=$2
 X509PATH=$3
 
-export HOME=`pwd`
-if [ -d /afs/cern.ch/user/${USER:0:1}/$USER ]; then
-  export HOME=/afs/cern.ch/user/${USER:0:1}/$USER
-fi
-
+# Set environment variables for xrootd and proxy certificate
 export XRD_NETWORKSTACK=IPv4
 export XRD_RUNFORKHANDLER=1
 export X509_USER_PROXY=$X509PATH
+
+# Print proxy certificate details to verify validity and VOMS attributes
 voms-proxy-info -all -file $X509PATH
 
+# Save the current working directory where JSON configuration files are expected to be
 WORKDIR=`pwd`
 
+# Declare an associative array (dictionary) to hold job parameters
 declare -A ARGS
-for key in workflow year output_path output_path output_format dataset; do
+
+# Extract specific job parameters from arguments.json
+for key in workflow year output_path output_format dataset; do
     ARGS[$key]=$(python3 -c "import json; print(json.load(open('$WORKDIR/arguments.json'))['$key'])")
 done
 
-OPTS="--workflow ${ARGS[workflow]} --year ${ARGS[year]} --output_path ${ARGS[output_path]} --output_format ${ARGS[output_format]} --dataset ${ARGS[dataset]}_$JOBID"
+# Build the full set of command-line parameters for submit.py (Add the JOBID suffix to the dataset name to uniquely identify the output)
+CMD_ARGS="--workflow ${ARGS[workflow]} --year ${ARGS[year]} --output_path ${ARGS[output_path]} --output_format ${ARGS[output_format]} --dataset ${ARGS[dataset]}_$JOBID"
 
-# get partition fileset
+# From partitions.json (which contains the partitioning of the full dataset across jobs),
+# extract only the subset assigned to the current JOBID and save it as partition_fileset.json.
+# This ensures each job processes a unique subset of the full dataset
 python3 -c "import json; json.dump(json.load(open('$WORKDIR/partitions.json'))['$JOBID'], open('$WORKDIR/partition_fileset.json', 'w'), indent=4)"
-OPTS="$OPTS --partition_json $WORKDIR/partition_fileset.json"
 
-echo $OPTS
+# Add the newly created partition file to the list of arguments to pass to submit.py
+CMD_ARGS="$CMD_ARGS --partition_json $WORKDIR/partition_fileset.json"
+echo $CMD_ARGS
 
+# Call the submit.py script with all collected job parameters
 cd $BASEDIR
-python3 submit.py $OPTS
+python3 submit.py $CMD_ARGS
