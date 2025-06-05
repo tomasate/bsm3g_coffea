@@ -143,8 +143,8 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
                 )
 
         if "electron" in weights_config:
-            if "selected_electrons" in pruned_ev.fields:
-                if weights_config["electron"]:
+            if weights_config["electron"]:
+                if "selected_electrons" in pruned_ev.fields:
                     electron_corrector = ElectronCorrector(
                         events=pruned_ev,
                         weights=weights_container,
@@ -165,35 +165,10 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
                             electron_corrector.add_hlt_weights(
                                 id_wp=weights_config["electron"]["id"],
                             )
-                else:
-                    weights_container.add(
-                        name=f"CMS_eff_e_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_e_reco_above20_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_e_reco_below20_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_e_trigger_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
 
         if "muon" in weights_config:
-            if "selected_muons" in pruned_ev.fields:
-                if weights_config["muon"]:
+            if weights_config["muon"]:
+                if "selected_muons" in pruned_ev.fields:
                     muon_corrector = MuonCorrector(
                         events=pruned_ev,
                         weights=weights_container,
@@ -217,35 +192,10 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
                     if "trigger" in weights_config["muon"]:
                         if weights_config["muon"]["trigger"]:
                             muon_corrector.add_triggeriso_weight()
-                else:
-                    weights_container.add(
-                        name=f"CMS_eff_m_id_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_m_reco_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_m_iso_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_m_trigger_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
 
         if "tau" in weights_config:
-            if "selected_taus" in pruned_ev.fields:
-                if weights_config["tau"]:
+            if weights_config["tau"]:
+                if "selected_taus" in pruned_ev.fields:
                     tau_corrector = TauCorrector(
                         events=pruned_ev,
                         weights=weights_container,
@@ -264,31 +214,6 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
                     if "taus_vs_mu" in weights_config["tau"]:
                         if weights_config["tau"]["taus_vs_mu"]:
                             tau_corrector.add_id_weight_deeptauvsmu()
-                else:
-                    weights_container.add(
-                        name=f"CMS_eff_tau_idDeepTauVSe_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_tau_idDeepTauVSmu_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_tau_idDeepTauVSjet_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
-                    weights_container.add(
-                        name=f"CMS_eff_t_trigger_{year_key}",
-                        weight=np.ones(nevents),
-                        weightUp=np.ones(nevents),
-                        weightDown=np.ones(nevents),
-                    )
 
     else:
         weights_container.add("weight", np.ones(len(pruned_ev)))
