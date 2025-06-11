@@ -15,7 +15,7 @@ def add_muon_boost_weight(events, weights, year, variation, dataset):
         subleading_bjet_pt = ak.pad_none(bjets, target=2)[:, 1].pt
 
         st = muons_pt + met_pt + leading_bjet_pt + subleading_bjet_pt
-        njet = ak.num(events.selected_jets)
+        njet = ak.num(events.selected_lightjets)
 
         in_binning = (st > 196.4) & (st < 1000.0) & (njet > 1) & (njet < 9)
         selected_st = st.mask[in_binning]
