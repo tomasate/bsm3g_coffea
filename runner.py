@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 DATA_SAMPLES = {
-    "1b1e1mu": {
+    "1b1mu1e": {
         "2016preVFP": [
             "SingleMuonBver1",
             "SingleMuonBver2",
@@ -22,7 +22,7 @@ DATA_SAMPLES = {
         ],
         "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
     },
-    "1b1mu1e": {
+    "1b1e1mu": {
         "2016preVFP": [
             "SingleElectronBver1",
             "SingleElectronBver2",

@@ -61,7 +61,7 @@ object_selection:
     field: events.MET
 event_selection:
   hlt_paths:
-    SingleElectron:
+    SingleMuon:
       - SingleMu
   selections:
     goodvertex: events.PV.npvsGood > 0
