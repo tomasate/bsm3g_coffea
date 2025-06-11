@@ -276,8 +276,6 @@ class ElectronCorrector:
             self.weights.add(
                 name=f"CMS_eff_e_trigger_{self.year_key}",
                 weight=nominal_sf,
-                weightUp=np.ones_like(nominal_sf),
-                weightDown=np.ones_like(nominal_sf),
             )
         else:
             self.weights.add(
