@@ -113,23 +113,12 @@ class BTagCorrector:
         self._cset = correctionlib.CorrectionSet.from_file(
             get_pog_json(json_name="btag", year=year)
         )
-        # select b, c and light jets
+        # select bc and light jets
         # hadron flavor definition: 5=b, 4=c, 0=udsg
-        self._flavors = {"b": 5, "c": 4, "light": 0}
-        self._b_jets = events.selected_jets[
-            events.selected_jets.hadronFlavour == self._flavors["b"]
-        ]
-        self._c_jets = events.selected_jets[
-            events.selected_jets.hadronFlavour == self._flavors["c"]
-        ]
-        self._light_jets = events.selected_jets[
-            events.selected_jets.hadronFlavour == self._flavors["light"]
-        ]
-        self._jet_map = {
-            "b": self._b_jets,
-            "c": self._c_jets,
-            "light": self._light_jets,
-        }
+        self._bc_jets = events.selected_jets[events.selected_jets.hadronFlavour >= 4]
+        self._light_jets = events.selected_jets[events.selected_jets.hadronFlavour == 0]
+        self._jet_map = {"bc": self._bc_jets, "light": self._light_jets}
+
         btag_wps = {
             "2016preVFP": {
                 "loose": 0.0508,
@@ -150,16 +139,14 @@ class BTagCorrector:
                 "loose": 0.049,
                 "medium": 0.2783,
                 "tight": 0.71,
-            },
+            }
         }
         self._jet_pass_btag = {
-            "b": self._jet_map["b"]["btagDeepFlavB"] > btag_wps[year][self._wp],
-            "c": self._jet_map["c"]["btagDeepFlavB"] > btag_wps[year][self._wp],
+            "bc": self._jet_map["bc"]["btagDeepFlavB"] > btag_wps[year][self._wp],
             "light": self._jet_map["light"]["btagDeepFlavB"] > btag_wps[year][self._wp],
         }
         self.var_naming_map = {
-            "b": "CMS_btag_heavy_b",
-            "c": "CMS_btag_heavy_c",
+            "bc": "CMS_btag_heavy",
             "light": "CMS_btag_light",
         }
 
@@ -170,7 +157,7 @@ class BTagCorrector:
         Parameters:
         -----------
             flavor:
-                hadron flavor {'b', 'c', 'light'}
+                hadron flavor {'bc', 'light'}
         """
         # efficiencies
         eff = self.efficiency(flavor=flavor)
@@ -266,13 +253,12 @@ class BTagCorrector:
         Parameters:
         -----------
             flavor:
-                hadron flavor {'b', 'c', 'light'}
+                hadron flavor {'bc', 'light'}
             syst:
                 Name of the systematic {'central', 'down', 'down_correlated', 'down_uncorrelated', 'up', 'up_correlated'}
         """
         cset_keys = {
-            "b": f"{self._tagger}_{self._sf}",
-            "c": f"{self._tagger}_{self._sf}",
+            "bc": f"{self._tagger}_{self._sf}",
             "light": f"{self._tagger}_incl",
         }
         # until correctionlib handles jagged data natively we have to flatten and unflatten
@@ -286,7 +272,10 @@ class BTagCorrector:
         # get jet transverse momentum, abs pseudorapidity and hadron flavour (replace None values with some 'in-limit' value)
         jets_pt = ak.fill_none(in_jets.pt, 0.0)
         jets_eta = ak.fill_none(np.abs(in_jets.eta), 0.0)
-        jets_hadron_flavour = ak.fill_none(in_jets.hadronFlavour, self._flavors[flavor])
+        jets_hadron_flavour = ak.fill_none(
+            in_jets.hadronFlavour, 5 if flavor == "bc" else 0
+        )
+
         sf = self._cset[cset_keys[flavor]].evaluate(
             syst,
             self._taggers[self._tagger][self._wp],

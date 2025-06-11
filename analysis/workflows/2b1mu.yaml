@@ -97,16 +97,15 @@ corrections:
       - id: tight
     btagging: 
       - id: medium
-      - b: true
-      - c: true
+      - bc: true
       - light: true
       - full_run: false
-    electron: false
     muon:
       - id: tight
       - iso: tight
       - reco: true
       - trigger: true
+    electron: false
     tau: false
 histogram_config:
   flow: true
@@ -172,25 +171,10 @@ histogram_config:
       label: $\phi(\text{jet})$
       expression: objects['jets'].phi
     jet_multiplicity:
-      type: IntCategory
-      categories:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5 
-        - 6
-        - 7
-        - 8
-        - 9
-        - 10
-        - 11
-        - 12
-        - 13
-        - 14
-        - 15
-      label: jet multiplicity
+      type: Integer
+      start: 0
+      stop: 14
+      label: Jet multiplicity
       expression: ak.num(objects['jets'])
     bjet_pt:
       type: Variable
@@ -299,31 +283,7 @@ histogram_config:
       stop: 1000
       label: $S_T(\mu, p_T^{miss}, b)$ [GeV]
       expression: objects['met'].pt + objects['muons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
-    nmuons:
-      type: Integer
-      start: 0
-      stop: 5
-      label: nmuons
-      expression: ak.num(objects['muons'])
-    nelectrons:
-      type: Integer
-      start: 0
-      stop: 5
-      label: nelectrons
-      expression: ak.num(objects['electrons'])
-    nbjets:
-      type: Integer
-      start: 0
-      stop: 5
-      label: nbjets
-      expression: ak.num(objects['bjets'])
   layout:
-    nmuons:
-      - nmuons
-    nelectrons:
-      - nelectrons
-    nbjets:
-      - nbjets
     st:
       - st
       - jet_multiplicity

@@ -97,8 +97,7 @@ corrections:
       - id: tight
     btagging: 
       - id: medium
-      - b: true
-      - c: true
+      - bc: true
       - light: true
       - full_run: false
     electron:
@@ -171,25 +170,10 @@ histogram_config:
       label: $\phi(\text{jet})$
       expression: objects['jets'].phi
     jet_multiplicity:
-      type: IntCategory
-      categories:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5 
-        - 6
-        - 7
-        - 8
-        - 9
-        - 10
-        - 11
-        - 12
-        - 13
-        - 14
-        - 15
-      label: $N(\text{jet}$
+      type: Integer
+      start: 0
+      stop: 14
+      label: Jet multiplicity
       expression: ak.num(objects['jets'])
     bjet_pt:
       type: Variable
