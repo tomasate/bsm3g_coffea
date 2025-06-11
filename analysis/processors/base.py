@@ -52,23 +52,26 @@ class BaseProcessor(processor.ProcessorABC):
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
-            # nominal JEC are already applied in data
             return self.process_shift(events, shift_name="nominal")
 
-        # define Jet/MET shifts
-        shifts = [({"Jet": events.Jet, "MET": events.MET}, "nominal")]
+        # define object-level shifts
+        shifts = [({"Jet": events.Jet, "MET": events.MET, "Muon": events.Muon, "Tau": events.Tau}, "nominal")]
         if self.apply_obj_syst:
             year_key = self.year
             if self.year.startswith("2016"):
                 year_key = "2016"
             shifts.extend(
                 [
-                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up}, f"CMS_scale_j_{year_key}Up"),
-                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down}, f"CMS_scale_j_{year_key}Down"),
-                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up}, f"CMS_res_j_{year_key}Up"),
-                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down}, f"CMS_res_j_{year_key}Down"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up}, f"CMS_met_unclustered_{year_key}Up"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down}, f"CMS_met_unclustered_{year_key}Down"),
+                    ({"Jet": events.Jet, "MET": events.MET.rochester.up, "Muon": events.Muon.rochester.up, "Tau": events.Tau}, f"CMS_rochester_{year_key}Up"),
+                    ({"Jet": events.Jet, "MET": events.MET.rochester.down, "Muon": events.Muon.rochester.down, "Tau": events.Tau}, f"CMS_rochester_{year_key}Down"),
+                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{year_key}Up"),
+                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{year_key}Down"),
+                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{year_key}Up"),
+                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{year_key}Down"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{year_key}Up"),
+                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{year_key}Down"),
+                    ({"Jet": events.Jet, "MET": events.MET.tau_energy.up, "Muon": events.Muon, "Tau": events.Tau.tau_energy.up}, f"CMS_t_energy_{year_key}Up"),
+                    ({"Jet": events.Jet, "MET": events.MET.tau_energy.down, "Muon": events.Muon, "Tau": events.Tau.tau_energy.down}, f"CMS_t_energy_{year_key}Down"),
                 ]
             )
         return processor.accumulate(

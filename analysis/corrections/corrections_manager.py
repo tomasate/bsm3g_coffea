@@ -29,19 +29,14 @@ def object_corrector_manager(events, year, workflow_config, variation):
         apply_jet_corrections(events, year)
     if "muons" in objcorr_config:
         # apply rochester corretions to muons
-        apply_rochester_corrections(events=events, year=year, variation=variation)
+        apply_rochester_corrections(events, year)
     if "taus" in objcorr_config:
         if hasattr(events, "genWeight"):
             # apply energy corrections to taus (only to MC)
-            apply_tau_energy_scale_corrections(
-                events=events, year=year, variation=variation
-            )
+            apply_tau_energy_scale_corrections(events, year)
     if "met" in objcorr_config:
         # apply MET phi modulation corrections
-        apply_met_phi_corrections(
-            events=events,
-            year=year,
-        )
+        apply_met_phi_corrections(events, year)
 
 
 def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
