@@ -3,6 +3,49 @@ import subprocess
 from pathlib import Path
 
 DATA_SAMPLES = {
+    "1b1e1mu": {
+        "2016preVFP": [
+            "SingleMuonBver1",
+            "SingleMuonBver2",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
+        "2017": [
+            "SingleMuonB",
+            "SingleMuonC",
+            "SingleMuonD",
+            "SingleMuonE",
+            "SingleMuonF",
+        ],
+        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
+    },
+    "1b1mu1e": {
+        "2016preVFP": [
+            "SingleElectronBver1",
+            "SingleElectronBver2",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
+        "2017": [
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+            "SingleElectronE",
+            "SingleElectronF",
+        ],
+        "2018": [
+            "SingleElectronA",
+            "SingleElectronB",
+            "SingleElectronC",
+            "SingleElectronD",
+        ],
+    },
     "2b1mu": {
         "2016preVFP": [
             "SingleMuonBver1",
@@ -126,7 +169,7 @@ if __name__ == "__main__":
         "--workflow",
         dest="workflow",
         type=str,
-        choices=["2b1e", "2b1mu", "ztomumu", "ztoee"],
+        choices=["2b1e", "2b1mu", "ztomumu", "ztoee", "1b1e1mu", "1b1mu1e"],
         help="workflow config to run",
     )
     parser.add_argument(
