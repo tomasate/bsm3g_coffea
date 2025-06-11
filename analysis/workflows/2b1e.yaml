@@ -35,6 +35,17 @@ object_selection:
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
+  lightjets:
+    field: events.Jet
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.4
+      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_pileup_id(events, 'tight', year)
+      - ~working_points.jets_deepjet_b(events, 'loose', year)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
   bjets:
     field: events.Jet
     cuts:
@@ -92,7 +103,7 @@ corrections:
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
-    EleBoostWeight: true
+    EleBoostWeight: false
     pujetid: 
       - id: tight
     btagging: 
@@ -282,9 +293,17 @@ histogram_config:
       stop: 1000
       label: $S_T(e, p_T^{miss}, b)$ [GeV]
       expression: objects['met'].pt + objects['electrons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
+    lightjets_multiplicity:
+      type: Integer
+      start: 0
+      stop: 14
+      label: Light Jet multiplicity
+      expression: ak.num(objects['lightjets'])
   layout:
     st:
       - st
+      - lightjets_multiplicity
+    jet_multiplicity:
       - jet_multiplicity
     mass:
       - electron_met_bjet_mass
