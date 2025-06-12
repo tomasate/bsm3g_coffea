@@ -1,5 +1,6 @@
 import json
 import argparse
+from pathlib import Path
 from coffea import processor
 from coffea.util import save
 from coffea.nanoevents import NanoAODSchema
@@ -31,8 +32,10 @@ if __name__ == "__main__":
         "--workflow",
         dest="workflow",
         type=str,
-        choices=["2b1e", "2b1mu", "ztomumu", "ztoee", "1b1e1mu", "1b1mu1e"],
-        help="workflow config to run",
+        choices=[
+            f.stem for f in (Path.cwd() / "analysis" / "workflows").glob("*.yaml")
+        ],
+        help="workflow config to submit",
     )
     parser.add_argument(
         "-y",

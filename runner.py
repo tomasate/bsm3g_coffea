@@ -2,152 +2,64 @@ import argparse
 import subprocess
 from pathlib import Path
 
-DATA_SAMPLES = {
-    "1b1mu1e": {
-        "2016preVFP": [
-            "SingleMuonBver1",
-            "SingleMuonBver2",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
-        "2017": [
-            "SingleMuonB",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
-    },
-    "1b1e1mu": {
-        "2016preVFP": [
-            "SingleElectronBver1",
-            "SingleElectronBver2",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
-        "2017": [
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2018": [
-            "SingleElectronA",
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-        ],
-    },
-    "2b1mu": {
-        "2016preVFP": [
-            "SingleMuonBver1",
-            "SingleMuonBver2",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
-        "2017": [
-            "SingleMuonB",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
-    },
-    "2b1e": {
-        "2016preVFP": [
-            "SingleElectronBver1",
-            "SingleElectronBver2",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
-        "2017": [
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2018": [
-            "SingleElectronA",
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-        ],
-    },
-    "ztomumu": {
-        "2016preVFP": [
-            "SingleMuonBver1",
-            "SingleMuonBver2",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
-        "2017": [
-            "SingleMuonB",
-            "SingleMuonC",
-            "SingleMuonD",
-            "SingleMuonE",
-            "SingleMuonF",
-        ],
-        "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
-    },
-    "ztoee": {
-        "2016preVFP": [
-            "SingleElectronBver1",
-            "SingleElectronBver2",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
-        "2017": [
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-            "SingleElectronE",
-            "SingleElectronF",
-        ],
-        "2018": [
-            "SingleElectronA",
-            "SingleElectronB",
-            "SingleElectronC",
-            "SingleElectronD",
-        ],
-    },
+single_muon = {
+    "2016preVFP": [
+        "SingleMuonBver1",
+        "SingleMuonBver2",
+        "SingleMuonC",
+        "SingleMuonD",
+        "SingleMuonE",
+        "SingleMuonF",
+    ],
+    "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
+    "2017": [
+        "SingleMuonB",
+        "SingleMuonC",
+        "SingleMuonD",
+        "SingleMuonE",
+        "SingleMuonF",
+    ],
+    "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
 }
-MC_SAMPLES = [
-    # DYJetsToLL
-    "DYJetsToLL_inclusive_10to50",
-    "DYJetsToLL_inclusive_50",
-    # SingleTop
+single_electron = {
+    "2016preVFP": [
+        "SingleElectronBver1",
+        "SingleElectronBver2",
+        "SingleElectronC",
+        "SingleElectronD",
+        "SingleElectronE",
+        "SingleElectronF",
+    ],
+    "2016postVFP": ["SingleElectronF", "SingleElectronG", "SingleElectronH"],
+    "2017": [
+        "SingleElectronB",
+        "SingleElectronC",
+        "SingleElectronD",
+        "SingleElectronE",
+        "SingleElectronF",
+    ],
+    "2018": [
+        "SingleElectronA",
+        "SingleElectronB",
+        "SingleElectronC",
+        "SingleElectronD",
+    ],
+}
+dy_inclusive = ["DYJetsToLL_inclusive_10to50", "DYJetsToLL_inclusive_50"]
+singletop = [
     "ST_s-channel_4f_leptonDecays",
     "ST_t-channel_antitop_4f_InclusiveDecays",
     "ST_t-channel_top_4f_InclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_top_5f_inclusiveDecays",
-    # tt
+]
+tt = [
     "TTTo2L2Nu",
     "TTToHadronic",
     "TTToSemiLeptonic",
-    # WJetsToLNu
+]
+wjets_inclusive = ["WJetsToLNu_inclusive"]
+wjets_ht = [
     "WJetsToLNu_HT-100To200",
     "WJetsToLNu_HT-1200To2500",
     "WJetsToLNu_HT-200To400",
@@ -155,11 +67,41 @@ MC_SAMPLES = [
     "WJetsToLNu_HT-400To600",
     "WJetsToLNu_HT-600To800",
     "WJetsToLNu_HT-800To1200",
-    # Diboson
+]
+diboson = [
     "WW",
     "WZ",
     "ZZ",
 ]
+
+data_samples = {
+    "1b1mu1e": single_muon,
+    "1b1e1mu": single_electron,
+    "2b1mu": single_muon,
+    "2b1e": single_electron,
+    "ztomumu": single_muon,
+    "ztoee": single_electron,
+    "qcd_mu": single_muon,
+    "qcd_ele": single_electron,
+    "qcd_cr1T_mu": None,
+    "qcd_cr2T_mu": None,
+    "qcd_cr1T_ele": None,
+    "qcd_cr2T_ele": None,
+}
+mc_samples = {
+    "1b1mu1e": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "1b1e1mu": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "2b1mu": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "2b1e": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "ztomumu": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "ztoee": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "qcd_mu": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "qcd_ele": dy_inclusive + singletop + tt + wjets_ht + diboson,
+    "qcd_cr1T_mu": wjets_ht,
+    "qcd_cr2T_mu": wjets_ht,
+    "qcd_cr1T_ele": wjets_ht,
+    "qcd_cr2T_ele": wjets_ht,
+}
 
 
 if __name__ == "__main__":
@@ -169,8 +111,10 @@ if __name__ == "__main__":
         "--workflow",
         dest="workflow",
         type=str,
-        choices=["2b1e", "2b1mu", "ztomumu", "ztoee", "1b1e1mu", "1b1mu1e"],
-        help="workflow config to run",
+        choices=[
+            f.stem for f in (Path.cwd() / "analysis" / "workflows").glob("*.yaml")
+        ],
+        help="workflow to run",
     )
     parser.add_argument(
         "-y",
@@ -214,7 +158,9 @@ if __name__ == "__main__":
         subprocess.run(cmd, shell=True)
 
     # submit (or prepare) a job for each dataset using the given arguments
-    to_run = MC_SAMPLES + DATA_SAMPLES[args.workflow][args.year]
+    to_run = mc_samples[args.workflow]
+    if data_samples[args.workflow]:
+        to_run += data_samples[args.workflow][args.year]
     cmd = ["python3", "submit_condor.py"]
     for dataset in to_run:
         cmd_args = [

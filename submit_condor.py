@@ -16,7 +16,9 @@ def move_proxy() -> str:
             "VOMS proxy expired or non-existing: please run 'voms-proxy-init --voms cms'"
         )
     user = os.environ["USER"]
-    x509_localpath = subprocess.check_output("voms-proxy-info -path", shell=True, text=True).strip()
+    x509_localpath = subprocess.check_output(
+        "voms-proxy-info -path", shell=True, text=True
+    ).strip()
     x509_path = (
         f"/afs/cern.ch/user/{user[0]}/{user}/private/{x509_localpath.split('/')[-1]}"
     )
@@ -101,8 +103,10 @@ if __name__ == "__main__":
         "--workflow",
         dest="workflow",
         type=str,
-        choices=["2b1e", "2b1mu", "ztomumu", "ztoee", "1b1e1mu", "1b1mu1e"],
-        help="workflow config to run",
+        choices=[
+            f.stem for f in (Path.cwd() / "analysis" / "workflows").glob("*.yaml")
+        ],
+        help="workflow config to submit",
     )
     parser.add_argument(
         "-y",
