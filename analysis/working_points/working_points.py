@@ -52,8 +52,10 @@ class WorkingPoints:
             # mva ID working points https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
             "wp80iso": events.Electron.mvaFall17V2Iso_WP80,
             "wp90iso": events.Electron.mvaFall17V2Iso_WP90,
+            "wpLiso": events.Electron.mvaFall17V2Iso_WPL,
             "wp80noiso": events.Electron.mvaFall17V2noIso_WP80,
             "wp90noiso": events.Electron.mvaFall17V2noIso_WP90,
+            "wpLnoiso": events.Electron.mvaFall17V2noIso_WPL,
             # cutbased ID working points https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
             "loose": events.Electron.cutBased == 2,
             "medium": events.Electron.cutBased == 3,
