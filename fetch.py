@@ -7,6 +7,7 @@ if __name__ == "__main__":
     years = ["2016preVFP", "2016postVFP", "2017", "2018"]
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-y",
         "--year",
         dest="year",
         type=str,
