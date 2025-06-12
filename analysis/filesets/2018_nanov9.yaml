@@ -168,6 +168,11 @@ TauD:
   process: Data
   query: Tau/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD
   xsec: null
+WJetsToLNu_inclusive:
+  is_mc: true
+  process: WJetsToLNu
+  query: WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM
+  xsec: 61334.0
 WJetsToLNu_HT-100To200:
   is_mc: true
   process: WJetsToLNu
