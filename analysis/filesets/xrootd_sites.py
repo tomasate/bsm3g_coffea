@@ -1,4 +1,5 @@
 xroot_to_site =  {
+    "root://lyoeos.in2p3.fr:1094": "T3_FR_IPNL",
     "root://cmseos.fnal.gov": "T3_US_FNALLPC",
     "root://cmsdcadisk.fnal.gov": "T1_US_FNAL_Disk",
     "root://xrootd-vanderbilt.sites.opensciencegrid.org:1094": "T2_US_Vanderbilt",
