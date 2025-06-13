@@ -163,15 +163,19 @@ def get_cutflow(processed_histograms, category):
     self.cutflow_df.to_csv(f"{output_path}/cutflow_{category}.csv")
 
 
+def find_kin_and_axis(processed_histograms, name="multiplicity"):
+    for process, histogram_dict in processed_histograms.items():
+        if process == "Data":
+            continue
+        for kin, hist in histogram_dict.items():
+            for axis_name in hist.axes.name:
+                if axis_name != "variation" and name in axis_name:
+                    return kin, axis_name
+    raise ValueError(f"No histogram with a '{name}' axis found.")
+
+
 def get_results_report(processed_histograms, category):
-    for process in processed_histograms:
-        for kin in processed_histograms[process]:
-            aux_hist = processed_histograms[process][kin]
-            for aux_var in aux_hist.axes.name:
-                if "multiplicity" not in aux_var:
-                    continue
-                break
-            break
+    kin, aux_var = find_kin_and_axis(processed_histograms)
 
     nominal = {}
     variations = {}
