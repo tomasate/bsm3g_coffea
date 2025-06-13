@@ -44,7 +44,9 @@ def parse_arguments():
         "-w",
         "--workflow",
         required=True,
-        choices=["2b1e", "2b1mu", "ztomumu", "ztoee"],
+        choices=[
+            f.stem for f in (Path.cwd() / "analysis" / "workflows").glob("*.yaml")
+        ],
         help="Workflow config to run",
     )
     parser.add_argument(
@@ -75,6 +77,7 @@ def parse_arguments():
         choices=["pdf", "png"],
         help="File extension for plots",
     )
+    parser.add_argument("--no_ratio", action="store_true", help="Enable postprocessing")
     parser.add_argument(
         "--output_format",
         type=str,
@@ -83,13 +86,6 @@ def parse_arguments():
         help="Format of output histograms",
     )
     return parser.parse_args()
-
-
-def build_process_sample_map(dataset_configs):
-    process_map = defaultdict(list)
-    for sample, config in dataset_configs.items():
-        process_map[config["process"]].append(sample)
-    return process_map
 
 
 def load_2016_histograms(workflow):
@@ -221,7 +217,14 @@ if __name__ == "__main__":
             for i in glob.glob(f"{output_dir}/*/*{extension}", recursive=True)
             if not i.split("/")[-1].startswith("cutflow")
         ]
-        process_samples_map = build_process_sample_map(dataset_configs)
+
+        process_samples_map = defaultdict(list)
+        samples_in_out = [
+            str(p).split("/")[-1] for p in output_dir.iterdir() if p.is_dir()
+        ]
+        for sample, config in dataset_configs.items():
+            if sample in samples_in_out:
+                process_samples_map[config["process"]].append(sample)
 
         # group output file paths by sample name
         grouped_outputs = {}
@@ -344,6 +347,7 @@ if __name__ == "__main__":
                     yratio_limits=args.yratio_limits,
                     log=args.log,
                     extension=args.extension,
+                    add_ratio=not args.no_ratio,
                 )
             subprocess.run(
                 f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",

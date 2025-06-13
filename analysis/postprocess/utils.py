@@ -43,6 +43,8 @@ def clear_output_directory(output_dir, ext):
 
 
 def combine_event_tables(df1, df2):
+    df1 = df1.sort_index()
+    df2 = df2.sort_index()
     assert all(df1.index == df2.index), "index does not match!"
     combined = pd.DataFrame(index=df1.index)
     combined["events"] = df1["events"] + df2["events"]
@@ -51,11 +53,8 @@ def combine_event_tables(df1, df2):
     combined["syst err down"] = np.sqrt(
         df1["syst err down"] ** 2 + df2["syst err down"] ** 2
     )
-    print(combined)
     data = combined.loc["Data", "events"]
     total_bkg = combined.loc["Total background", "events"]
-    print(data)
-    print(total_bkg)
     combined.loc[
         "Data/Total background", ["events", "stat err", "syst err up", "syst err down"]
     ] = [

@@ -142,7 +142,6 @@ def load_processed_histograms(
 
 
 def get_cutflow(processed_histograms, category):
-
     processed_cutflow = self.group_by_process(self.scaled_cutflow[category])
     self.cutflow_df = pd.DataFrame(processed_cutflow)
     # add total background events to cutflow
@@ -165,40 +164,52 @@ def get_cutflow(processed_histograms, category):
 
 
 def get_results_report(processed_histograms, category):
-    nominal = {}
     for process in processed_histograms:
         for kin in processed_histograms[process]:
             aux_hist = processed_histograms[process][kin]
             for aux_var in aux_hist.axes.name:
-                nominal[process] = aux_hist[{"variation": "nominal"}].project(aux_var)
+                if "multiplicity" not in aux_var:
+                    continue
                 break
             break
 
+    nominal = {}
     variations = {}
     mcstat_err = {}
     bin_error_up = {}
     bin_error_down = {}
     for process in processed_histograms:
-        if process == "Data":
-            continue
+        aux_hist = processed_histograms[process][kin]
+        nominal_selector = {"variation": "nominal"}
+        if "category" in aux_hist.axes.name:
+            nominal_selector["category"] = category
+        nominal_hist = aux_hist[nominal_selector].project(aux_var)
+        nominal[process] = nominal_hist
+
         mcstat_err[process] = {}
         bin_error_up[process] = {}
         bin_error_down[process] = {}
-        nom = nominal[process].values()
-        mcstat_err2 = nominal[process].variances()
+        mcstat_err2 = nominal_hist.variances()
         mcstat_err[process] = np.sum(np.sqrt(mcstat_err2))
         err2_up = mcstat_err2
         err2_down = mcstat_err2
+
+        if process == "Data":
+            continue
+
         for variation in get_variations_keys(processed_histograms):
             if f"{variation}Up" not in aux_hist.axes["variation"]:
                 continue
-            var_up = aux_hist[{"variation": f"{variation}Up"}].project(aux_var).values()
-            var_down = (
-                aux_hist[{"variation": f"{variation}Down"}].project(aux_var).values()
-            )
+            selectorup = {"variation": f"{variation}Up"}
+            selectordown = {"variation": f"{variation}Down"}
+            if "category" in aux_hist.axes.name:
+                selectorup["category"] = category
+                selectordown["category"] = category
+            var_up = aux_hist[selectorup].project(aux_var).values()
+            var_down = aux_hist[selectordown].project(aux_var).values()
             # Compute the uncertainties corresponding to the up/down variations
-            err_up = var_up - nom
-            err_down = var_down - nom
+            err_up = var_up - nominal_hist.values()
+            err_down = var_down - nominal_hist.values()
             # Compute the flags to check which of the two variations (up and down) are pushing the nominal value up and down
             up_is_up = err_up > 0
             down_is_down = err_down < 0
