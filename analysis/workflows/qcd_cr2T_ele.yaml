@@ -65,7 +65,7 @@ event_selection:
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
     transverse_mass: np.sqrt(2.0 * ak.pad_none(objects['electrons'], target=2)[:, 0].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(ak.pad_none(objects['electrons'], target=2)[:, 0].delta_phi(objects['met'])))) > 60
-    electron_invariant_mass: ((ak.pad_none(objects['electrons'], target=2)[:, 0] + ak.pad_none(objects['electrons'], target=2)[:, 1]).mass < 60) & ((ak.pad_none(objects['electrons'], target=2)[:, 0] + ak.pad_none(objects['electrons'], target=2)[:, 1]).mass > 120)
+    electron_invariant_mass: ((ak.pad_none(objects['electrons'], target=2)[:, 0] + ak.pad_none(objects['electrons'], target=2)[:, 1]).mass < 60) | ((ak.pad_none(objects['electrons'], target=2)[:, 0] + ak.pad_none(objects['electrons'], target=2)[:, 1]).mass > 120)
   categories:
     central:
       - goodvertex
