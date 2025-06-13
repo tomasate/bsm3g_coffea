@@ -95,12 +95,12 @@ mc_samples = {
     "2b1e": dy_inclusive + singletop + tt + wjets_ht + diboson,
     "ztomumu": dy_inclusive + singletop + tt + wjets_ht + diboson,
     "ztoee": dy_inclusive + singletop + tt + wjets_ht + diboson,
-    "qcd_mu": dy_inclusive + singletop + tt + wjets_ht + diboson,
-    "qcd_ele": dy_inclusive + singletop + tt + wjets_ht + diboson,
-    "qcd_cr1T_mu": wjets_ht,
-    "qcd_cr2T_mu": wjets_ht,
-    "qcd_cr1T_ele": wjets_ht,
-    "qcd_cr2T_ele": wjets_ht,
+    "qcd_mu": dy_inclusive + singletop + tt + wjets_inclusive + wjets_ht + diboson,
+    "qcd_ele": dy_inclusive + singletop + tt + wjets_inclusive + wjets_ht + diboson,
+    "qcd_cr1T_mu": wjets_inclusive + wjets_ht,
+    "qcd_cr2T_mu": wjets_inclusive + wjets_ht,
+    "qcd_cr1T_ele": wjets_inclusive + wjets_ht,
+    "qcd_cr2T_ele": wjets_inclusive + wjets_ht,
 }
 
 

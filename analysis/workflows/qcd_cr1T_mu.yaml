@@ -60,6 +60,7 @@ event_selection:
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
+    w_stitching: get_stitching_mask(events, dataset, 'WJetsToLNu_inclusive', 100)
     exactly_two_loose_muons: ak.num(objects['muons']) == 2
     one_or_two_tight_muons: (ak.sum(objects['muons'].tightId, axis=1) == 1) | (ak.sum(objects['muons'].tightId, axis=1) == 2)
     electron_veto: ak.num(objects['electrons']) == 0
@@ -74,6 +75,7 @@ event_selection:
       - trigger_match
       - metfilters
       - hemcleaning
+      - w_stitching
       - exactly_two_loose_muons
       - one_or_two_tight_muons
       - electron_veto
@@ -150,16 +152,11 @@ histogram_config:
       stop: 15
       label: genPartFlav($\mu_1$)
       expression: ak.pad_none(objects['muons'], target=2)[:, 0].genPartFlav
-    leading_muon_passLoose:
-      type: Integer
-      start: 0
-      stop: 1
-      label: $\mu_1$ Pass Loose
-      expression: ak.pad_none(objects['muons'], target=2)[:, 0].looseId
     leading_muon_passTight:
-      type: Integer
+      type: Regular
+      bins: 2
       start: 0
-      stop: 1
+      stop: 2
       label: $\mu_1$ Pass Tight
       expression: ak.pad_none(objects['muons'], target=2)[:, 0].tightId
     subleading_muon_pt:
@@ -197,16 +194,11 @@ histogram_config:
       stop: 15
       label: genPartFlav($\mu_2$)
       expression: ak.pad_none(objects['muons'], target=2)[:, 1].genPartFlav
-    subleading_muon_passLoose:
-      type: Integer
-      start: 0
-      stop: 1
-      label: $\mu_2$ Pass Loose
-      expression: ak.pad_none(objects['muons'], target=2)[:, 1].looseId
     subleading_muon_passTight:
-      type: Integer
+      type: Regular
+      bins: 2
       start: 0
-      stop: 1
+      stop: 2
       label: $\mu_2$ Pass Tight
       expression: ak.pad_none(objects['muons'], target=2)[:, 1].tightId
     jet_multiplicity:

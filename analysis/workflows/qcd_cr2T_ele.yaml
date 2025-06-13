@@ -60,6 +60,7 @@ event_selection:
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
+    w_stitching: get_stitching_mask(events, dataset, 'WJetsToLNu_inclusive', 100)
     exactly_two_loose_electrons: ak.num(objects['electrons']) == 2
     exactly_two_tight_electrons: ak.sum(objects['electrons'].mvaFall17V2Iso_WP80, axis=1) == 2
     muon_veto: ak.num(objects['muons']) == 0
@@ -74,6 +75,7 @@ event_selection:
       - trigger_match
       - metfilters
       - hemcleaning
+      - w_stitching
       - exactly_two_loose_electrons
       - exactly_two_tight_electrons
       - muon_veto
@@ -150,18 +152,13 @@ histogram_config:
       stop: 15
       label: genPartFlav($e_1$)
       expression: ak.pad_none(objects['electrons'], target=2)[:, 0].genPartFlav
-    leading_electron_passLoose:
-      type: Integer
-      start: 0
-      stop: 1
-      label: $e_1$ Pass Loose
-      expression: ak.pad_none(objects['electrons'], target=2)[:, 0].looseId
     leading_electron_passTight:
-      type: Integer
+      type: Regular
+      bins: 2
       start: 0
-      stop: 1
+      stop: 2
       label: $e_1$ Pass Tight
-      expression: ak.pad_none(objects['electrons'], target=2)[:, 0].tightId
+      expression: ak.pad_none(objects['electrons'], target=2)[:, 0].mvaFall17V2Iso_WP80
     subleading_electron_pt:
       type: Variable
       edges:
@@ -197,18 +194,13 @@ histogram_config:
       stop: 15
       label: genPartFlav($e_2$)
       expression: ak.pad_none(objects['electrons'], target=2)[:, 1].genPartFlav
-    subleading_electron_passLoose:
-      type: Integer
-      start: 0
-      stop: 1
-      label: $e_2$ Pass Loose
-      expression: ak.pad_none(objects['electrons'], target=2)[:, 1].looseId
     subleading_electron_passTight:
-      type: Integer
+      type: Regular
+      bins: 2
       start: 0
-      stop: 1
+      stop: 2
       label: $e_2$ Pass Tight
-      expression: ak.pad_none(objects['electrons'], target=2)[:, 1].tightId
+      expression: ak.pad_none(objects['electrons'], target=2)[:, 1].mvaFall17V2Iso_WP80
     jet_multiplicity:
       type: Integer
       start: 0
