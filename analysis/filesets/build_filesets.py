@@ -10,6 +10,7 @@ if __name__ == "__main__":
     years = ["2016preVFP", "2016postVFP", "2017", "2018"]
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-y",
         "--year",
         dest="year",
         type=str,
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         # the dataset definition is passed to a DataDiscoveryCLI
         ddc = DataDiscoveryCLI()
         # set the allow sites to look for replicas
-        sites_file = filesets_dir / "sites.yaml"
+        sites_file = filesets_dir / f"{args.year}_sites.yaml"
         with open(sites_file, "r") as f:
             sites = yaml.safe_load(f)["white"]
         ddc.do_allowlist_sites(sites)

@@ -180,10 +180,10 @@ def update_input_filesets(
         datasets_with_missing_jobs (list): Datasets to update.
     """
     for site in xroot_to_site.values():
-        modify_site_list(site, "white")
+        modify_site_list(year, site, "white")
 
     for site in site_errs:
-        modify_site_list(site, "black")
+        modify_site_list(year, site, "black")
 
     subprocess.run(["python3", "fetch.py", "--year", year])
 

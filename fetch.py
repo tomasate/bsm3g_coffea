@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     sites_file = Path.cwd() / "analysis" / "filesets" / "sites.yaml"
     if not sites_file.exists():
-        cmd = "python3 analysis/filesets/build_sites.py"
+        cmd = f"python3 analysis/filesets/build_sites.py --year {args.year}"
         subprocess.run(cmd, shell=True)
 
     cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/build_filesets.py --year {args.year}"
