@@ -157,26 +157,29 @@ if __name__ == "__main__":
         cmd = f"python3 fetch.py --year {args.year}"
         subprocess.run(cmd, shell=True)
 
-    # submit (or prepare) a job for each dataset using the given arguments
-    to_run = mc_samples[args.workflow]
-    if data_samples[args.workflow]:
-        to_run += data_samples[args.workflow][args.year]
-    cmd = ["python3", "submit_condor.py"]
-    for dataset in to_run:
-        cmd_args = [
-            "--workflow",
-            args.workflow,
-            "--year",
-            args.year,
-            "--dataset",
-            dataset,
-            "--nfiles",
-            str(args.nfiles),
-            "--output_format",
-            args.output_format,
-        ]
-        if args.submit:
-            cmd_args.append("--submit")
-        if args.eos:
-            cmd_args.append("--eos")
-        subprocess.run(cmd + cmd_args)
+    if fileset_file.exists():
+        # submit (or prepare) a job for each dataset using the given arguments
+        to_run = mc_samples[args.workflow]
+        if data_samples[args.workflow]:
+            to_run += data_samples[args.workflow][args.year]
+        cmd = ["python3", "submit_condor.py"]
+        for dataset in to_run:
+            cmd_args = [
+                "--workflow",
+                args.workflow,
+                "--year",
+                args.year,
+                "--dataset",
+                dataset,
+                "--nfiles",
+                str(args.nfiles),
+                "--output_format",
+                args.output_format,
+            ]
+            if args.submit:
+                cmd_args.append("--submit")
+            if args.eos:
+                cmd_args.append("--eos")
+            subprocess.run(cmd + cmd_args)
+    else:
+        print("Input dataset could not be found!")
