@@ -95,7 +95,7 @@ corrections:
     - muons
     - taus
     - met
-  apply_obj_syst: false
+  apply_obj_syst: true
   event_weights:
     genWeight: true
     pileupWeight: true
@@ -227,14 +227,14 @@ histogram_config:
         - 200
         - 300
         - 500
-      label: $p_T^{miss}$ [GeV]
+      label: $p_T^{\text{miss}}$ [GeV]
       expression: objects['met'].pt
     met_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(p_T^{miss})$ [GeV]
+      label: $\phi(p_T^{\text{miss}})$ [GeV]
       expression: objects['met'].phi
     electron_met_mass:
       type: Variable
@@ -249,7 +249,7 @@ histogram_config:
         - 300
         - 500
         - 800
-      label: $m_T(e, p_T^{miss})$ [GeV]
+      label: $m_T(e, p_T^{\text{miss}})$ [GeV]
       expression: np.sqrt(2.0 * objects['electrons'].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['electrons'].delta_phi(objects['met']))))
     electron_bjet_mass:
       type: Variable
@@ -278,7 +278,7 @@ histogram_config:
         - 300
         - 500
         - 800
-      label: $m_T^{tot}(e, p_T^{miss}, \text{Leading b-jet})$ [GeV]
+      label: $m_T^{tot}(e, p_T^{\text{miss}}, \text{Leading b-jet})$ [GeV]
       expression: np.sqrt((objects['electrons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + objects['met'].pt) ** 2 - (objects['electrons'] + ak.pad_none(objects['bjets'], target=2)[:, 0] + objects['met']).pt ** 2)
     npvs:
       type: Integer
@@ -291,7 +291,7 @@ histogram_config:
       bins: 50
       start: 20
       stop: 1000
-      label: $S_T(e, p_T^{miss}, b)$ [GeV]
+      label: $S_T(e, p_T^{\text{miss}}, b)$ [GeV]
       expression: objects['met'].pt + objects['electrons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + ak.pad_none(objects['bjets'], target=2)[:, 1].pt
     lightjets_multiplicity:
       type: Integer
@@ -299,12 +299,20 @@ histogram_config:
       stop: 14
       label: Light Jet multiplicity
       expression: ak.num(objects['lightjets'])
+    electron_met_dphi:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 10
+      label: $|\Delta \phi(e, p_T^{\text{miss}})|$
+      expression: np.abs(objects['electrons'].phi - objects['met'].phi)
   layout:
     st:
       - st
       - lightjets_multiplicity
     jet_multiplicity:
       - jet_multiplicity
+      - electron_met_dphi
     mass:
       - electron_met_bjet_mass
       - electron_bjet_mass

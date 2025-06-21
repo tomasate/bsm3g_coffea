@@ -95,7 +95,7 @@ corrections:
     - muons
     - taus
     - met
-  apply_obj_syst: false
+  apply_obj_syst: true
   event_weights:
     genWeight: true
     pileupWeight: true
@@ -260,14 +260,14 @@ histogram_config:
         - 200
         - 300
         - 500
-      label: $p_T^{miss}$ [GeV]
+      label: $p_T^{\text{miss}}$ [GeV]
       expression: objects['met'].pt
     met_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(p_T^{miss})$ [GeV]
+      label: $\phi(p_T^{\text{miss}})$ [GeV]
       expression: objects['met'].phi
     electron_met_mass:
       type: Variable
@@ -282,7 +282,7 @@ histogram_config:
         - 300
         - 500
         - 800
-      label: $m_T(e, p_T^{miss})$ [GeV]
+      label: $m_T(e, p_T^{\text{miss}})$ [GeV]
       expression: np.sqrt(2.0 * objects['electrons'].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['electrons'].delta_phi(objects['met']))))
     muon_met_mass:
       type: Variable
@@ -297,7 +297,7 @@ histogram_config:
         - 300
         - 500
         - 800
-      label: $m_T(\mu, p_T^{miss})$ [GeV]
+      label: $m_T(\mu, p_T^{\text{miss}})$ [GeV]
       expression: np.sqrt(2.0 * objects['muons'].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['muons'].delta_phi(objects['met']))))
     npvs:
       type: Integer
@@ -310,7 +310,7 @@ histogram_config:
       bins: 50
       start: 20
       stop: 1000
-      label: $S_T(e, \mu, p_T^{miss}, b)$ [GeV]
+      label: $S_T(e, \mu, p_T^{\text{miss}}, b)$ [GeV]
       expression: objects['met'].pt + ak.firsts(objects['electrons'].pt) + ak.firsts(objects['bjets'].pt) + ak.firsts(objects['muons'].pt)
     lightjets_multiplicity:
       type: Integer
@@ -318,12 +318,20 @@ histogram_config:
       stop: 14
       label: Light Jet multiplicity
       expression: ak.num(objects['lightjets'])
+    electron_met_dphi:
+      type: Regular
+      bins: 50
+      start: 0
+      stop: 10
+      label: $|\Delta \phi(e, p_T^{\text{miss}})|$
+      expression: np.abs(objects['electrons'].phi - objects['met'].phi)
   layout:
     st:
       - st
       - lightjets_multiplicity
     jet_multiplicity:
       - jet_multiplicity
+      - electron_met_dphi
     mass:
       - electron_met_mass
       - muon_met_mass
