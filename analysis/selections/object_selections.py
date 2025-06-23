@@ -1,3 +1,4 @@
+import vector
 import numpy as np
 import awkward as ak
 from analysis.working_points import working_points
@@ -9,6 +10,9 @@ class ObjectSelector:
     def __init__(self, object_selection_config, year):
         self.object_selection_config = object_selection_config
         self.year = year
+        self.run_key = (
+            "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
+        )
 
     def select_objects(self, events):
         self.objects = {}
@@ -47,15 +51,70 @@ class ObjectSelector:
             mask = eval(str_mask)
             selection_mask = np.logical_and(selection_mask, mask)
         return selection_mask
-    
-    
+
+    # --------------------------------------------------------------------------------
+    # GENERAL
+    # --------------------------------------------------------------------------------
     def select_dimuons(self, obj_name):
         if "muons" not in self.objects:
             raise ValueError(f"'muons' object has not been defined!")
         self.objects[obj_name] = select_dileptons(self.objects, "muons")
 
-        
     def select_dielectrons(self, obj_name):
         if "electrons" not in self.objects:
             raise ValueError(f"'electrons' object has not been defined!")
         self.objects[obj_name] = select_dileptons(self.objects, "electrons")
+
+    def select_met(self, obj_name):
+        if self.run_key == "Run2":
+            met = self.events.MET
+        else:
+            met = self.events.PuppiMET
+        self.objects[obj_name] = met
+
+    # --------------------------------------------------------------------------------
+    # SUSY VBF
+    # --------------------------------------------------------------------------------
+    def select_dijets(self, obj_name):
+        # create pair combinations with all jets (VBF selection)
+        dijets = ak.combinations(self.objects["jets"], 2, fields=["j1", "j2"])
+        # add dijet 4-momentum field
+        dijets["p4"] = dijets.j1 + dijets.j2
+        dijets["pt"] = dijets.p4.pt
+        self.objects[obj_name] = dijets
+
+    def select_max_mass_dijet(self, obj_name):
+        self.objects[obj_name] = ak.max(self.objects["dijets"].p4.mass, axis=1)
+
+    def select_max_mass_dijet_eta(self, obj_name):
+        dijets_idx = ak.local_index(self.objects["dijets"], axis=1)
+        max_mass_idx = ak.argmax(self.objects["dijets"].p4.mass, axis=1)
+        max_mass_dijet = self.objects["dijets"][max_mass_idx == dijets_idx]
+        self.objects[obj_name] = ak.firsts(
+            np.abs(max_mass_dijet.j1.eta - max_mass_dijet.j2.eta)
+        )
+
+    def select_ztojets_met(self, obj_name):
+        # add muons pT to MET to simulate a 0-lepton final state
+        all_muons = ak.sum(self.objects["muons"], axis=1)
+        muons2D = ak.zip(
+            {
+                "pt": all_muons.pt,
+                "phi": all_muons.phi,
+            },
+            with_name="Momentum2D",
+            behavior=vector.backends.awkward.behavior,
+        )
+        if self.run_key == "Run2":
+            met = self.events.MET
+        else:
+            met = self.events.PuppiMET
+        met2D = ak.zip(
+            {
+                "pt": met.pt,
+                "phi": met.phi,
+            },
+            with_name="Momentum2D",
+            behavior=vector.backends.awkward.behavior,
+        )
+        self.objects[obj_name] = met2D + muons2D

@@ -20,18 +20,20 @@ def get_metfilters_mask(events, year):
 
 
 def get_lumi_mask(events, year):
-    if year.startswith("2017"):
-        goldenjson = (
-            "analysis/data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
-        )
-    elif year.startswith("2018"):
-        goldenjson = (
-            "analysis/data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
-        )
-    elif year.startswith("2016"):
-        goldenjson = (
-            "analysis/data/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
-        )
+    year_map = {
+        "2016": "analysis/data/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
+        "2017": "analysis/data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
+        "2018": "analysis/data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
+        "2022": "analysis/data/Cert_Collisions2022_355100_362760_Golden.txt",
+        "2023": "analysis/data/Cert_Collisions2023_366442_370790_Golden.txt",
+    }
+    for key in year_map:
+        if year.startswith(key):
+            goldenjson = year_map[key]
+            break
+    else:
+        raise ValueError(f"Unrecognized year format: '{year}'")
+
     if hasattr(events, "genWeight"):
         lumi_mask = np.ones(len(events), dtype="bool")
     else:
