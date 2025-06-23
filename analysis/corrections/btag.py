@@ -139,7 +139,7 @@ class BTagCorrector:
                 "loose": 0.049,
                 "medium": 0.2783,
                 "tight": 0.71,
-            }
+            },
         }
         self._jet_pass_btag = {
             "bc": self._jet_map["bc"]["btagDeepFlavB"] > btag_wps[year][self._wp],

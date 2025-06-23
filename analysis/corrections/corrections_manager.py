@@ -11,29 +11,59 @@ from analysis.corrections import (
     add_pujetid_weight,
     add_scalevar_weight,
     apply_jet_corrections,
+    apply_jerc_corrections,
     add_l1prefiring_weight,
     add_partonshower_weight,
     add_muon_boost_weight,
     add_electron_boost_weight,
     apply_met_phi_corrections,
-    apply_rochester_corrections,
+    apply_electron_ss_corrections,
+    apply_rochester_corrections_run2,
+    apply_rochester_corrections_run3,
     apply_tau_energy_scale_corrections,
 )
 
 
-def object_corrector_manager(events, year, workflow_config, variation):
+def object_corrector_manager(events, year, dataset, workflow_config):
     """apply object level corrections"""
+
     objcorr_config = workflow_config.corrections_config["objects"]
+    run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
+
     if "jets" in objcorr_config:
-        # apply JEC/JER corrections to jets (in data, the corrections are already applied)
-        apply_jet_corrections(events, year)
+        if run_key == "Run2":
+            apply_jet_corrections(events, year)
+        elif run_key == "Run3":
+            apply_jec = True
+            apply_jer = False
+            apply_junc = False
+            if hasattr(events, "genWeight"):
+                apply_jer = True
+            apply_jerc_corrections(
+                events,
+                year=year,
+                dataset=dataset,
+                apply_jec=apply_jec,
+                apply_jer=apply_jer,
+                apply_junc=apply_junc,
+            )
     if "muons" in objcorr_config:
         # apply rochester corretions to muons
-        apply_rochester_corrections(events, year)
+        if run_key == "Run2":
+            apply_rochester_corrections_run2(events, year)
+        elif run_key == "Run3":
+            apply_rochester_corrections_run3(events, year)
+    if "electrons" in objcorr_config:
+        if run_key == "Run3":
+            apply_electron_ss_corrections(
+                events=events,
+                year=year,
+            )
     if "taus" in objcorr_config:
         if hasattr(events, "genWeight"):
-            # apply energy corrections to taus (only to MC)
-            apply_tau_energy_scale_corrections(events, year)
+            if run_key == "Run2":
+                # apply energy corrections to taus (only to MC)
+                apply_tau_energy_scale_corrections(events, year)
     if "met" in objcorr_config:
         # apply MET phi modulation corrections
         apply_met_phi_corrections(events, year)
@@ -45,6 +75,8 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
     year_key = year
     if year.startswith("2016"):
         year_key = "2016"
+
+    run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
 
     # get weights config info
     weights_config = workflow_config.corrections_config["event_weights"]
@@ -92,13 +124,14 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
 
         if "pujetid" in weights_config:
             if weights_config["pujetid"]:
-                add_pujetid_weight(
-                    events=pruned_ev,
-                    weights=weights_container,
-                    year=year,
-                    working_point=weights_config["pujetid"]["id"],
-                    variation=variation,
-                )
+                if run_key == "Run2":
+                    add_pujetid_weight(
+                        events=pruned_ev,
+                        weights=weights_container,
+                        year=year,
+                        working_point=weights_config["pujetid"]["id"],
+                        variation=variation,
+                    )
         if "btagging" in weights_config:
             if weights_config["btagging"]:
                 btag_corrector = BTagCorrector(
@@ -151,8 +184,13 @@ def weight_manager(pruned_ev, year, workflow_config, variation, dataset):
                             )
                     if "reco" in weights_config["electron"]:
                         if weights_config["electron"]["reco"]:
-                            electron_corrector.add_reco_weight("RecoAbove20")
-                            electron_corrector.add_reco_weight("RecoBelow20")
+                            if run_key == "Run2":
+                                electron_corrector.add_reco_weight("RecoAbove20")
+                                electron_corrector.add_reco_weight("RecoBelow20")
+                            elif run_key == "Run3":
+                                electron_corrector.add_reco_weight("RecoBelow20")
+                                electron_corrector.add_reco_weight("Reco20to75")
+                                electron_corrector.add_reco_weight("RecoAbove75")
                     if "trigger" in weights_config["electron"]:
                         if weights_config["electron"]["trigger"]:
                             electron_corrector.add_hlt_weights(

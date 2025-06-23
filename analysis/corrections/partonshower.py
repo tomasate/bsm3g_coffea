@@ -15,7 +15,6 @@ def add_partonshower_weight(events, weights_container, variation):
                 weightUp=events.PSWeight[:, 0],
                 weightDown=events.PSWeight[:, 2],
             )
-
             weights_container.add(
                 name="ps_fsr",
                 weight=np.ones(len(events)),
