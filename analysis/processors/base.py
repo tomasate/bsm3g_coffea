@@ -35,7 +35,17 @@ class BaseProcessor(processor.ProcessorABC):
         workflow: str,
         year: str = "2017",
     ):
+        year_key_map = {
+            "2016preVFP": "2016",
+            "2016postVFP": "2016",
+            "2022preEE": "2022",
+            "2022postEE": "2022",
+            "2023preBPix": "2023",
+            "2023postBPix": "2023",
+        }
         self.year = year
+        self.year_key = year_key_map.get(year, year)
+        self.run_key = "Run3" if self.year_key in ["2022", "2023"] else "Run2"
 
         config_builder = WorkflowConfigBuilder(workflow=workflow)
         self.workflow_config = config_builder.build_workflow_config()
@@ -47,8 +57,12 @@ class BaseProcessor(processor.ProcessorABC):
 
     def process(self, events):
         # correct objects
-        object_corrector_manager(events, self.year, self.workflow_config, "nominal")
-
+        object_corrector_manager(
+            events=events,
+            year=self.year,
+            workflow_config=self.workflow_config,
+            dataset=events.metadata["dataset"],
+        )
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
@@ -57,23 +71,21 @@ class BaseProcessor(processor.ProcessorABC):
         # define object-level shifts
         shifts = [({"Jet": events.Jet, "MET": events.MET, "Muon": events.Muon, "Tau": events.Tau}, "nominal")]
         if self.apply_obj_syst:
-            year_key = self.year
-            if self.year.startswith("2016"):
-                year_key = "2016"
-            shifts.extend(
-                [
-                    ({"Jet": events.Jet, "MET": events.MET.rochester.up, "Muon": events.Muon.rochester.up, "Tau": events.Tau}, f"CMS_rochester_{year_key}Up"),
-                    ({"Jet": events.Jet, "MET": events.MET.rochester.down, "Muon": events.Muon.rochester.down, "Tau": events.Tau}, f"CMS_rochester_{year_key}Down"),
-                    ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{year_key}Up"),
-                    ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{year_key}Down"),
-                    ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{year_key}Up"),
-                    ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{year_key}Down"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{year_key}Up"),
-                    ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{year_key}Down"),
-                    ({"Jet": events.Jet, "MET": events.MET.tau_energy.up, "Muon": events.Muon, "Tau": events.Tau.tau_energy.up}, f"CMS_t_energy_{year_key}Up"),
-                    ({"Jet": events.Jet, "MET": events.MET.tau_energy.down, "Muon": events.Muon, "Tau": events.Tau.tau_energy.down}, f"CMS_t_energy_{year_key}Down"),
-                ]
-            )
+            if self.run_key == "Run2":
+                shifts.extend(
+                    [
+                        ({"Jet": events.Jet, "MET": events.MET.rochester.up, "Muon": events.Muon.rochester.up, "Tau": events.Tau}, f"CMS_rochester_{self.year_key}Up"),
+                        ({"Jet": events.Jet, "MET": events.MET.rochester.down, "Muon": events.Muon.rochester.down, "Tau": events.Tau}, f"CMS_rochester_{self.year_key}Down"),
+                        ({"Jet": events.Jet.JES_jes.up, "MET": events.MET.JES_jes.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{self.year_key}Up"),
+                        ({"Jet": events.Jet.JES_jes.down, "MET": events.MET.JES_jes.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_scale_j_{self.year_key}Down"),
+                        ({"Jet": events.Jet.JER.up, "MET": events.MET.JER.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{self.year_key}Up"),
+                        ({"Jet": events.Jet.JER.down, "MET": events.MET.JER.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_res_j_{self.year_key}Down"),
+                        ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.up, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{self.year_key}Up"),
+                        ({"Jet": events.Jet, "MET": events.MET.MET_UnclusteredEnergy.down, "Muon": events.Muon, "Tau": events.Tau}, f"CMS_met_unclustered_{self.year_key}Down"),
+                        ({"Jet": events.Jet, "MET": events.MET.tau_energy.up, "Muon": events.Muon, "Tau": events.Tau.tau_energy.up}, f"CMS_t_energy_{self.year_key}Up"),
+                        ({"Jet": events.Jet, "MET": events.MET.tau_energy.down, "Muon": events.Muon, "Tau": events.Tau.tau_energy.down}, f"CMS_t_energy_{self.year_key}Down"),
+                    ]
+                )
         return processor.accumulate(
             self.process_shift(update(events, collections), name)
             for collections, name in shifts
@@ -104,7 +116,7 @@ class BaseProcessor(processor.ProcessorABC):
         # object selection
         # -------------------------------------------------------------
         if "jets_veto" in self.workflow_config.corrections_config["objects"]:
-            # apply jet veto maps and update MET field
+            # apply jet veto maps and update missing energy
             apply_jetvetomaps(events, year)
 
         object_selector = ObjectSelector(object_selection, year)
