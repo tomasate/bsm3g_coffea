@@ -53,7 +53,16 @@ def parse_arguments():
         "-y",
         "--year",
         required=True,
-        choices=["2016", "2016preVFP", "2016postVFP", "2017", "2018"],
+        choices=[
+            "2016preVFP",
+            "2016postVFP",
+            "2017",
+            "2018",
+            "2022preEE",
+            "2022postEE",
+            "2023preBPix",
+            "2023postBPix",
+        ],
         help="Dataset year",
     )
     parser.add_argument(
@@ -88,16 +97,20 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def load_2016_histograms(workflow):
+def load_year_histograms(workflow: str, year: str):
+    """load and merge histograms from pre/post campaigns"""
     aux_map = {
         "2016": ["2016preVFP", "2016postVFP"],
+        "2022": ["2022preEE", "2022postEE"],
+        "2023": ["2023preBPix", "2023postBPix"],
     }
-    pre_year, post_year = aux_map["2016"]
+    pre_year, post_year = aux_map[year]
     base_path = OUTPUT_DIR / workflow
-
-    pre_file = base_path / pre_year / f"{pre_year}_processed_histograms{FILE_EXTENSION}"
+    pre_file = (
+        base_path / pre_year / f"{pre_year}_processed_histograms.{FILE_EXTENSION}"
+    )
     post_file = (
-        base_path / post_year / f"{post_year}_processed_histograms{FILE_EXTENSION}"
+        base_path / post_year / f"{post_year}_processed_histograms.{FILE_EXTENSION}"
     )
     return accumulate([load(pre_file), load(post_file)])
 
@@ -124,10 +137,11 @@ if __name__ == "__main__":
     categories = workflow_config.event_selection["categories"]
     processed_histograms = None
 
-    if args.year == "2016":
+    if args.year in ["2016", "2022", "2023"]:
         # load and accumulate processed 2016preVFP and 2016postVFP histograms
-        processed_histograms = load_2016_histograms(args.workflow)
-        identifier = "VFP"
+        processed_histograms = load_year_histograms(args.workflow, args.year)
+        identifier_map = {"2016": "VFP", "2022": "EE", "2023": "BPix"}
+        identifier = identifier_map[args.year]
 
         if args.workflow in ["2b1e", "2b1mu"]:
             print_header(f"Systematic uncertainty impact")

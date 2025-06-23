@@ -39,11 +39,6 @@ class CoffeaPlotter:
         workflow_config = config_builder.build_workflow_config()
         self.histogram_config = workflow_config.histogram_config
 
-        if year.startswith("2016") and year not in ["2016preVFP", "2016ostVFP"]:
-            aux_year = "2016preVFP"
-        else:
-            aux_year = year
-
         # load luminosities and style
         postprocess_dir = Path.cwd() / "analysis" / "postprocess"
         style_file = postprocess_dir / "style.yaml"
@@ -55,6 +50,12 @@ class CoffeaPlotter:
             self.luminosities = yaml.safe_load(f)
 
         # set processes color map
+        aux_year_map = {
+            "2016": "2016preVFP",
+            "2022": "2022preEE",
+            "2023": "2023preBPix",
+        }
+        aux_year = aux_year_map.get(year, year)
         with open(f"{Path.cwd()}/analysis/filesets/{aux_year}_nanov9.yaml", "r") as f:
             dataset_configs = yaml.safe_load(f)
         processes = sorted(
@@ -374,8 +375,14 @@ class CoffeaPlotter:
                     if i % 5 != 0:  # Show only every 5th tick
                         label.set_visible(False)
         # add CMS info
+        energy = {"run2": "13 TeV", "run3": "13.6 TeV"}
+        run_key = (
+            "run3"
+            if (self.year.startswith("2022") or self.year.startswith("2023"))
+            else "run2"
+        )
         hep.cms.lumitext(
-            f"{self.luminosities[self.year] * 1e-3:.1f} fb$^{{-1}}$ ({self.year}, 13 TeV)",
+            f"{self.luminosities[self.year] * 1e-3:.1f} fb$^{{-1}}$ ({self.year}, {energy[run_key]})",
             ax=ax,
         )
         hep.cms.text("Preliminary", ax=ax)
