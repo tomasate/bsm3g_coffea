@@ -4,14 +4,22 @@ from pathlib import Path
 
 
 if __name__ == "__main__":
-    years = ["2016preVFP", "2016postVFP", "2017", "2018"]
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-y",
         "--year",
         dest="year",
         type=str,
-        choices=["all"] + years,
+        choices=[
+            "2016preVFP",
+            "2016postVFP",
+            "2017",
+            "2018",
+            "2022preEE",
+            "2022postEE",
+            "2023preBPix",
+            "2023postBPix",
+        ],
     )
     parser.add_argument(
         "--image",
