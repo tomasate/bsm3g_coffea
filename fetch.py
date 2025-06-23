@@ -28,7 +28,7 @@ if __name__ == "__main__":
             "VOMS proxy expired or non-existing: please run 'voms-proxy-init --voms cms'"
         )
 
-    sites_file = Path.cwd() / "analysis" / "filesets" / "sites.yaml"
+    sites_file = Path.cwd() / "analysis" / "filesets" / f"{args.year}_sites.yaml"
     if not sites_file.exists():
         cmd = f"python3 analysis/filesets/build_sites.py --year {args.year}"
         subprocess.run(cmd, shell=True)
