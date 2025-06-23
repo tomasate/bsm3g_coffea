@@ -13,20 +13,45 @@ if __name__ == "__main__":
         "--year",
         dest="year",
         type=str,
-        choices=["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+        choices=[
+            "2016preVFP",
+            "2016postVFP",
+            "2017",
+            "2018",
+            "2022preEE",
+            "2022postEE",
+            "2023preBPix",
+            "2023postBPix",
+        ],
+    )
+    parser.add_argument(
+        "--samples",
+        nargs="*",
+        type=str,
+        help="(Optional) List of samples to use. If omitted, all available samples will be used",
     )
     args = parser.parse_args()
 
     # open dataset configs
     filesets_dir = Path.cwd() / "analysis" / "filesets"
-    run_key = "Run3" if args.year.startswith("2022") or args.year.startswith("2023") else "Run2"
-    nano_version = 'nanov9' if run_key == "Run2" else 'nanov12'
+    run_key = (
+        "Run3"
+        if args.year.startswith("2022") or args.year.startswith("2023")
+        else "Run2"
+    )
+    nano_version = "nanov9" if run_key == "Run2" else "nanov12"
     datasets_dir = filesets_dir / f"{args.year}_{nano_version}.yaml"
     with open(datasets_dir, "r") as f:
         dataset_configs = yaml.safe_load(f)
+
+    if args.samples:
+        samples_to_use = args.samples
+    else:
+        samples_to_use = list(dataset_configs.keys())
+
     # read dataset queries
     das_queries = {}
-    for sample in dataset_configs:
+    for sample in samples_to_use:
         das_queries[sample] = dataset_configs[sample]["query"]
 
     # create a dataset_definition dict for each yeare

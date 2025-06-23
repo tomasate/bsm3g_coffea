@@ -22,6 +22,12 @@ if __name__ == "__main__":
         ],
     )
     parser.add_argument(
+        "--samples",
+        nargs="*",
+        type=str,
+        help="(Optional) List of samples to use. If omitted, all available samples will be used",
+    )
+    parser.add_argument(
         "--image",
         dest="image",
         type=str,
@@ -41,5 +47,6 @@ if __name__ == "__main__":
         cmd = f"python3 analysis/filesets/build_sites.py --year {args.year}"
         subprocess.run(cmd, shell=True)
 
-    cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/build_filesets.py --year {args.year}"
+    samples_str = " ".join(args.samples) if args.samples else ""
+    cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/build_filesets.py --year {args.year} --samples {samples_str}"
     subprocess.run(cmd, shell=True)
