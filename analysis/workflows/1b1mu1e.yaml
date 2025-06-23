@@ -58,7 +58,7 @@ object_selection:
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
   met:
-    field: events.MET
+    field: select_met
 event_selection:
   hlt_paths:
     SingleMuon:
@@ -126,6 +126,12 @@ histogram_config:
   add_weight: true
   add_syst_axis: true
   axes:
+    vertex_multiplicity:
+      type: Integer
+      start: 0
+      stop: 100
+      label: vertex multiplicity
+      expression: events.PV.npvsGood
     muon_pt:
       type: Variable
       edges:
@@ -341,6 +347,8 @@ histogram_config:
       label: $|\Delta \phi(\mu, p_T^{\text{miss}})|$
       expression: np.abs(objects['muons'].phi - objects['met'].phi)
   layout:
+    vertex_multiplicity:
+      - vertex_multiplicity
     st:
       - st
       - lightjets_multiplicity
@@ -367,5 +375,3 @@ histogram_config:
       - bjet_pt
       - bjet_eta
       - bjet_phi
-    vertex:
-      - npvs

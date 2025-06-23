@@ -58,7 +58,7 @@ object_selection:
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
   met:
-    field: events.MET
+    field: select_met
 event_selection:
   hlt_paths:
     SingleElectron:
@@ -122,6 +122,12 @@ histogram_config:
   add_weight: true
   add_syst_axis: true
   axes:
+    vertex_multiplicity:
+      type: Integer
+      start: 0
+      stop: 100
+      label: vertex multiplicity
+      expression: events.PV.npvsGood
     electron_pt:
       type: Variable
       edges:
@@ -280,12 +286,6 @@ histogram_config:
         - 800
       label: $m_T^{tot}(e, p_T^{\text{miss}}, \text{Leading b-jet})$ [GeV]
       expression: np.sqrt((objects['electrons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + objects['met'].pt) ** 2 - (objects['electrons'] + ak.pad_none(objects['bjets'], target=2)[:, 0] + objects['met']).pt ** 2)
-    npvs:
-      type: Integer
-      start: 0
-      stop: 100
-      label: NPVS
-      expression: events.PV.npvsGood
     st:
       type: Regular
       bins: 50
@@ -307,6 +307,8 @@ histogram_config:
       label: $|\Delta \phi(e, p_T^{\text{miss}})|$
       expression: np.abs(objects['electrons'].phi - objects['met'].phi)
   layout:
+    vertex_multiplicity:
+      - vertex_multiplicity
     st:
       - st
       - lightjets_multiplicity
@@ -330,5 +332,3 @@ histogram_config:
       - bjet_pt
       - bjet_eta
       - bjet_phi
-    vertex:
-      - npvs

@@ -40,7 +40,7 @@ object_selection:
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
   met:
-    field: events.MET
+    field: select_met
 event_selection:
   hlt_paths:
     SingleMuon:
@@ -73,6 +73,7 @@ corrections:
     - jets
     - jets_veto
     - muons
+    - electrons
     - taus
     - met
   apply_obj_syst: false
@@ -93,7 +94,7 @@ histogram_config:
   add_weight: true
   add_syst_axis: true
   axes:
-    npvs:
+    vertex_multiplicity:
       type: Integer
       start: 0
       stop: 60
@@ -109,6 +110,7 @@ histogram_config:
     dimuon_pt:
       type: Variable
       edges:
+        - 0
         - 20
         - 40
         - 60
@@ -314,8 +316,8 @@ histogram_config:
       label: $\phi(p_T^{miss})$
       expression: objects['met'].phi
   layout:
-    vertex:
-      - npvs
+    vertex_multiplicity:
+      - vertex_multiplicity
     isr:
       - dimuon_pt
       - jet_multiplicity
