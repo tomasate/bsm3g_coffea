@@ -58,17 +58,19 @@ def get_dataset_key(dataset):
 
 def get_dataset_era(dataset, year):
     fileset_path = Path(f"{Path.cwd()}/analysis/filesets")
-    with open(f"{fileset_path}/{year}_nanov9.yaml", "r") as f:
+    run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
+    nano_version = "nanov9" if run_key == "Run2" else "nanov12"
+    with open(f"{fileset_path}/{year}_{nano_version}.yaml", "r") as f:
         dataset_config = yaml.safe_load(f)
     for dataset_key in dataset_config:
         if dataset.startswith(dataset_key):
             return dataset_config[dataset_key]["era"]
-        
-        
+
+
 def modify_site_list(year: str, site: str, status: str) -> None:
     """
-    Move a given site to the specified status list ("white" or "black") 
-    
+    Move a given site to the specified status list ("white" or "black")
+
     Parameters:
     -----------
         site: The site identifier to modify.
@@ -91,8 +93,8 @@ def modify_site_list(year: str, site: str, status: str) -> None:
 
     with open(yaml_file, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
-    
-    
+
+
 def extract_xrootd_errors(error_files: list) -> set:
     """
     Extract xrootd URLs from a list of Condor error log files.
