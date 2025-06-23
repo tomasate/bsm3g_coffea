@@ -10,31 +10,19 @@ def apply_met_phi_corrections(
     year: str,
 ) -> Tuple[ak.Array, ak.Array]:
     """
-    Apply MET phi modulation corrections
+    Apply MET phi modulation corrections (only for Run2)
 
     Parameters:
     -----------
         events:
             Events array
         year:
-            Year of the dataset  {'2016preVFP', '2016postVFP', '2017', '2018'}
+            Year of the dataset  {2016preVFP, 2016postVFP, 2017, 2018, 2022preEE, 2022postEE, 2023preBPix, 2023postBPix}
 
     Returns:
     --------
         corrected MET pt and phi
     """
-    cset = correctionlib.CorrectionSet.from_file(
-        get_pog_json(json_name="met", year=year)
-    )
-    events["MET", "pt_raw"] = ak.ones_like(events.MET.pt) * events.MET.pt
-    events["MET", "phi_raw"] = ak.ones_like(events.MET.phi) * events.MET.phi
-
-    # make sure to not cross the maximum allowed value for uncorrected met
-    met_pt = events.MET.pt_raw
-    met_pt = np.clip(met_pt, 0.0, 6499.0)
-    met_phi = events.MET.phi_raw
-    met_phi = np.clip(met_phi, -3.5, 3.5)
-
     # use correct run ranges when working with data, otherwise use uniform run numbers in an arbitrary large window
     run_ranges = {
         "2016preVFP": [272007, 278771],
@@ -42,22 +30,41 @@ def apply_met_phi_corrections(
         "2017": [297020, 306463],
         "2018": [315252, 325274],
     }
-    data_kind = "mc" if hasattr(events, "genWeight") else "data"
-    if data_kind == "mc":
-        run = np.random.randint(
-            run_ranges[year][0], run_ranges[year][1], size=len(met_pt)
+    if year in run_ranges:
+        cset = correctionlib.CorrectionSet.from_file(
+            get_pog_json(json_name="met", year=year)
         )
-    else:
-        run = events.run
-    try:
-        events["MET", "pt"] = cset[f"pt_metphicorr_pfmet_{data_kind}"].evaluate(
-            met_pt.to_numpy(), met_phi.to_numpy(), events.PV.npvsGood.to_numpy(), run
-        )
-        events["MET", "phi"] = cset[f"phi_metphicorr_pfmet_{data_kind}"].evaluate(
-            met_pt.to_numpy(), met_phi.to_numpy(), events.PV.npvsGood.to_numpy(), run
-        )
-    except:
-        pass
+        events["MET", "pt_raw"] = ak.ones_like(events.MET.pt) * events.MET.pt
+        events["MET", "phi_raw"] = ak.ones_like(events.MET.phi) * events.MET.phi
+
+        # make sure to not cross the maximum allowed value for uncorrected met
+        met_pt = events.MET.pt_raw
+        met_pt = np.clip(met_pt, 0.0, 6499.0)
+        met_phi = events.MET.phi_raw
+        met_phi = np.clip(met_phi, -3.5, 3.5)
+
+        data_kind = "mc" if hasattr(events, "genWeight") else "data"
+        if data_kind == "mc":
+            run = np.random.randint(
+                run_ranges[year][0], run_ranges[year][1], size=len(met_pt)
+            )
+        else:
+            run = events.run
+        try:
+            events["MET", "pt"] = cset[f"pt_metphicorr_pfmet_{data_kind}"].evaluate(
+                met_pt.to_numpy(),
+                met_phi.to_numpy(),
+                events.PV.npvsGood.to_numpy(),
+                run,
+            )
+            events["MET", "phi"] = cset[f"phi_metphicorr_pfmet_{data_kind}"].evaluate(
+                met_pt.to_numpy(),
+                met_phi.to_numpy(),
+                events.PV.npvsGood.to_numpy(),
+                run,
+            )
+        except:
+            pass
 
 
 def corrected_polar_met(
