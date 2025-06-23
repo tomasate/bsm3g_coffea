@@ -50,17 +50,25 @@ class WorkingPoints:
     def electrons_id(self, events, wp):
         wps = {
             # mva ID working points https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
-            "wp80iso": events.Electron.mvaFall17V2Iso_WP80,
-            "wp90iso": events.Electron.mvaFall17V2Iso_WP90,
-            "wpLiso": events.Electron.mvaFall17V2Iso_WPL,
-            "wp80noiso": events.Electron.mvaFall17V2noIso_WP80,
-            "wp90noiso": events.Electron.mvaFall17V2noIso_WP90,
-            "wpLnoiso": events.Electron.mvaFall17V2noIso_WPL,
+            "wp80iso": (
+                events.Electron.mvaFall17V2Iso_WP80
+                if hasattr(events.Electron, "mvaFall17V2Iso_WP80")
+                else events.Electron.mvaIso_WP80
+            ),
+            "wp90iso": (
+                events.Electron.mvaFall17V2Iso_WP90
+                if hasattr(events.Electron, "mvaFall17V2Iso_WP90")
+                else events.Electron.mvaIso_WP90
+            ),
             # cutbased ID working points https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
+            "fail": events.Electron.cutBased == 0,
+            "veto": events.Electron.cutBased == 1,
             "loose": events.Electron.cutBased == 2,
             "medium": events.Electron.cutBased == 3,
             "tight": events.Electron.cutBased == 4,
         }
+        if hasattr(events.Electron, "mvaFall17V2Iso_WPL"):
+            wps["wpLiso"] = events.Electron.mvaFall17V2Iso_WPL
         if wp not in wps:
             raise ValueError(
                 f"Invalid value {wp} for electron ID working point. Please specify {list(wps.keys())}"
@@ -178,39 +186,43 @@ class WorkingPoints:
         return wps[wp]
 
     def jets_pileup_id(self, events, wp, year):
-        wps = {
-            "2016preVFP": {
-                "loose": events.Jet.puId == 1,
-                "medium": events.Jet.puId == 3,
-                "tight": events.Jet.puId == 7,
-            },
-            "2016postVFP": {
-                "loose": events.Jet.puId == 1,
-                "medium": events.Jet.puId == 3,
-                "tight": events.Jet.puId == 7,
-            },
-            "2017": {
-                "loose": events.Jet.puId == 4,
-                "medium": events.Jet.puId == 6,
-                "tight": events.Jet.puId == 7,
-            },
-            "2018": {
-                "loose": events.Jet.puId == 4,
-                "medium": events.Jet.puId == 6,
-                "tight": events.Jet.puId == 7,
-            },
-        }
-        if wp not in wps[year]:
-            raise ValueError(
-                f"Invalid value {wp} for jet pileup ID working point. Please specify {list(wps[year].keys())}"
+        run_key = "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
+        if run_key == "Run2":
+            wps = {
+                "2016preVFP": {
+                    "loose": events.Jet.puId == 1,
+                    "medium": events.Jet.puId == 3,
+                    "tight": events.Jet.puId == 7,
+                },
+                "2016postVFP": {
+                    "loose": events.Jet.puId == 1,
+                    "medium": events.Jet.puId == 3,
+                    "tight": events.Jet.puId == 7,
+                },
+                "2017": {
+                    "loose": events.Jet.puId == 4,
+                    "medium": events.Jet.puId == 6,
+                    "tight": events.Jet.puId == 7,
+                },
+                "2018": {
+                    "loose": events.Jet.puId == 4,
+                    "medium": events.Jet.puId == 6,
+                    "tight": events.Jet.puId == 7,
+                },
+            }
+            if wp not in wps[year]:
+                raise ValueError(
+                    f"Invalid value {wp} for jet pileup ID working point. Please specify {list(wps[year].keys())}"
+                )
+            # break up selection for low and high pT jets
+            # to apply jets_pileup only to jets with pT < 50 GeV
+            return ak.where(
+                events.Jet.pt < 50,
+                wps[year][wp],
+                events.Jet.pt >= 50,
             )
-        # break up selection for low and high pT jets
-        # to apply jets_pileup only to jets with pT < 50 GeV
-        return ak.where(
-            events.Jet.pt < 50,
-            wps[year][wp],
-            events.Jet.pt >= 50,
-        )
+        else:
+            return np.ones_like(events.Jet.pt, dtype=bool)
 
     def jets_deepjet_b(self, events, wp, year):
         wps = {
@@ -233,6 +245,26 @@ class WorkingPoints:
                 "loose": events.Jet.btagDeepFlavB > 0.049,
                 "medium": events.Jet.btagDeepFlavB > 0.2783,
                 "tight": events.Jet.btagDeepFlavB > 0.71,
+            },
+            "2022preEE": {
+                "loose": events.Jet.btagDeepFlavB > 0.0583,
+                "medium": events.Jet.btagDeepFlavB > 0.3086,
+                "tight": events.Jet.btagDeepFlavB > 0.7183,
+            },
+            "2022postEE": {
+                "loose": events.Jet.btagDeepFlavB > 0.0614,
+                "medium": events.Jet.btagDeepFlavB > 0.3196,
+                "tight": events.Jet.btagDeepFlavB > 0.73,
+            },
+            "2023preBPix": {
+                "loose": events.Jet.btagDeepFlavB > 0.0479,
+                "medium": events.Jet.btagDeepFlavB > 0.2431,
+                "tight": events.Jet.btagDeepFlavB > 0.6553,
+            },
+            "2023postBPix": {
+                "loose": events.Jet.btagDeepFlavB > 0.048,
+                "medium": events.Jet.btagDeepFlavB > 0.2435,
+                "tight": events.Jet.btagDeepFlavB > 0.6563,
             },
         }
         if wp not in wps[year]:
