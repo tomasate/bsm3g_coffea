@@ -60,42 +60,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    data_samples = {
-        "1b1mu1e": "muon",
-        "1b1e1mu": "electron",
-        "2b1mu": "muon",
-        "2b1e": "electron",
-        "ztomumu": "muon",
-        "ztoee": "electron",
-        "qcd_mu": "muon",
-        "qcd_ele": "electron",
-        "qcd_cr1T_mu": None,
-        "qcd_cr2T_mu": None,
-        "qcd_cr1T_ele": None,
-        "qcd_cr2T_ele": None,
-        "ztojets": "muon",
-    }
-    mc_samples = {
-        "1b1mu1e": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "1b1e1mu": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "2b1mu": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "2b1e": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "ztomumu": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "ztoee": ["dy_inclusive", "singletop", "tt", "wjets_ht", "diboson"],
-        "qcd_mu": ["dy_inclusive", "singletop", "tt", "wjets_ht", "wjets_inclusive", "diboson"],
-        "qcd_ele": ["dy_inclusive", "singletop", "tt", "wjets_ht", "wjets_inclusive", "diboson"],
-        "qcd_cr1T_mu": ["wjets_ht", "wjets_inclusive"],
-        "qcd_cr2T_mu": ["wjets_ht", "wjets_inclusive"],
-        "qcd_cr1T_ele": ["wjets_ht", "wjets_inclusive"],
-        "qcd_cr2T_ele": ["wjets_ht", "wjets_inclusive"],
-        "ztojets": ["dy_inclusive", "dy_ht", "singletop", "tt", "wjets_ht", "wjets_inclusive", "diboson", "ewk", "higgs"],
-    }
-    datasets_to_run = get_datasets_to_run(
-        args.workflow, args.year, data_samples, mc_samples
-    )
-    fileset_checker(datasets_to_run, args.year)
-
     # submit (or prepare) a job for each dataset using the given arguments
+    datasets_to_run = get_datasets_to_run(args.workflow, args.year)
+    fileset_checker(datasets_to_run, args.year)
     cmd = ["python3", "submit_condor.py"]
     for dataset in datasets_to_run:
         cmd_args = [

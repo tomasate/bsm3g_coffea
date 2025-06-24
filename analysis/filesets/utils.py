@@ -3,6 +3,7 @@ import glob
 import yaml
 import subprocess
 from pathlib import Path
+from analysis.workflows.config import WorkflowConfigBuilder
 
 
 def get_rootfiles(year: str, dataset: str):
@@ -133,11 +134,16 @@ def get_datasets_map(year: str):
     return datasets_map
 
 
-def get_datasets_to_run(workflow: str, year: str, data_samples: dict, mc_samples: dict):
+def get_datasets_to_run(workflow: str, year: str):
+    config_builder = WorkflowConfigBuilder(workflow=workflow)
+    workflow_config = config_builder.build_workflow_config()
+    mc_samples = workflow_config.datasets["mc"]
+    data_samples = workflow_config.datasets["data"]
+
     datasets_map = get_datasets_map(year)
-    samples_keys_to_run = mc_samples[workflow]
-    if data_samples[workflow]:
-        samples_keys_to_run += [data_samples[workflow]]
+    samples_keys_to_run = mc_samples
+    if data_samples:
+        samples_keys_to_run += data_samples
     datasets_to_run = []
     for key in samples_keys_to_run:
         if key not in datasets_map:
