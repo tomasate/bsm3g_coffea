@@ -51,8 +51,7 @@ def divide_list(lst: list, nfiles: int = 20) -> list:
     return result
 
 
-
-def get_dataset_config(dataset, year):
+def get_dataset_config(year):
     fileset_path = Path(f"{Path.cwd()}/analysis/filesets")
     run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
     nano_version = "nanov9" if run_key == "Run2" else "nanov12"
@@ -62,7 +61,7 @@ def get_dataset_config(dataset, year):
 
 
 def get_dataset_key(dataset, year):
-    dataset_config = get_dataset_config(dataset, year)
+    dataset_config = get_dataset_config(year)
     for dataset_key in dataset_config:
         if dataset.startswith(dataset_key):
             if dataset_config[dataset_key]["process"] == "Data":
@@ -72,7 +71,7 @@ def get_dataset_key(dataset, year):
 
 
 def get_dataset_era(dataset, year):
-    dataset_config = get_dataset_config(dataset, year)
+    dataset_config = get_dataset_config(year)
     for dataset_key in dataset_config:
         if dataset.startswith(dataset_key):
             return dataset_config[dataset_key]["era"]
