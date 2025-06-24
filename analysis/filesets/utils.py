@@ -1,6 +1,7 @@
 import re
 import glob
 import yaml
+import json
 import subprocess
 from pathlib import Path
 from analysis.workflows.config import WorkflowConfigBuilder
