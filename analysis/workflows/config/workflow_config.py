@@ -33,7 +33,7 @@ class WorkflowConfig:
             "event_selection": self.event_selection,
             "corrections_config": self.corrections_config,
             "histogram_config": self.histogram_config.to_dict(),
-            "datasets": self.datasets.to_dict(),
+            "datasets": self.datasets,
         }
 
     def to_yaml(self):
