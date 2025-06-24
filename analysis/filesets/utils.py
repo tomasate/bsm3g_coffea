@@ -1,6 +1,7 @@
 import re
 import glob
 import yaml
+import subprocess
 from pathlib import Path
 
 
@@ -114,3 +115,54 @@ def extract_xrootd_errors(error_files: list) -> set:
         xrootd_matches = re.findall(r"root://[a-zA-Z0-9\-.]+(?:[:]\d+)?", err_content)
         xrootd_errs.update(xrootd_matches)
     return xrootd_errs
+
+
+def get_datasets_map(year: str):
+    run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
+    nano_version = "nanov9" if run_key == "Run2" else "nanov12"
+    fileset_path = Path.cwd() / "analysis" / "filesets" / f"{year}_{nano_version}.yaml"
+    with open(fileset_path) as f:
+        fileset_config = yaml.safe_load(f)
+    datasets_map = {}
+    for sample in fileset_config:
+        key = fileset_config[sample]["key"]
+        if key in datasets_map:
+            datasets_map[key] += [sample]
+        else:
+            datasets_map[key] = [sample]
+    return datasets_map
+
+
+def get_datasets_to_run(workflow: str, year: str, data_samples: dict, mc_samples: dict):
+    datasets_map = get_datasets_map(year)
+    samples_keys_to_run = mc_samples[workflow]
+    if data_samples[workflow]:
+        samples_keys_to_run += [data_samples[workflow]]
+    datasets_to_run = []
+    for key in samples_keys_to_run:
+        if key not in datasets_map:
+            print(f"\n{key} not availabe for {year}!")
+            continue
+        datasets_to_run += datasets_map[key]
+    return datasets_to_run
+
+
+def fileset_checker(samples: list, year: str):
+    """check if the fileset for the given year exists, generate it otherwise"""
+
+    filesets_path = Path.cwd() / "analysis" / "filesets"
+    fileset_file = filesets_path / f"fileset_{year}_NANO_lxplus.json"
+
+    build_input_fileset = False
+    if not fileset_file.exists():
+        build_input_fileset = True
+    else:
+        with open(fileset_file, "r") as f:
+            filesets = json.load(f)
+        build_input_fileset = not any(ds not in filesets for ds in samples)
+
+    if build_input_fileset:
+        print("\nBuilding input filesets for:")
+        print(yaml.dump(samples, default_flow_style=False, sort_keys=False, indent=2))
+        cmd = f"python3 fetch.py --year {year} --samples {' '.join(samples)}"
+        subprocess.run(cmd, shell=True)
