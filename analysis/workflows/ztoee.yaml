@@ -1,3 +1,12 @@
+datasets:
+  data: 
+    - electron
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson
 object_selection:
   electrons:
     field: events.Electron
@@ -44,7 +53,7 @@ object_selection:
     field: select_met
 event_selection:
   hlt_paths:
-    SingleElectron:
+    electron:
       - SingleEle
   selections:
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
@@ -345,12 +354,3 @@ histogram_config:
     met:
       - met_pt
       - met_phi
-datasets:
-  data: 
-    - electron
-  mc:
-    - dy_inclusive
-    - singletop
-    - tt
-    - wjets_ht
-    - diboson

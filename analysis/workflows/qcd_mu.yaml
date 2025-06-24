@@ -1,3 +1,13 @@
+datasets:
+  data: 
+    - muon
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - wjets_inclusive
+    - diboson
 object_selection:
   muons:
     field: events.Muon
@@ -51,7 +61,7 @@ object_selection:
     field: select_met
 event_selection:
   hlt_paths:
-    SingleMuon:
+    muon:
       - SingleMu
   selections:
     goodvertex: events.PV.npvsGood > 0
@@ -237,13 +247,3 @@ histogram_config:
       - bjet_phi
     vertex:
       - npvs
-datasets:
-  data: 
-    - muon
-  mc:
-    - dy_inclusive
-    - singletop
-    - tt
-    - wjets_ht
-    - wjets_inclusive
-    - diboson

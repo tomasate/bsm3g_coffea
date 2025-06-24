@@ -28,7 +28,8 @@ def trigger_from_flag(events, flag, year):
 
 
 def trigger_mask(events, hlt_paths, dataset, year):
-    dataset_key = get_dataset_key(dataset)
+    dataset_key = get_dataset_key(dataset, year)
+
     # compute all trigger masks based on the flags in hlt_paths
     trigger_flags = {}
     for dataset_flags in hlt_paths.values():
