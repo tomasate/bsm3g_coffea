@@ -2,6 +2,20 @@
 
 Workflow's selection, variables, output histograms, triggers, among other features are defined through a yaml configuration file:
 
+* `datasets`: Data and MC datasets to process
+
+```yaml
+datasets:
+  data: 
+    - muon
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson
+```
+Each item (e.g. muon, dy_inclusive, tt) corresponds to a key in the fileset YAML file.
 
 * `object_selection`: Contains the information required for object selection:
 ```yaml
@@ -18,8 +32,7 @@ object_selection:
     cuts:
       - objects['dimuons'].l1.delta_r(objects['dimuons'].l2) > 0.3
       - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
-      - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass <
-        120.0)
+      - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass < 120.0)
 ```
 With `field` you define how to select the object, either through a NanoAOD field (`events.Muon`) or a custom object-selection function (`select_dimuons`) defined as a method of the [ObjectSelector](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/object_selections.py) class. Each object is added sequentially to a dictionary called `objects`, which can later be used to access the already selected objects.
 
@@ -52,24 +65,31 @@ muons:
 ```yaml
 event_selection:
   hlt_paths:
-    - IsoMu27
+    muon:
+      - SingleMu
   selections:
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
-    lumimask: get_lumi_mask(events, year)
-    atleast_one_goodvertex: events.PV.npvsGood > 0
-    electron_veto: ak.num(objects['electrons']) == 0
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Muon)
+    lumi: get_lumi_mask(events, year)
+    goodvertex: events.PV.npvsGood > 0
     two_muons: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
+    leading_muon_pt: ak.firsts(objects['muons'].pt) > 30
+    subleading_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 15
   categories:
     base:
+      - goodvertex
+      - lumi
       - trigger
-      - lumimask
-      - atleast_one_goodvertex
-      - electron_veto
+      - trigger_match
       - two_muons
+      - leading_muon_pt
+      - subleading_muon_pt
       - one_dimuon
 ```
-First, you define which trigger(s) to apply with `hlt_paths`. Then, you define all event-level cuts in `selections`. Similarly to the object selection, you can use any valid expression from a NanoAOD field or a custom event-selection function defined in [`analysis/selections/event_selections.py`](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/event_selections.py). Then, you can define one or more categories in `categories` by listing the cuts you want to include for each category. Histograms will be filled for each category.
+First, you define which trigger(s) to apply with `hlt_paths`. The first-level key (`muon`) refers to the dataset key as defined in the fileset config. The values (e.g. `SingleMu`) are trigger flags. These map to specific HLT paths (like `HLT_IsoMu24`, `HLT_Mu50`, etc.) and are defined [here](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/trigger_flags.yaml). 
+
+The event-level cuts are defined in `selections`. Similarly to the object selection, you can use any valid expression from a NanoAOD field or a custom event-selection function defined in [`analysis/selections/event_selections.py`](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/event_selections.py). Then, you can define one or more categories in `categories` by listing the cuts you want to include for each category. Histograms will be filled for each category.
 
 
 * `corrections`: Contains the object-level corrections and event-level weights to apply:
@@ -78,19 +98,19 @@ First, you define which trigger(s) to apply with `hlt_paths`. Then, you define a
 corrections:
   objects:
     - jets
-    - muons
-    - met
     - jets_veto
+    - muons
+    - electrons
+    - taus
+    - met
+  apply_obj_syst: false
   event_weights:
     genWeight: true
     pileupWeight: true
-    l1prefiring: true
-    pujetid:
-      - id: tight
-    btagging: false
-    electron:
-      - id: false
-      - reco: false
+    l1prefiringWeight: true
+    lhepdfWeight: false
+    lhescaleWeight: false
+    partonshowerWeight: true
     muon:
       - id: tight
       - iso: tight
@@ -134,6 +154,21 @@ histogram_config:
       stop: 150
       label: $m(\mu\mu)$ [GeV]
       expression: objects['dimuons'].p4.mass
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(j)$ [GeV]
+      expression: objects['jets'].pt
     jet_flav:
       type: IntCategory
       categories:
@@ -142,11 +177,11 @@ histogram_config:
         - 5
       label: HadronFlavour
       expression: objects['jets'].hadronFlavour
-    npvs:
+    vertex_multiplicity:
       type: Integer
       start: 0
       stop: 60
-      label: npvs
+      label: vertex multiplicity
       expression: events.PV.npvsGood
   layout:
     muon:
@@ -155,7 +190,10 @@ histogram_config:
       - muon_phi
     zcandidate:
       - dimuon_mass
-    vertex:
-      - npvs
+    jet:
+      - jet_pt
+      - jet_flav
+    vertex_multiplicity:
+      - vertex_multiplicity
 ```
-Note that the variable associated with the axis must be included through the `expression` field using the `objects` dictionary. Output histogram's layout is defined with the `layout` field. In the example above, our output dictionary will contain two histograms labelled `muon` and `zcandidate`, the first with the `muon_pt`, `muon_eta` and `muon_phi` axes, and the second only with the `dimuon_mass` axis (make sure to include axis with the same dimensions within a histogram). If you set `layout: individual` then the output dictionary will contain a histogram for each axis. Note that if you set `add_syst_axis: true`, a StrCategory axis `{"variable_name": {"type": "StrCategory", "categories": [], "growth": True}}` to store systematic variations will be added to each histogram.
+Note that the variable associated with the axis must be included through the `expression` field using the `objects` dictionary. Output histogram's layout is defined with the `layout` field. In the example above, our output dictionary will contain four histograms labelled `muon`, `zcandidate`, `jet` and `vertex_multiplicity` (make sure to include axis with the same dimensions within a histogram). If you set `layout: individual` then the output dictionary will contain a histogram for each axis. Note that if you set `add_syst_axis: true`, a StrCategory axis `{"variable_name": {"type": "StrCategory", "categories": [], "growth": True}}` to store systematic variations will be added to each histogram.

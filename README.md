@@ -1,35 +1,69 @@
-# W' + b
+# BSM3G Coffea
 
 [![Codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-<p align="left">
-  <img width="300" src="https://i.imgur.com/OWhX13O.jpg" />
-</p>
 
-Python package for analyzing W' + b in the electron and muon channels. The analysis uses a columnar framework to process input tree-based [NanoAOD](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD) v9 files using the [coffea](https://coffeateam.github.io/coffea/) and [scikit-hep](https://scikit-hep.org) Python libraries.
+Python package that uses a columnar framework to process input tree-based [NanoAOD](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD) files using the [coffea](https://coffeateam.github.io/coffea/) and [scikit-hep](https://scikit-hep.org) Python libraries.
 
-- [Workflows](#Workflows)
 - [Input filesets](#Input-filesets)
+- [Workflows](#Workflows)
 - [Submit Condor jobs](#Submit-Condor-jobs)
 - [Postprocessing](#Postprocessing)
-- [Luminosity](#Luminosity)
+
+
+### Input filesets
+ 
+
+Each year/campaign has a config file in [`analysis/filesets/<year>_<nano version>.yaml`](https://github.com/deoache/wprimeplusb/tree/main/analysis/filesets) from which the input filesets are built. 
+
+Each entry in the fileset configuration includes the following fields:
+
+- **`era`**: Dataset era. For data, this is typically the run letter (e.g. `B`, `F`, etc.). For Monte Carlo datasets, use `"MC"`.
+- **`process`**: Logical process name used during postprocessing to group multiple datasets (e.g. different HT bins) into the same physical process.
+- **`key`**: Label that associates the dataset with a group defined in the workflow configuration under `datasets` (see next section). This key is used in the Condor submitter script to determine which datasets to run for a given workflow and year.
+- **`query`**: DAS path used to fetch the files for this dataset.
+- **`xsec`**: Cross section in picobarns (pb). Should be `null` for data. Required for Monte Carlo samples in order to compute event weights.
+
+example:
+```yaml
+SingleMuonF:
+  era: F
+  process: Data
+  key: muon
+  query: SingleMuon/Run2017F-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD
+  xsec: null
+DYJetsToLL_M-4to50_HT-100to200:
+  era: MC
+  process: DYJetsToLL
+  key: dy_ht
+  query: DYJetsToLL_M-4to50_HT-100to200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM
+  xsec: 224.2
+```
+
 
 ### Workflows
+
+The workflows (selections, variables, output histograms, triggers, etc) are defined through a configuration file located in `analysis/workflows`. [Here](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/README.md) you can find a detailed description on how to create the config file.
 
 The available workflows are:
 
 * [ztomumu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztomumu.yaml)
 * [ztoee](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztoee.yaml)
-* [2b1mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1mu.yaml)
-* [2b1e](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1e.yaml)
-
-
-The workflows (selections, variables, output histograms, triggers, etc) are defined through a configuration file located in `analysis/workflows`. [Here](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/README.md) you can find a detailed description on how to create the config file.
-
-
-### Input filesets
-
-Each year has a config file in `analysis/filesets/<year>_nanov9.yaml` from which the input filesets are built. The sites allowed are defined in [`analysis/filesets/xrootd_sites.py`](https://github.com/deoache/higgscharm/blob/lxplus/analysis/filesets/xrootd_sites.py).
+* W'+b
+    * $t\bar{t}$ estimation
+        * [2b1mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1mu.yaml)
+        * [2b1e](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1e.yaml)
+        * [1b1mu1e](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/1b1mu1e.yaml)
+        * [1b1e1mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/1b1e1mu.yaml)
+    * QCD estimation
+        * [qcd_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_mu.yaml)
+        * [qcd_cr1T_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr1T_mu.yaml)
+        * [qcd_cr2T_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr2T_mu.yaml)
+        * [qcd_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_ele.yaml)
+        * [qcd_cr1T_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr1T_ele.yaml)
+        * [qcd_cr2T_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr2T_ele.yaml)
+* VBF SUSY
+    * [ztojets](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztojets.yaml)
 
 
 ### Submit Condor jobs
@@ -45,16 +79,14 @@ You need to have a valid grid proxy in the CMS VO. (see [here](https://twiki.cer
 ```
 voms-proxy-init --voms cms
 ```
-Jobs are submitted via the [submit_condor.py](https://github.com/deoache/higgscharm/blob/lxplus/submit_condor.py) script
-```
-python3 submit_condor.py --workflow ztomumu --dataset ZZ --year 2017 --submit --eos
-```
-**Note**: It's recommended to add the `--eos` flag to save the outputs in your `/eos` area, so the postprocessing step can be done from [SWAN](https://swan-k8s.cern.ch/hub/spawn). **In this case, you will need to clone the repo also in [SWAN](https://swan-k8s.cern.ch/hub/spawn) (select the 105a release) in order to be able to run the postprocess**.
 
-The [runner.py](https://github.com/deoache/higgscharm/blob/lxplus/runner.py) script is built on top of `submit_condor.py` and can be used to submit all jobs (MC + data) of a workflow/year
+Jobs are submitted via the [runner.py](https://github.com/deoache/higgscharm/blob/lxplus/runner.py) script. It can be used to submit all jobs (MC + data) of a workflow/year
 ```
 python3 runner.py --workflow ztomumu --year 2017 --submit --eos
 ``` 
+
+**Note**: It's recommended to add the `--eos` flag to save the outputs in your `/eos` area, so the postprocessing step can be done from [SWAN](https://swan-k8s.cern.ch/hub/spawn). **In this case, you will need to clone the repo also in [SWAN](https://swan-k8s.cern.ch/hub/spawn) (select the 105a release) in order to be able to run the postprocess**.
+
 After submitting the jobs you can watch their status by typing:
 ```
 watch condor_q
@@ -71,59 +103,3 @@ Once all jobs are done for a processor/year, you can get the results using the `
 python3 run_postprocess.py --workflow ztomumu --year 2017 --postprocess --plot --log
 ``` 
 Results will be saved to the same directory as the output files
-
-## Luminosity
-
-To obtain the integrated luminosity we use the [Brilcal tool](https://twiki.cern.ch/twiki/bin/view/CMS/BrilcalcQuickStart). See luminosity recomendations for Run2 at https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2
-
-```
-# connect to lxplus
-ssh <your_username>@lxplus.cern.ch
-
-# Load the environment
-source /cvmfs/cms-bril.cern.ch/cms-lumi-pog/brilws-docker/brilws-env
-
-# Run brilcalc
-brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i <Goldenjson file>
-```
-
-* 2016
-```
-brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt
-```
-```
-#Summary:
-+-------+------+--------+--------+-------------------+------------------+
-| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
-+-------+------+--------+--------+-------------------+------------------+
-| 144   | 393  | 234231 | 233406 | 38.184814445      | 36.313753344     |
-+-------+------+--------+--------+-------------------+------------------+
-```
-
-**Note:** We created our own .txt files for 2016preVFP and 2016postVFP and we found: PreVFP: 19.501601622 /fb and PostVFP: 16.812151722 /fb
-
-* 2017
-```
-brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt
-```
-```
-#Summary:
-+-------+------+--------+--------+-------------------+------------------+
-| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
-+-------+------+--------+--------+-------------------+------------------+
-| 175   | 457  | 206287 | 205294 | 44.069556521      | 41.479680528     |
-+-------+------+--------+--------+-------------------+------------------+
-```
-
-* 2018
-```
-brilcalc lumi -b "STABLE BEAMS" --normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt
-```
-```
-#Summary:
-+-------+------+--------+--------+-------------------+------------------+
-| nfill | nrun | nls    | ncms   | totdelivered(/fb) | totrecorded(/fb) |
-+-------+------+--------+--------+-------------------+------------------+
-| 196   | 478  | 234527 | 234125 | 62.322923205      | 59.832422397     |
-+-------+------+--------+--------+-------------------+------------------+
-```
