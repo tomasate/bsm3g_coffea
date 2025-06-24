@@ -3,8 +3,8 @@ import json
 import argparse
 import subprocess
 from pathlib import Path
-from analysis.filesets.utils import divide_list
 from analysis.utils import make_output_directory
+from analysis.filesets.utils import divide_list, fileset_checker
 
 
 def move_proxy() -> str:
@@ -29,6 +29,7 @@ def move_proxy() -> str:
 def submit_condor(args):
     """Build condor files. Optionally submit condor job"""
     print(f"Creating {args.workflow}-{args.year}-{args.dataset} condor file")
+    
     jobname = f"{args.workflow}_{args.dataset}"
 
     # make condor and log directories
@@ -42,11 +43,7 @@ def submit_condor(args):
         log_dir.mkdir(parents=True, exist_ok=True)
 
     # check if the fileset for the given year exists, generate it otherwise
-    filesets_path = Path.cwd() / "analysis" / "filesets"
-    fileset_file = filesets_path / f"fileset_{args.year}_NANO_lxplus.json"
-    if not fileset_file.exists():
-        cmd = f"python3 fetch.py --year {args.year}"
-        subprocess.run(cmd, shell=True)
+    fileset_checker(year=args.year, samples=[args.dataset])
     # save partitions json and jobnums to job directory
     jobnum_list = []
     partition_dataset = {}
