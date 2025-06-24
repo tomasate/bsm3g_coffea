@@ -70,7 +70,7 @@ object_selection:
     field: select_met
 event_selection:
   hlt_paths:
-    SingleElectron:
+    electron:
       - SingleEle
   selections:
     goodvertex: events.PV.npvsGood > 0
