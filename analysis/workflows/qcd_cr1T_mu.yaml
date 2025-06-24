@@ -261,3 +261,8 @@ histogram_config:
       - subleading_muon_passTight
     vertex:
       - npvs
+datasets:
+  data: null
+  mc:
+    - wjets_ht
+    - wjets_inclusive

@@ -361,3 +361,16 @@ histogram_config:
     met:
       - met_pt
       - met_phi
+datasets:
+  data: 
+    - muon
+  mc:
+    - dy_inclusive
+    - dy_ht
+    - singletop
+    - tt
+    - wjets_ht
+    - wjets_inclusive
+    - diboson
+    - ewk
+    - higgs

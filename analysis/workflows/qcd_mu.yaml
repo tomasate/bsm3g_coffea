@@ -237,3 +237,13 @@ histogram_config:
       - bjet_phi
     vertex:
       - npvs
+datasets:
+  data: 
+    - muon
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - wjets_inclusive
+    - diboson

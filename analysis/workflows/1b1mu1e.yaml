@@ -375,3 +375,12 @@ histogram_config:
       - bjet_pt
       - bjet_eta
       - bjet_phi
+datasets:
+  data: 
+    - muon
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson

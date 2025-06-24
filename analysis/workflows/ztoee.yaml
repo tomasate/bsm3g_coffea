@@ -345,3 +345,12 @@ histogram_config:
     met:
       - met_pt
       - met_phi
+datasets:
+  data: 
+    - electron
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson
