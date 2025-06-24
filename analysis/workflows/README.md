@@ -34,9 +34,9 @@ object_selection:
       - objects['dimuons'].l1.charge * objects['dimuons'].l2.charge < 0
       - (objects['dimuons'].p4.mass > 60.0) & (objects['dimuons'].p4.mass < 120.0)
 ```
-With `field` you define how to select the object, either through a NanoAOD field (`events.Muon`) or a custom object-selection function (`select_dimuons`) defined as a method of the [ObjectSelector](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/object_selections.py) class. Each object is added sequentially to a dictionary called `objects`, which can later be used to access the already selected objects.
+With `field` you define how to select the object, either through a NanoAOD field (`events.Muon`) or a custom object-selection function (`select_dimuons`) defined as a method of the [ObjectSelector](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/selections/object_selections.py) class. Each object is added sequentially to a dictionary called `objects`, which can later be used to access the already selected objects.
 
-`cuts` defines the set of object-level cuts to apply. Similarly, you can use NanoAOD fields (`events.Muon.pt > 24`) to define a cut or any valid expression (`objects['dimuons'].p4.mass < 120.0`). Alternatively, you can also use a working point function (`working_points.muons_iso(events, 'tight')`) defined in the [WorkingPoints class](https://github.com/deoache/wprimeplusb/blob/main/analysis/working_points/working_points.py). 
+`cuts` defines the set of object-level cuts to apply. Similarly, you can use NanoAOD fields (`events.Muon.pt > 24`) to define a cut or any valid expression (`objects['dimuons'].p4.mass < 120.0`). Alternatively, you can also use a working point function (`working_points.muons_iso(events, 'tight')`) defined in the [WorkingPoints class](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/working_points/working_points.py). 
 
 You can also use `add_cut` to define masks that will be added to the object and can be accessed later in the workflow:
 
@@ -87,9 +87,9 @@ event_selection:
       - subleading_muon_pt
       - one_dimuon
 ```
-First, you define which trigger(s) to apply with `hlt_paths`. The first-level key (`muon`) refers to the dataset key as defined in the fileset config. The values (e.g. `SingleMu`) are trigger flags. These map to specific HLT paths (like `HLT_IsoMu24`, `HLT_Mu50`, etc.) and are defined [here](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/trigger_flags.yaml). 
+First, you define which trigger(s) to apply with `hlt_paths`. The first-level key (`muon`) refers to the dataset key as defined in the fileset config. The values (e.g. `SingleMu`) are trigger flags. These map to specific HLT paths (like `HLT_IsoMu24`, `HLT_Mu50`, etc.) and are defined [here](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/selections/trigger_flags.yaml). 
 
-The event-level cuts are defined in `selections`. Similarly to the object selection, you can use any valid expression from a NanoAOD field or a custom event-selection function defined in [`analysis/selections/event_selections.py`](https://github.com/deoache/wprimeplusb/blob/main/analysis/selections/event_selections.py). Then, you can define one or more categories in `categories` by listing the cuts you want to include for each category. Histograms will be filled for each category.
+The event-level cuts are defined in `selections`. Similarly to the object selection, you can use any valid expression from a NanoAOD field or a custom event-selection function defined in [`analysis/selections/event_selections.py`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/selections/event_selections.py). Then, you can define one or more categories in `categories` by listing the cuts you want to include for each category. Histograms will be filled for each category.
 
 
 * `corrections`: Contains the object-level corrections and event-level weights to apply:
@@ -118,7 +118,7 @@ corrections:
       - trigger: true
 ```
 
-The corrections are managed [here](https://github.com/deoache/wprimeplusb/blob/main/analysis/corrections/corrections_manager.py).
+The corrections are managed [here](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/corrections/corrections_manager.py).
 
 * `histogram_config`: Use to define processor's output histograms (more info on Hist histograms [here](https://hist.readthedocs.io/en/latest/)). Here you define the histogram axes associated with the variables you want to include in the analysis. 
 ```yaml

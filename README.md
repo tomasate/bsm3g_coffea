@@ -14,7 +14,7 @@ Python package that uses a columnar framework to process input tree-based [NanoA
 ### Input filesets
  
 
-Each year/campaign has a config file in [`analysis/filesets/<year>_<nano version>.yaml`](https://github.com/deoache/wprimeplusb/tree/main/analysis/filesets) from which the input filesets are built. 
+Each year/campaign has a config file in [`analysis/filesets/<year>_<nano version>.yaml`](https://github.com/deoache/bsm3g_coffea/tree/main/analysis/filesets) from which the input filesets are built. 
 
 Each entry in the fileset configuration includes the following fields:
 
@@ -43,27 +43,27 @@ DYJetsToLL_M-4to50_HT-100to200:
 
 ### Workflows
 
-The workflows (selections, variables, output histograms, triggers, etc) are defined through a configuration file located in `analysis/workflows`. [Here](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/README.md) you can find a detailed description on how to create the config file.
+The workflows (selections, variables, output histograms, triggers, etc) are defined through a configuration file located in `analysis/workflows`. [Here](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/README.md) you can find a detailed description on how to create the config file.
 
 The available workflows are:
 
-* [ztomumu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztomumu.yaml)
-* [ztoee](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztoee.yaml)
+* [ztomumu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztomumu.yaml)
+* [ztoee](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztoee.yaml)
 * W'+b
     * $t\bar{t}$ estimation
-        * [2b1mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1mu.yaml)
-        * [2b1e](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/2b1e.yaml)
-        * [1b1mu1e](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/1b1mu1e.yaml)
-        * [1b1e1mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/1b1e1mu.yaml)
+        * [2b1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1mu.yaml)
+        * [2b1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1e.yaml)
+        * [1b1mu1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1mu1e.yaml)
+        * [1b1e1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1e1mu.yaml)
     * QCD estimation
-        * [qcd_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_mu.yaml)
-        * [qcd_cr1T_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr1T_mu.yaml)
-        * [qcd_cr2T_mu](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr2T_mu.yaml)
-        * [qcd_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_ele.yaml)
-        * [qcd_cr1T_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr1T_ele.yaml)
-        * [qcd_cr2T_ele](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/qcd_cr2T_ele.yaml)
+        * [qcd_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_mu.yaml)
+        * [qcd_cr1T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_mu.yaml)
+        * [qcd_cr2T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_mu.yaml)
+        * [qcd_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_ele.yaml)
+        * [qcd_cr1T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_ele.yaml)
+        * [qcd_cr2T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_ele.yaml)
 * VBF SUSY
-    * [ztojets](https://github.com/deoache/wprimeplusb/blob/main/analysis/workflows/ztojets.yaml)
+    * [ztojets](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztojets.yaml)
 
 
 ### Submit Condor jobs
@@ -72,8 +72,8 @@ First connect to lxplus and clone the repository (if you have not done it yet)
 ```
 ssh <your_username>@lxplus.cern.ch
 
-git clone https://github.com/deoache/wprimeplusb.git
-cd wprimeplusb
+git clone https://github.com/deoache/bsm3g_coffea.git
+cd bsm3g_coffea
 ```
 You need to have a valid grid proxy in the CMS VO. (see [here](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess) for details on how to register in the CMS VO). The needed grid proxy is obtained via the usual command
 ```
