@@ -14,7 +14,7 @@ Python package that uses a columnar framework to process input tree-based [NanoA
 ### Input filesets
  
 
-Each year/campaign has a config file in [`analysis/filesets/<year>_<nano version>.yaml`](https://github.com/deoache/bsm3g_coffea/tree/main/analysis/filesets) from which the input filesets are built. 
+Each data-taking year or campaign has a corresponding config file in [`analysis/filesets/<year>_<nano version>.yaml`](https://github.com/deoache/bsm3g_coffea/tree/main/analysis/filesets), which defines the input datasets to process.
 
 Each entry in the fileset configuration includes the following fields:
 
@@ -32,6 +32,7 @@ SingleMuonF:
   key: muon
   query: SingleMuon/Run2017F-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD
   xsec: null
+  
 DYJetsToLL_M-4to50_HT-100to200:
   era: MC
   process: DYJetsToLL
@@ -43,7 +44,7 @@ DYJetsToLL_M-4to50_HT-100to200:
 
 ### Workflows
 
-The workflows (selections, variables, output histograms, triggers, etc) are defined through a configuration file located in `analysis/workflows`. [Here](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/README.md) you can find a detailed description on how to create the config file.
+Workflows define the analysis configuration: selections, histograms, triggers, corrections, and output structure. They are stored as YAML files in the [`analysis/workflows`](https://github.com/deoache/bsm3g_coffea/tree/main/analysis/workflows) directory. You can find a detailed explanation of the structure of a workflow [here](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/README.md) 
 
 The available workflows are:
 
@@ -68,38 +69,73 @@ The available workflows are:
 
 ### Submit Condor jobs
 
-First connect to lxplus and clone the repository (if you have not done it yet)
-```
+**1. Log in to lxplus and clone the repository**
+   
+If you haven't done so already:
+```bash
 ssh <your_username>@lxplus.cern.ch
 
 git clone https://github.com/deoache/bsm3g_coffea.git
 cd bsm3g_coffea
 ```
-You need to have a valid grid proxy in the CMS VO. (see [here](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess) for details on how to register in the CMS VO). The needed grid proxy is obtained via the usual command
-```
+
+**2. Initialize a valid CMS grid proxy**
+
+To access remote datasets via xrootd, you need a valid grid proxy.
+
+To generate the proxy:
+```bash
 voms-proxy-init --voms cms
 ```
+If you're not registered in the CMS VO, follow these [instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideLcgAccess) to request access.
 
-Jobs are submitted via the [runner.py](https://github.com/deoache/higgscharm/blob/lxplus/runner.py) script. It can be used to submit all jobs (MC + data) of a workflow/year
+**3. (Optional) build the input fileset**
+
+Before submitting jobs, you can manually generate the input fileset for a given campaign/year. This step will query DAS based on the YAML config file
+```bash
+python3 fecth.py -y <campaign>
 ```
-python3 runner.py --workflow ztomumu --year 2017 --submit --eos
+If you skip this step, the job submission script will automatically try to generate missing filesets on demand.
+
+**4. Submit jobs**
+
+There are two main ways to submit jobs: per dataset or entire workflow.
+
+**A. Submit a single dataset**
+
+Use [submit_condor.py](https://github.com/deoache/bsm3g_coffea/blob/main/submit_condor.py) to submit jobs for a specific workflow, dataset and campaign/year:
+```bash
+python3 submit_condor.py --workflow <workflow> --dataset <dataset> --year <campaign> --submit --eos
+```
+
+**B. Submit all datasets from a workflow**
+
+The easiest and recommended method is using [runner.py](https://github.com/deoache/higgscharm/blob/lxplus/runner.py), which reads the `datasets` section in the workflow YAML and submits jobs for all listed data and MC samples
+```bash
+python3 runner.py --workflow <workflow> --year <campaign> --submit --eos
 ``` 
 
-**Note**: It's recommended to add the `--eos` flag to save the outputs in your `/eos` area, so the postprocessing step can be done from [SWAN](https://swan-k8s.cern.ch/hub/spawn). **In this case, you will need to clone the repo also in [SWAN](https://swan-k8s.cern.ch/hub/spawn) (select the 105a release) in order to be able to run the postprocess**.
+Use `--nfiles <N>` to control how many root files are used per job (default is 10).
 
-After submitting the jobs you can watch their status by typing:
-```
+**Note**: It's recommended to add the `--eos` flag to save the outputs to your `/eos` area, so the postprocessing step can be done from [SWAN](https://swan-k8s.cern.ch/hub/spawn). **In this case, you will need to clone the repo also in [SWAN](https://swan-k8s.cern.ch/hub/spawn) (select the 105a release) in order to be able to run the postprocess**.
+
+**5. Monitor job status**
+
+To continuously monitor your Condor jobs:
+```bash
 watch condor_q
 ```
-You can use the `jobs_status.py` script to see which jobs are still to be executed, build new datasets in case there are xrootd OS errors, update and resubmit condor jobs.
+To get a summary of missing, failed, or incomplete jobs, and optionally resubmit them, use:
+```bash
+python3 jobs_status.py --workflow <workflow> --year <campaign> --eos
 ```
-python3 jobs_status.py --workflow ztomumu --year 2017 --eos
-```
+It can also regenerate filesets and resubmit jobs if needed
+
 
 ### Postprocessing
 
-Once all jobs are done for a processor/year, you can get the results using the `run_postprocess.py` script:
-```
-python3 run_postprocess.py --workflow ztomumu --year 2017 --postprocess --plot --log
+Once all jobs are done, you can get the results (plots + tables) using `run_postprocess.py`:
+```bash
+python3 run_postprocess.py --workflow <workflow> --year <campaign> --postprocess --plot --log
 ``` 
 Results will be saved to the same directory as the output files
