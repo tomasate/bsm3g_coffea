@@ -5,6 +5,7 @@ from coffea import processor
 from coffea.analysis_tools import PackedSelection, Weights
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.histograms import HistBuilder, fill_histograms
+from analysis.corrections.jetvetomaps import apply_jetvetomaps
 from analysis.corrections import (
     object_corrector_manager,
     weight_manager,
@@ -18,7 +19,7 @@ from analysis.selections import (
     get_stitching_mask,
     get_hemcleaning_mask,
 )
-from analysis.corrections.jetvetomaps import apply_jetvetomaps
+
 
 
 def update(events, collections):
@@ -94,16 +95,8 @@ class BaseProcessor(processor.ProcessorABC):
     def process_shift(self, events, shift_name):
         year = self.year
         is_mc = self.is_mc
-        # get number of events
-        nevents = len(events)
         # get dataset name
         dataset = events.metadata["dataset"]
-        # get object and event selection configs
-        object_selection = self.workflow_config.object_selection
-        event_selection = self.workflow_config.event_selection
-        hlt_paths = event_selection["hlt_paths"]
-        # create copies of histogram objects
-        histograms = copy.deepcopy(self.histograms)
         # initialize output dictionary
         output = {}
         output["metadata"] = {}
@@ -112,28 +105,30 @@ class BaseProcessor(processor.ProcessorABC):
             sumw = ak.sum(events.genWeight) if is_mc else len(events)
             output["metadata"].update({"sumw": sumw})
 
-        # -------------------------------------------------------------
+        # ----------------------------------------------------------------------------------
         # object selection
-        # -------------------------------------------------------------
+        # ----------------------------------------------------------------------------------
         if "jets_veto" in self.workflow_config.corrections_config["objects"]:
             # apply jet veto maps and update missing energy
             apply_jetvetomaps(events, year)
 
-        object_selector = ObjectSelector(object_selection, year)
+        object_selector = ObjectSelector(self.workflow_config.object_selection, year)
         objects = object_selector.select_objects(events)
-        # -------------------------------------------------------------
+        # ----------------------------------------------------------------------------------
         # event selection
-        # -------------------------------------------------------------
-        # itinialize selection manager
+        # ----------------------------------------------------------------------------------
+        # itinialize selection manager and add all selections from workflow
         selection_manager = PackedSelection()
-        # add all selections to selector manager
+        #  to selector manager
+        event_selection = self.workflow_config.event_selection
+        hlt_paths = event_selection["hlt_paths"]
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
-        # --------------------------------------------------------------
+        # -----------------------------------------------------------------------------------
         # Histogram filling
-        # --------------------------------------------------------------
-        categories = event_selection["categories"]
-        for category, category_cuts in categories.items():
+        # -----------------------------------------------------------------------------------
+        histograms = copy.deepcopy(self.histograms)
+        for category, category_cuts in event_selection["categories"].items():
             # get selection mask by category
             category_mask = selection_manager.all(*category_cuts)
             nevents_after = ak.sum(category_mask)
