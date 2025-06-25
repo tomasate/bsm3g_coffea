@@ -12,7 +12,6 @@ def get_rootfiles(year: str, dataset: str):
     fileset_path = Path(f"{main_dir}/analysis/filesets")
     with open(f"{fileset_path}/{year}_fileset.yaml", "r") as f:
         dataset_config = yaml.safe_load(f)[dataset]
-
     # check for .root files in the specified path
     root_files = glob.glob(f"{dataset_config['path']}/*.root")
     if not root_files:
@@ -29,18 +28,15 @@ def divide_list(lst: list, nfiles: int = 20) -> list:
     """Divide a list into sublists such that each sublist has at least 20 elements."""
     if len(lst) < nfiles:
         return [lst]
-
     # Dynamically calculate the number of sublists such that each has at least 20 elements
     n = len(lst) // nfiles  # This gives the number of groups with at least 20 elements
     if len(lst) % nfiles != 0:
         n += 1  # Increase n by 1 if there is a remainder, to accommodate extra elements
-
     # Divide the list into 'n' sublists
     size = len(lst) // n
     remainder = len(lst) % n
     result = []
     start = 0
-
     for i in range(n):
         if i < remainder:
             end = start + size + 1
@@ -127,14 +123,10 @@ def extract_xrootd_errors(error_files: list) -> set:
 
 
 def get_datasets_map(year: str):
-    run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
-    nano_version = "nanov9" if run_key == "Run2" else "nanov12"
-    fileset_path = Path.cwd() / "analysis" / "filesets" / f"{year}_{nano_version}.yaml"
-    with open(fileset_path) as f:
-        fileset_config = yaml.safe_load(f)
+    dataset_config = get_dataset_config(year)
     datasets_map = {}
-    for sample in fileset_config:
-        key = fileset_config[sample]["key"]
+    for sample in dataset_config:
+        key = dataset_config[sample]["key"]
         if key in datasets_map:
             datasets_map[key] += [sample]
         else:
