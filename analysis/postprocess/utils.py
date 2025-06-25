@@ -177,6 +177,8 @@ def df_to_latex_average(df, table_title="Events"):
 def get_variations_keys(processed_histograms: dict):
     variations = {}
     for process, histogram_dict in processed_histograms.items():
+        if process == "Data":
+            continue
         for feature in histogram_dict:
             helper_histogram = histogram_dict[feature]
             variations = [

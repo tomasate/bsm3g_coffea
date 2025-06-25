@@ -1,4 +1,5 @@
 import gc
+import sys
 import yaml
 import glob
 import logging
@@ -10,6 +11,7 @@ from pathlib import Path
 from collections import defaultdict
 from coffea.util import save, load
 from coffea.processor import accumulate
+from analysis.filesets.utils import get_dataset_config
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
 from analysis.postprocess.coffea_postprocessor import (
@@ -32,7 +34,7 @@ from analysis.postprocess.utils import (
 
 
 OUTPUT_DIR = Path.cwd() / "outputs"
-FILE_EXTENSION = ".coffea"
+FILE_EXTENSION = "coffea"
 TXT_EXT = "txt"
 
 
@@ -54,10 +56,13 @@ def parse_arguments():
         "--year",
         required=True,
         choices=[
+            "2016",
             "2016preVFP",
             "2016postVFP",
             "2017",
             "2018",
+            "2022",
+            "2023",
             "2022preEE",
             "2022postEE",
             "2023preBPix",
@@ -143,7 +148,7 @@ if __name__ == "__main__":
         identifier_map = {"2016": "VFP", "2022": "EE", "2023": "BPix"}
         identifier = identifier_map[args.year]
 
-        if args.workflow in ["2b1e", "2b1mu"]:
+        if args.workflow in ["2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
             print_header(f"Systematic uncertainty impact")
             syst_df = uncertainty_table(processed_histograms, args.workflow)
             syst_df.to_csv(
@@ -218,11 +223,6 @@ if __name__ == "__main__":
 
     if args.postprocess:
         logging.info(workflow_config.to_yaml())
-
-        fileset_path = Path.cwd() / "analysis/filesets" / f"{args.year}_nanov9.yaml"
-        with open(fileset_path, "r") as f:
-            dataset_configs = yaml.safe_load(f)
-
         print_header(f"Reading outputs from: {output_dir}")
 
         extension = ".coffea"
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         samples_in_out = [
             str(p).split("/")[-1] for p in output_dir.iterdir() if p.is_dir()
         ]
-        for sample, config in dataset_configs.items():
+        for sample, config in get_dataset_config(args.year).items():
             if sample in samples_in_out:
                 process_samples_map[config["process"]].append(sample)
 
@@ -278,7 +278,7 @@ if __name__ == "__main__":
             process_samples_map=process_samples_map,
         )
 
-        if args.workflow in ["2b1e", "2b1mu"]:
+        if args.workflow in ["2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
             print_header(f"Systematic uncertainty impact")
             syst_df = uncertainty_table(processed_histograms, args.workflow)
             syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
@@ -332,9 +332,9 @@ if __name__ == "__main__":
                 f.write(latex_table_average)
 
     if args.plot:
-        if not args.postprocess and args.year != "2016":
+        if not args.postprocess and args.year not in ["2016", "2022", "2023"]:
             postprocess_file = (
-                output_dir / f"{args.year}_processed_histograms{FILE_EXTENSION}"
+                output_dir / f"{args.year}_processed_histograms.{FILE_EXTENSION}"
             )
             processed_histograms = load_histogram_file(postprocess_file)
             if processed_histograms is None:

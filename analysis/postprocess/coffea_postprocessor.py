@@ -6,6 +6,7 @@ import pandas as pd
 from pathlib import Path
 from coffea.util import load, save
 from coffea.processor import accumulate
+from analysis.filesets.utils import get_dataset_config
 from analysis.postprocess.utils import print_header, get_variations_keys
 
 
@@ -17,10 +18,6 @@ def save_process_histograms_by_sample(
     categories,
 ):
     print_header(f"Processing {sample} outputs")
-
-    fileset_file = Path.cwd() / "analysis" / "filesets" / f"{year}_nanov9.yaml"
-    with open(fileset_file, "r") as f:
-        dataset_config = yaml.safe_load(f)
 
     metadata = {}
     histograms = {}
@@ -56,9 +53,10 @@ def save_process_histograms_by_sample(
     xsecs = {}
     sumw = {}
     weight = 1
+    dataset_config = get_dataset_config(year)
     xsec = dataset_config[sample]["xsec"]
     sumw = metadata["sumw"]
-    if dataset_config[sample]["is_mc"]:
+    if dataset_config[sample]["era"] == "MC":
         weight = (luminosities[year] * xsec) / sumw
 
     logging.info(f"luminosity [1/pb]: {luminosities[year]}")
@@ -163,7 +161,7 @@ def get_cutflow(processed_histograms, category):
     self.cutflow_df.to_csv(f"{output_path}/cutflow_{category}.csv")
 
 
-def find_kin_and_axis(processed_histograms, name="multiplicity"):
+def find_kin_and_axis(processed_histograms, name="jet_multiplicity"):
     for process, histogram_dict in processed_histograms.items():
         if process == "Data":
             continue

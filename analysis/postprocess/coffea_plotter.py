@@ -9,6 +9,7 @@ from matplotlib.lines import Line2D
 from coffea.processor import accumulate
 from hist.intervals import poisson_interval
 from matplotlib.offsetbox import AnchoredText
+from analysis.filesets.utils import get_dataset_config
 from analysis.histograms import VariableAxis, IntegerAxis
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.utils import (
@@ -55,9 +56,7 @@ class CoffeaPlotter:
             "2022": "2022preEE",
             "2023": "2023preBPix",
         }
-        aux_year = aux_year_map.get(year, year)
-        with open(f"{Path.cwd()}/analysis/filesets/{aux_year}_nanov9.yaml", "r") as f:
-            dataset_configs = yaml.safe_load(f)
+        dataset_configs = get_dataset_config(aux_year_map.get(year, year))
         processes = sorted(
             set(
                 dataset_configs[sample]["process"]
