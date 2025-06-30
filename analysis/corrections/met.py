@@ -29,18 +29,32 @@ def apply_met_phi_corrections(
         "2016postVFP": [278769, 284045],
         "2017": [297020, 306463],
         "2018": [315252, 325274],
+        "2022preEE": [355094, 359017],
+        "2022postEE": [359045, 362760],
     }
     if year in run_ranges:
-        cset = correctionlib.CorrectionSet.from_file(
-            get_pog_json(json_name="met", year=year)
+        run_key = (
+            "run3" if year.startswith("2022") or year.startswith("2023") else "run2"
         )
-        events["MET", "pt_raw"] = ak.ones_like(events.MET.pt) * events.MET.pt
-        events["MET", "phi_raw"] = ak.ones_like(events.MET.phi) * events.MET.phi
+        met_key = "MET" if run_key == "run2" else "PuppiMET"
+        cset_file = (
+            get_pog_json(json_name="met", year=year)
+            if run_key == "run2"
+            else "analysis/data/run3_met_xy_corrections.json"
+        )
+        cset = correctionlib.CorrectionSet.from_file(cset_file)
+
+        events[met_key, "pt_raw"] = (
+            ak.ones_like(events[met_key].pt) * events[met_key].pt
+        )
+        events[met_key, "phi_raw"] = (
+            ak.ones_like(events[met_key].phi) * events[met_key].phi
+        )
 
         # make sure to not cross the maximum allowed value for uncorrected met
-        met_pt = events.MET.pt_raw
+        met_pt = events[met_key].pt_raw
         met_pt = np.clip(met_pt, 0.0, 6499.0)
-        met_phi = events.MET.phi_raw
+        met_phi = events[met_key].phi_raw
         met_phi = np.clip(met_phi, -3.5, 3.5)
 
         data_kind = "mc" if hasattr(events, "genWeight") else "data"
@@ -51,13 +65,23 @@ def apply_met_phi_corrections(
         else:
             run = events.run
         try:
-            events["MET", "pt"] = cset[f"pt_metphicorr_pfmet_{data_kind}"].evaluate(
+            pt_corr_file = (
+                f"pt_metphicorr_pfmet_{data_kind}"
+                if run_key == "run2"
+                else f"pt_metphicorr_puppimet_{data_kind}"
+            )
+            events[met_key, "pt"] = cset[pt_corr_file].evaluate(
                 met_pt.to_numpy(),
                 met_phi.to_numpy(),
                 events.PV.npvsGood.to_numpy(),
                 run,
             )
-            events["MET", "phi"] = cset[f"phi_metphicorr_pfmet_{data_kind}"].evaluate(
+            phi_corr_file = (
+                f"phi_metphicorr_pfmet_{data_kind}"
+                if run_key == "run2"
+                else f"phi_metphicorr_puppimet_{data_kind}"
+            )
+            events[met_key, "phi"] = cset[phi_corr_file].evaluate(
                 met_pt.to_numpy(),
                 met_phi.to_numpy(),
                 events.PV.npvsGood.to_numpy(),
