@@ -121,7 +121,8 @@ class BaseProcessor(processor.ProcessorABC):
         selection_manager = PackedSelection()
         #  to selector manager
         event_selection = self.workflow_config.event_selection
-        hlt_paths = event_selection["hlt_paths"]
+        if "hlt_paths" in event_selection:
+            hlt_paths = event_selection["hlt_paths"]
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
         # -----------------------------------------------------------------------------------

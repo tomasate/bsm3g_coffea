@@ -1,0 +1,97 @@
+datasets:
+  data: null
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson
+object_selection:
+  jets:
+    field: events.Jet
+    add_cut:
+      pass_wp:
+        - working_points.jets_deepjet_b(events, 'medium', year)
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.4
+      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_pileup_id(events, 'tight', year)
+event_selection:
+  selections:
+    goodvertex: events.PV.npvsGood > 0
+  categories:
+    base:
+      - goodvertex
+corrections:
+  objects:
+    - jets
+    - jets_veto
+  apply_obj_syst: false
+  event_weights:
+    genWeight: true
+    pileupWeight: true
+    l1prefiringWeight: true
+    pujetid: 
+      - id: tight
+histogram_config:
+  flow: true
+  add_weight: true
+  add_syst_axis: true
+  axes:
+    vertex_multiplicity:
+      type: Integer
+      start: 0
+      stop: 100
+      label: vertex multiplicity
+      expression: events.PV.npvsGood
+    jet_multiplicity:
+      type: Integer
+      start: 0
+      stop: 14
+      label: Jet multiplicity
+      expression: ak.num(objects['jets'])
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+        - 1000
+      label: $p_T(\text{jet})$ [GeV]
+      expression: objects['jets'].pt
+    jet_abseta:
+      type: Regular
+      bins: 50
+      start: -2.4
+      stop: 2.4
+      label: $|\eta(\text{jet})|$
+      expression: np.abs(objects['jets'].eta)
+    jet_flavor:
+      type: IntCategory
+      categories: [0, 4, 5]
+      label: hadronFlavour${jet}$
+      expression: objects['jets'].hadronFlavour
+    jet_passwp:
+      type: Regular
+      bins: 2
+      start: 0
+      stop: 2
+      label: pass WP
+      expression: objects['jets'].pass_wp
+  layout:
+    multiplicity:
+      - vertex_multiplicity
+      - jet_multiplicity
+    eff:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_passwp
