@@ -36,21 +36,9 @@ corrections:
       - id: tight
 histogram_config:
   flow: true
-  add_weight: true
-  add_syst_axis: true
+  add_weight: false
+  add_syst_axis: false
   axes:
-    vertex_multiplicity:
-      type: Integer
-      start: 0
-      stop: 100
-      label: vertex multiplicity
-      expression: events.PV.npvsGood
-    jet_multiplicity:
-      type: Integer
-      start: 0
-      stop: 14
-      label: Jet multiplicity
-      expression: ak.num(objects['jets'])
     jet_pt:
       type: Variable
       edges:
@@ -69,8 +57,8 @@ histogram_config:
       expression: objects['jets'].pt
     jet_abseta:
       type: Regular
-      bins: 50
-      start: -2.4
+      bins: 25
+      start: 0
       stop: 2.4
       label: $|\eta(\text{jet})|$
       expression: np.abs(objects['jets'].eta)
@@ -79,7 +67,7 @@ histogram_config:
       categories: [0, 4, 5]
       label: hadronFlavour${jet}$
       expression: objects['jets'].hadronFlavour
-    jet_passwp:
+    jet_pass_wp:
       type: Regular
       bins: 2
       start: 0
@@ -87,11 +75,8 @@ histogram_config:
       label: pass WP
       expression: objects['jets'].pass_wp
   layout:
-    multiplicity:
-      - vertex_multiplicity
-      - jet_multiplicity
     eff:
       - jet_pt
       - jet_abseta
       - jet_flavor
-      - jet_passwp
+      - jet_pass_wp
