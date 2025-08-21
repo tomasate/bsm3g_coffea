@@ -6,6 +6,14 @@ datasets:
     - tt
     - wjets_ht
     - diboson
+    - signalWpb_MuNu_M300
+    - signal_Wpb_MuNu_M400
+    - signal_Wpb_MuNu_M600
+    - signal_Wpb_MuNu_M750
+    - signal_Wpb_MuNu_M1000
+    - signal_Wpb_MuNu_M1500
+    - signal_Wpb_MuNu_M2000
+    - signal_Wpb_MuNu_M3000
 object_selection:
   muons:
     field: events.Muon

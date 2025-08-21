@@ -472,3 +472,99 @@ QCD_Pt-170To300_MuEnriched:
   key: qcd_mu
   query: QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM
   xsec: 8654.5
+signalWpb_MuNu_M300:
+  era: MC
+  process: Wpb_MuNu_M300
+  key: Wpb_MuNu_M300
+  query: Wpb_MuNu_M300/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M300-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M400:
+  era: MC
+  process: Wpb_MuNu_M400
+  key: Wpb_MuNu_M400
+  query: Wpb_MuNu_M400/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M400-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M600:
+  era: MC
+  process: Wpb_MuNu_M600
+  key: Wpb_MuNu_M600
+  query: Wpb_MuNu_M600/crendonh-RunIISummer20UL17_NanoAODv9_bWpM600_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M750:
+  era: MC
+  process: Wpb_MuNu_M750
+  key: Wpb_MuNu_M750
+  query: Wpb_MuNu_M750/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M750-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M1000:
+  era: MC
+  process: Wpb_MuNu_M1000
+  key: Wpb_MuNu_M1000
+  query: Wpb_MuNu_M1000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M1000-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M1500:
+  era: MC
+  process: Wpb_MuNu_M1500
+  key: Wpb_MuNu_M1500
+  query: Wpb_MuNu_M1500/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M1500-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M2000:
+  era: MC
+  process: Wpb_MuNu_M2000
+  key: Wpb_MuNu_M2000
+  query: Wpb_MuNu_M2000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M2000-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M3000:
+  era: MC
+  process: Wpb_MuNu_M3000
+  key: Wpb_MuNu_M3000
+  query: Wpb_MuNu_M3000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_MuNu_M3000-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M300:
+  era: MC
+  process: Wpb_eNu_M300
+  key: Wpb_eNu_M300
+  query: Wpb_eNu_M300/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M300-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M400:
+  era: MC
+  process: Wpb_eNu_M400
+  key: Wpb_eNu_M400
+  query: Wpb_eNu_M400/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M400-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M600:
+  era: MC
+  process: Wpb_eNu_M600
+  key: Wpb_eNu_M600
+  query: Wpb_eNu_M600/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M600-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M750:
+  era: MC
+  process: Wpb_eNu_M750
+  key: Wpb_eNu_M750
+  query: Wpb_eNu_M750/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M750-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M1000:
+  era: MC
+  process: Wpb_eNu_M1000
+  key: Wpb_eNu_M1000
+  query: Wpb_eNu_M1000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M1000-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M1500:
+  era: MC
+  process: Wpb_eNu_M1500
+  key: Wpb_eNu_M1500
+  query: Wpb_eNu_M1500/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M1500-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M2000:
+  era: MC
+  process: Wpb_eNu_M2000
+  key: Wpb_eNu_M2000
+  query: Wpb_eNu_M2000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M2000-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_eNu_M3000:
+  era: MC
+  process: Wpb_eNu_M3000
+  key: Wpb_eNu_M3000
+  query: Wpb_eNu_M3000/crendonh-RunIISummer20UL17_NanoAODv9_Wpb_eNu_M3000-00000000000000000000000000000000/USER
+  xsec: 1.0

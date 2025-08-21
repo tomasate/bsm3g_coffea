@@ -6,6 +6,14 @@ datasets:
     - tt
     - wjets_ht
     - diboson
+    - signal_Wpb_eNu_M300
+    - signal_Wpb_eNu_M400
+    - signal_Wpb_eNu_M600
+    - signal_Wpb_eNu_M750
+    - signal_Wpb_eNu_M1000
+    - signal_Wpb_eNu_M1500
+    - signal_Wpb_eNu_M2000
+    - signal_Wpb_eNu_M3000
 object_selection:
   electrons:
     field: events.Electron
