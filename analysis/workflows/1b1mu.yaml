@@ -1,5 +1,4 @@
 datasets:
-  data: null
   mc:
     - dy_inclusive
     - singletop
