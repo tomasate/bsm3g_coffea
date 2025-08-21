@@ -33,6 +33,13 @@ if __name__ == "__main__":
         type=str,
         default="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest-py3.10",
     )
+    parser.add_argument(
+        "--site",
+        dest="site",
+        default="root://xrootd-vanderbilt.sites.opensciencegrid.org:1094",
+        type=str,
+        help="site from which to read the signal samples",
+    )
     args = parser.parse_args()
 
     try:
@@ -50,3 +57,7 @@ if __name__ == "__main__":
     samples_str = " ".join(args.samples) if args.samples else ""
     cmd = f"singularity exec -B /afs -B /cvmfs {args.image} python3 analysis/filesets/build_filesets.py --year {args.year} --samples {samples_str}"
     subprocess.run(cmd, shell=True)
+
+    # add signal samples
+    signal_cmd = f"python3 analysis/filesets/build_signal_filesets.py --year {args.year} --site {args.site}"
+    subprocess.run(signal_cmd, shell=True)
