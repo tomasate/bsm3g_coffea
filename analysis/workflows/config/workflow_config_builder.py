@@ -65,7 +65,4 @@ class WorkflowConfigBuilder:
         return corrections
 
     def parse_datasets_config(self):
-        return {
-            "data": self.config["datasets"]["data"],
-            "mc": self.config["datasets"]["mc"],
-        }
+        return {key: self.config["datasets"][key] for key in self.config["datasets"]}

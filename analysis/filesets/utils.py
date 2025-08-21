@@ -134,23 +134,29 @@ def get_datasets_map(year: str):
     return datasets_map
 
 
-def get_datasets_to_run(workflow: str, year: str):
+def get_datasets_to_run_over(workflow: str, year: str):
     config_builder = WorkflowConfigBuilder(workflow=workflow)
     workflow_config = config_builder.build_workflow_config()
-    mc_samples = workflow_config.datasets["mc"]
-    data_samples = workflow_config.datasets["data"]
 
+    samples_keys_to_run_over = []
+    if "data" in workflow_config.datasets:
+        data_samples = workflow_config.datasets["data"]
+        samples_keys_to_run_over += data_samples
+    if "mc" in workflow_config.datasets:
+        mc_samples = workflow_config.datasets["mc"]
+        samples_keys_to_run_over += mc_samples
+    if "signal" in workflow_config.datasets:
+        signal_samples = workflow_config.datasets["signal"]
+        samples_keys_to_run_over += signal_samples
+
+    datasets_to_run_over = []
     datasets_map = get_datasets_map(year)
-    samples_keys_to_run = mc_samples
-    if data_samples:
-        samples_keys_to_run += data_samples
-    datasets_to_run = []
-    for key in samples_keys_to_run:
+    for key in samples_keys_to_run_over:
         if key not in datasets_map:
             print(f"\n{key} not availabe for {year}!")
             continue
-        datasets_to_run += datasets_map[key]
-    return datasets_to_run
+        datasets_to_run_over += datasets_map[key]
+    return datasets_to_run_over
 
 
 def fileset_checker(samples: list, year: str):

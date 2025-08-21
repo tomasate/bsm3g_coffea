@@ -472,7 +472,7 @@ QCD_Pt-170To300_MuEnriched:
   key: qcd_mu
   query: QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM
   xsec: 8654.5
-signalWpb_MuNu_M300:
+signal_Wpb_MuNu_M300:
   era: MC
   process: Wpb_MuNu_M300
   key: Wpb_MuNu_M300
