@@ -58,7 +58,9 @@ class CoffeaPlotter:
             "2023": "2023preBPix",
         }
         aux_year = aux_year_map.get(year, year)
-        processes, self.process_name_map, _ = get_process_maps(workflow_config, aux_year)
+        processes, self.process_name_map, _ = get_process_maps(
+            workflow_config, aux_year
+        )
         self.color_map = {
             process: color for process, color in zip(processes, self.style["colors"])
         }
@@ -110,7 +112,7 @@ class CoffeaPlotter:
             histogram_info["mc"] = {"nominal": {}, "variations": {}}
         if "signal" in self.datasets:
             histogram_info["signal"] = {"nominal": {}}
-            
+
         for process, histogram_dict in self.processed_histograms.items():
             if variable in histogram_dict:
                 aux_histogram = histogram_dict[variable]
@@ -128,7 +130,11 @@ class CoffeaPlotter:
                     histogram=aux_histogram,
                 )
             else:
-                key = "signal" if self.process_name_map[process].startswith("signal") else "mc"
+                key = (
+                    "signal"
+                    if self.process_name_map[process].startswith("signal")
+                    else "mc"
+                )
                 histogram_info[key]["nominal"][process] = self.get_histogram(
                     variable=variable,
                     category=category,
@@ -264,17 +270,17 @@ class CoffeaPlotter:
 
         # get variation histograms
         variation_histograms = histogram_info["mc"]["variations"]
-        
+
         # get Data histogram
         if not blind:
             data_histogram = histogram_info["data"]
             self.data_values = data_histogram.values()
             self.data_variances = data_histogram.variances()
-            
+
         # plot stacked MC and Data histograms
         if blind:
             add_ratio = False
-            
+
         fig, (ax, rax) = plt.subplots(
             nrows=2,
             ncols=1,
@@ -304,10 +310,12 @@ class CoffeaPlotter:
                 label="Data",
                 flow="none",
                 ax=ax,
-                
+                **self.style["data_hist_kwargs"],
             )
         if "signal" in self.datasets:
-            for signal_process, signal_histogram in histogram_info["signal"]["nominal"].items():
+            for signal_process, signal_histogram in histogram_info["signal"][
+                "nominal"
+            ].items():
                 hep.histplot(
                     signal_histogram,
                     label=signal_process,
@@ -315,7 +323,7 @@ class CoffeaPlotter:
                     flow="none",
                     ax=ax,
                     **self.style["signal_hist_kwargs"],
-                )  
+                )
         # plot uncertainty band
         self.plot_uncert_band(histogram_info, ax)
         if add_ratio:
