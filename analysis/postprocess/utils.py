@@ -198,7 +198,6 @@ def uncertainty_table(processed_histograms, workflow):
         if process != "Data":
             to_accumulate.append(processed_histograms[process])
     helper_histo = accumulate(to_accumulate)
-
     var = "electron_met_mass" if workflow in ["2b1e", "1b1e1mu"] else "muon_met_mass"
     helper_histo = helper_histo["mass"].project(var, "variation")
 

@@ -6,7 +6,7 @@ import pandas as pd
 from pathlib import Path
 from coffea.util import load, save
 from coffea.processor import accumulate
-from analysis.filesets.utils import get_dataset_config
+from analysis.filesets.utils import get_dataset_config, get_process_maps
 from analysis.postprocess.utils import print_header, get_variations_keys
 
 
@@ -139,28 +139,6 @@ def load_processed_histograms(
     return processed_histograms
 
 
-def get_cutflow(processed_histograms, category):
-    processed_cutflow = self.group_by_process(self.scaled_cutflow[category])
-    self.cutflow_df = pd.DataFrame(processed_cutflow)
-    # add total background events to cutflow
-    self.cutflow_df["Total Background"] = self.cutflow_df.drop(columns="Data").sum(
-        axis=1
-    )
-    # sort cutflow to show 'Data' and 'Total Background' first
-    self.cutflow_df = self.cutflow_df[
-        ["Data", "Total Background"]
-        + [
-            process
-            for process in self.cutflow_df.columns
-            if process not in ["Data", "Total Background"]
-        ]
-    ]
-    logging.info(
-        f'{self.cutflow_df.applymap(lambda x: f"{x:.3f}" if pd.notnull(x) else "")}\n'
-    )
-    self.cutflow_df.to_csv(f"{output_path}/cutflow_{category}.csv")
-
-
 def find_kin_and_axis(processed_histograms, name="jet_multiplicity"):
     for process, histogram_dict in processed_histograms.items():
         if process == "Data":
@@ -172,9 +150,8 @@ def find_kin_and_axis(processed_histograms, name="jet_multiplicity"):
     raise ValueError(f"No histogram with a '{name}' axis found.")
 
 
-def get_results_report(processed_histograms, category):
+def get_results_report(processed_histograms, workflow_config, category, columns_to_drop, blind):
     kin, aux_var = find_kin_and_axis(processed_histograms)
-
     nominal = {}
     variations = {}
     mcstat_err = {}
@@ -238,12 +215,12 @@ def get_results_report(processed_histograms, category):
     results = {}
     for process in nominal:
         results[process] = {}
-
         results[process]["events"] = np.sum(nominal[process].values())
         if process == "Data":
             results[process]["stat err"] = np.sqrt(np.sum(nominal[process].values()))
         else:
-            mcs.append(process)
+            if process not in columns_to_drop:
+                mcs.append(process)
             results[process]["stat err"] = mcstat_err[process]
             results[process]["syst err up"] = bin_error_up[process]
             results[process]["syst err down"] = bin_error_down[process]
@@ -259,7 +236,8 @@ def get_results_report(processed_histograms, category):
         np.sum(df.loc["syst err down", mcs] ** 2)
     )
     df = df.T
-    df.loc["Data/Total background"] = (
-        df.loc["Data", ["events"]] / df.loc["Total background", ["events"]]
-    )
+    if not blind:
+        df.loc["Data/Total background"] = (
+            df.loc["Data", ["events"]] / df.loc["Total background", ["events"]]
+        )
     return df

@@ -29,6 +29,8 @@ data_hist_kwargs:
   elinewidth: 1
   yerr: true
   xerr: true
+signal_hist_kwargs:
+  linewidth: 1.5
 ratio_error_kwargs:
   fmt: ko
   elinewidth: 1
@@ -53,3 +55,13 @@ colors:
   - "#b9ac70"
   - "#717581"
   - "#92dadd"
+  - "red"
+  - "blue"
+  - "yellow"
+  - "green"
+  - "orange"
+  - "cyan"
+  - "purple"
+  - "olive"
+  - "brown"
+  - "gray"

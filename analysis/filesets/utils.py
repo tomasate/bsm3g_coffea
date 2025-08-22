@@ -3,6 +3,7 @@ import glob
 import yaml
 import json
 import subprocess
+import numpy as np
 from pathlib import Path
 from analysis.workflows.config import WorkflowConfigBuilder
 
@@ -178,3 +179,21 @@ def fileset_checker(samples: list, year: str):
         print(yaml.dump(samples, default_flow_style=False, sort_keys=False, indent=2))
         cmd = f"python3 fetch.py --year {year} --samples {' '.join(samples)}"
         subprocess.run(cmd, shell=True)
+
+
+def get_process_maps(workflow_config, year):
+    datasets = workflow_config.datasets
+    dataset_configs = get_dataset_config(year)
+    sample_keys = np.concatenate(list(datasets.values())).tolist()
+    processes = []
+    process_name_map = {}
+    key_process_map = {}
+    for sample in dataset_configs:
+        sample_key = dataset_configs[sample]["key"]
+        if sample_key in sample_keys:
+            sample_process = dataset_configs[sample]["process"]
+            if sample_process not in processes:
+                processes.append(sample_process)
+                process_name_map[sample_process] = sample
+                key_process_map[sample_key] = sample_process
+    return processes, process_name_map, key_process_map

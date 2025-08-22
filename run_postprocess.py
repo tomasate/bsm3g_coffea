@@ -11,7 +11,7 @@ from pathlib import Path
 from collections import defaultdict
 from coffea.util import save, load
 from coffea.processor import accumulate
-from analysis.filesets.utils import get_dataset_config
+from analysis.filesets.utils import get_dataset_config, get_process_maps
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
 from analysis.postprocess.coffea_postprocessor import (
@@ -19,7 +19,6 @@ from analysis.postprocess.coffea_postprocessor import (
     save_process_histograms_by_sample,
     load_processed_histograms,
     get_results_report,
-    get_cutflow,
 )
 from analysis.postprocess.utils import (
     print_header,
@@ -99,6 +98,9 @@ def parse_arguments():
         choices=["coffea", "root"],
         help="Format of output histograms",
     )
+    parser.add_argument(
+        "--blind", action="store_true", help="Blind data"
+    )
     return parser.parse_args()
 
 
@@ -141,6 +143,8 @@ if __name__ == "__main__":
     event_selection = workflow_config.event_selection
     categories = workflow_config.event_selection["categories"]
     processed_histograms = None
+
+    _, process_name_map, key_process_map = get_process_maps(workflow_config, args.year)
 
     if args.year in ["2016", "2022", "2023"]:
         # load and accumulate processed 2016preVFP and 2016postVFP histograms
@@ -222,6 +226,7 @@ if __name__ == "__main__":
             )
 
     if args.postprocess:
+        
         logging.info(workflow_config.to_yaml())
         print_header(f"Reading outputs from: {output_dir}")
 
@@ -233,6 +238,7 @@ if __name__ == "__main__":
         ]
 
         process_samples_map = defaultdict(list)
+        
         samples_in_out = [
             str(p).split("/")[-1] for p in output_dir.iterdir() if p.is_dir()
         ]
@@ -297,17 +303,31 @@ if __name__ == "__main__":
                     [cutflow_df, pd.read_csv(cutflow_file, index_col=[0])], axis=1
                 )
 
-            cutflow_df["Total Background"] = cutflow_df.drop(columns="Data").sum(axis=1)
+            columns_to_drop = []
+            if "signal" in workflow_config.datasets:
+                signal_keys = [k for k in workflow_config.datasets["signal"]]
+                signals = [key_process_map[key] for key in signal_keys]
+                columns_to_drop += signals
+        
+            if not args.blind:
+                columns_to_drop += ["Data"]
+                
+            total_background = cutflow_df.drop(columns=columns_to_drop).sum(axis=1)
+            cutflow_df["Total Background"] = total_background
 
             cutflow_index = event_selection["categories"][category]
             cutflow_df = cutflow_df.loc[cutflow_index]
 
+            if not args.blind:
+                to_process = ["Data", "Total Background"]
+            else:
+                to_process = ["Total Background"]
             cutflow_df = cutflow_df[
-                ["Data", "Total Background"]
+                to_process
                 + [
                     process
                     for process in cutflow_df.columns
-                    if process not in ["Data", "Total Background"]
+                    if process not in to_process
                 ]
             ]
             logging.info(
@@ -317,19 +337,20 @@ if __name__ == "__main__":
             logging.info("\n")
 
             print_header(f"Results")
-            results_df = get_results_report(processed_histograms, category)
+            results_df = get_results_report(processed_histograms, workflow_config, category, columns_to_drop, args.blind)
             logging.info(
                 results_df.applymap(lambda x: f"{x:.5f}" if pd.notnull(x) else "")
             )
             logging.info("\n")
             results_df.to_csv(f"{category_dir}/results_{category}.csv")
 
-            latex_table_asymmetric = df_to_latex_asymmetric(results_df)
-            with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
-                f.write(latex_table_asymmetric)
-            latex_table_average = df_to_latex_average(results_df)
-            with open(category_dir / f"results_{category}_average.txt", "w") as f:
-                f.write(latex_table_average)
+            if not args.blind:
+                latex_table_asymmetric = df_to_latex_asymmetric(results_df)
+                with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
+                    f.write(latex_table_asymmetric)
+                latex_table_average = df_to_latex_average(results_df)
+                with open(category_dir / f"results_{category}_average.txt", "w") as f:
+                    f.write(latex_table_average)
 
     if args.plot:
         if not args.postprocess and args.year not in ["2016", "2022", "2023"]:
@@ -362,6 +383,7 @@ if __name__ == "__main__":
                     log=args.log,
                     extension=args.extension,
                     add_ratio=not args.no_ratio,
+                    blind=args.blind
                 )
             subprocess.run(
                 f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",
