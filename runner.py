@@ -2,7 +2,7 @@ import json
 import argparse
 import subprocess
 from pathlib import Path
-from analysis.filesets.utils import get_datasets_to_run, fileset_checker
+from analysis.filesets.utils import get_datasets_to_run_over, fileset_checker
 
 
 if __name__ == "__main__":
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # submit (or prepare) a job for each dataset using the given arguments
-    datasets_to_run = get_datasets_to_run(args.workflow, args.year)
+    datasets_to_run = get_datasets_to_run_over(args.workflow, args.year)
     fileset_checker(datasets_to_run, args.year)
     cmd = ["python3", "submit_condor.py"]
     for dataset in datasets_to_run:
