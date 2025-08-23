@@ -54,8 +54,8 @@ object_selection:
     field: select_met
 event_selection:
   hlt_paths:
-    muon:
-      - SingleMu
+    electron:
+      - SingleEle
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
