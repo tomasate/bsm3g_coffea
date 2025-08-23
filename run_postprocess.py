@@ -144,6 +144,9 @@ if __name__ == "__main__":
     categories = workflow_config.event_selection["categories"]
     processed_histograms = None
 
+    if "data" not in workflow_config.datasets:
+        args.blind = True
+
     _, process_name_map, key_process_map = get_process_maps(workflow_config, args.year)
 
     if args.year in ["2016", "2022", "2023"]:
