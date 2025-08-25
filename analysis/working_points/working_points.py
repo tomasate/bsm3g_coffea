@@ -1,5 +1,6 @@
 import numpy as np
 import awkward as ak
+from analysis.utils import load_btag_wps
 
 
 class WorkingPoints:
@@ -186,7 +187,9 @@ class WorkingPoints:
         return wps[wp]
 
     def jets_pileup_id(self, events, wp, year):
-        run_key = "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
+        run_key = (
+            "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
+        )
         if run_key == "Run2":
             wps = {
                 "2016preVFP": {
@@ -225,48 +228,14 @@ class WorkingPoints:
             return np.ones_like(events.Jet.pt, dtype=bool)
 
     def jets_deepjet_b(self, events, wp, year):
-        wps = {
-            "2016preVFP": {
-                "loose": events.Jet.btagDeepFlavB > 0.0508,
-                "medium": events.Jet.btagDeepFlavB > 0.2598,
-                "tight": events.Jet.btagDeepFlavB > 0.6502,
-            },
-            "2016postVFP": {
-                "loose": events.Jet.btagDeepFlavB > 0.048,
-                "medium": events.Jet.btagDeepFlavB > 0.2489,
-                "tight": events.Jet.btagDeepFlavB > 0.6377,
-            },
-            "2017": {
-                "loose": events.Jet.btagDeepFlavB > 0.0532,
-                "medium": events.Jet.btagDeepFlavB > 0.304,
-                "tight": events.Jet.btagDeepFlavB > 0.7476,
-            },
-            "2018": {
-                "loose": events.Jet.btagDeepFlavB > 0.049,
-                "medium": events.Jet.btagDeepFlavB > 0.2783,
-                "tight": events.Jet.btagDeepFlavB > 0.71,
-            },
-            "2022preEE": {
-                "loose": events.Jet.btagDeepFlavB > 0.0583,
-                "medium": events.Jet.btagDeepFlavB > 0.3086,
-                "tight": events.Jet.btagDeepFlavB > 0.7183,
-            },
-            "2022postEE": {
-                "loose": events.Jet.btagDeepFlavB > 0.0614,
-                "medium": events.Jet.btagDeepFlavB > 0.3196,
-                "tight": events.Jet.btagDeepFlavB > 0.73,
-            },
-            "2023preBPix": {
-                "loose": events.Jet.btagDeepFlavB > 0.0479,
-                "medium": events.Jet.btagDeepFlavB > 0.2431,
-                "tight": events.Jet.btagDeepFlavB > 0.6553,
-            },
-            "2023postBPix": {
-                "loose": events.Jet.btagDeepFlavB > 0.048,
-                "medium": events.Jet.btagDeepFlavB > 0.2435,
-                "tight": events.Jet.btagDeepFlavB > 0.6563,
-            },
-        }
+        btag_wps = load_btag_wps(tagger="deepJet")
+
+        wps = {}
+        for y in btag_wps:
+            wps[y] = {}
+            for wp_str in btag_wps[y]:
+                wps[y][wp_str] = events.Jet.btagDeepFlavB > btag_wps[y][wp_str]
+
         if wp not in wps[year]:
             raise ValueError(
                 f"Invalid value {wp} for DeepJet b-tag working point. Please specify {list(wps[year].keys())}"

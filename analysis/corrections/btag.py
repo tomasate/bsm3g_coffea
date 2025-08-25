@@ -8,6 +8,7 @@ import awkward as ak
 import importlib.resources
 from coffea import util
 from typing import Type
+from analysis.utils import load_btag_wps
 from coffea.analysis_tools import Weights
 from analysis.working_points import working_points
 from analysis.corrections.utils import get_pog_json
@@ -72,6 +73,9 @@ class BTagCorrector:
         self._year_key = year
         if year.startswith("2016"):
             self._year_key = "2016"
+        self.run_key = (
+            "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
+        )
 
         # check available btag SFs
         self._taggers = {"deepJet": {"tight": "T", "medium": "M", "loose": "L"}}
@@ -88,7 +92,10 @@ class BTagCorrector:
         years = set()
         for path in file_paths:
             wp_match = re.search(rf"{self._tagger}_(.*?)_", path)
-            year_match = re.search(r"_(\d{4}(?:preVFP|postVFP)?)\.coffea", path)
+            year_match = re.search(
+                r"_(\d{4}(?:preVFP|postVFP|preEE|postEE|preBPix|postBPix)?)\.coffea",
+                path,
+            )
             if wp_match:
                 wps.add(wp_match.group(1))
             if year_match:
@@ -119,28 +126,7 @@ class BTagCorrector:
         self._light_jets = events.selected_jets[events.selected_jets.hadronFlavour == 0]
         self._jet_map = {"bc": self._bc_jets, "light": self._light_jets}
 
-        btag_wps = {
-            "2016preVFP": {
-                "loose": 0.0508,
-                "medium": 0.2598,
-                "tight": 0.6502,
-            },
-            "2016postVFP": {
-                "loose": 0.048,
-                "medium": 0.2489,
-                "tight": 0.6377,
-            },
-            "2017": {
-                "loose": 0.0532,
-                "medium": 0.304,
-                "tight": 0.7476,
-            },
-            "2018": {
-                "loose": 0.049,
-                "medium": 0.2783,
-                "tight": 0.71,
-            },
-        }
+        btag_wps = load_btag_wps(tagger=self._tagger)
         self._jet_pass_btag = {
             "bc": self._jet_map["bc"]["btagDeepFlavB"] > btag_wps[year][self._wp],
             "light": self._jet_map["light"]["btagDeepFlavB"] > btag_wps[year][self._wp],
@@ -259,7 +245,11 @@ class BTagCorrector:
         """
         cset_keys = {
             "bc": f"{self._tagger}_{self._sf}",
-            "light": f"{self._tagger}_incl",
+            "light": (
+                f"{self._tagger}_incl"
+                if self.run_key == "Run2"
+                else f"{self._tagger}_light"
+            ),
         }
         # until correctionlib handles jagged data natively we have to flatten and unflatten
         j, nj = ak.flatten(self._jet_map[flavor]), ak.num(self._jet_map[flavor])

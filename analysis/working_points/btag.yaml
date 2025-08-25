@@ -1,0 +1,33 @@
+deepJet:
+  2016preVFP:
+    loose: 0.0508
+    medium: 0.2598
+    tight: 0.6502
+  2016postVFP:
+    loose: 0.048
+    medium: 0.2489
+    tight: 0.6377
+  '2017':
+    loose: 0.0532
+    medium: 0.304
+    tight: 0.7476
+  '2018':
+    loose: 0.049
+    medium: 0.2783
+    tight: 0.71
+  2022preEE:
+    loose: 0.0583
+    medium: 0.3086
+    tight: 0.7183
+  2022postEE:
+    loose: 0.0614
+    medium: 0.3196
+    tight: 0.73
+  2023preBPix:
+    loose: 0.0479
+    medium: 0.2431
+    tight: 0.6553
+  2023postBPix:
+    loose: 0.048
+    medium: 0.2435
+    tight: 0.6563
