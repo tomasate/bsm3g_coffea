@@ -1,26 +1,4 @@
-"""Check job outputs, identify missing results, and optionally resubmit jobs or update input filesets based on xrootd site issues"""
-
-import yaml
-import json
-import argparse
-import logging
-import subprocess
-from pathlib import Path
-from analysis.filesets.xrootd_sites import xroot_to_site
-from datetime import datetime, timedelta
-from analysis.utils import make_output_directory
-from analysis.filesets.xrootd_sites import xroot_to_site
-from analysis.filesets.utils import divide_list, modify_site_list, extract_xrootd_errors
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-w",
-        "--workflow",
-        type=str,
-        required=True,
-        choices=[
+choices=[
             f.stem for f in (Path.cwd() / "analysis" / "workflows").glob("*.yaml")
         ],
         help="workflow config to test",
@@ -57,6 +35,9 @@ def parse_args():
         type=int,
         default=3,
         help="use .err files that have been modified less than 'hours_ago' hours ago",
+    )
+    parser.add_argument(
+        "--reset", action="store_true", help="descp"
     )
     return parser.parse_args()
 
@@ -261,6 +242,16 @@ def resubmit_jobs(job_dir, jobnum_missing, datasets_with_missing_jobs, workflow,
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = parse_args()
+
+    if args.reset:
+        subprocess.run(f"rm -rf condor/{args.workflow}/{args.year}", shell=True)
+        subprocess.run(f"rm -rf condor/logs/{args.workflow}/{args.year}", shell=True)
+        subprocess.run(f"rm -rf analysis/filesets/{args.year}_sites.yaml", shell=True)
+        subprocess.run(f"rm -rf analysis/filesets/fileset_{args.year}_NANO_lxplus.json", shell=True)
+        reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
+        if args.eos:
+            reset_cmd += " --eos"
+        subprocess.run(reset_cmd, shell=True)
 
     output_dir = Path(make_output_directory(args))
     logging.info(f"Reading outputs from: {output_dir}\n")
