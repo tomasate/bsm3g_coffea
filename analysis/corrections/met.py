@@ -107,10 +107,10 @@ def corrected_polar_met(
     https://github.com/CoffeaTeam/coffea/blob/master/src/coffea/jetmet_tools/CorrectedMETFactory.py#L6
     """
     sin, cos = np.sin(other_phi), np.cos(other_phi)
-    met_px = met_pt * np.cos(met_phi) + ak.sum(
+    met_px = met_pt * np.cos(met_phi) - ak.sum(
         (other_pt_new - other_pt_old) * cos, axis=1
     )
-    met_py = met_pt * np.sin(met_phi) + ak.sum(
+    met_py = met_pt * np.sin(met_phi) - ak.sum(
         (other_pt_new - other_pt_old) * sin, axis=1
     )
     if positive is not None and dx is not None and dy is not None:
