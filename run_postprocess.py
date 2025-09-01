@@ -150,7 +150,7 @@ if __name__ == "__main__":
     if args.year in ["2016", "2022", "2023"]:
         # load and accumulate processed 2016preVFP and 2016postVFP histograms
         processed_histograms = load_year_histograms(args.workflow, args.year)
-        save(processed_histograms, f"{output_dir}/{year}_processed_histograms.coffea")
+        save(processed_histograms, f"{output_dir}/{args.year}_processed_histograms.coffea")
         identifier_map = {"2016": "VFP", "2022": "EE", "2023": "BPix"}
         identifier = identifier_map[args.year]
 
