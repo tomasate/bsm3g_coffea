@@ -182,8 +182,14 @@ def fileset_checker(samples: list, year: str):
 
 
 def get_process_maps(workflow_config, year):
+    aux_year_map = {
+        "2016": "2016preVFP",
+        "2022": "2022preEE",
+        "2023": "2023preBPix",
+    }
+    aux_year = aux_year_map.get(year, year)
     datasets = workflow_config.datasets
-    dataset_configs = get_dataset_config(year)
+    dataset_configs = get_dataset_config(aux_year)
     sample_keys = np.concatenate(list(datasets.values())).tolist()
     processes = []
     process_name_map = {}

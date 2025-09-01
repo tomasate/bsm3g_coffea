@@ -52,15 +52,7 @@ class CoffeaPlotter:
             self.luminosities = yaml.safe_load(f)
 
         # set processes -> color and processes -> sample name maps
-        aux_year_map = {
-            "2016": "2016preVFP",
-            "2022": "2022preEE",
-            "2023": "2023preBPix",
-        }
-        aux_year = aux_year_map.get(year, year)
-        processes, self.process_name_map, _ = get_process_maps(
-            workflow_config, aux_year
-        )
+        processes, self.process_name_map, _ = get_process_maps(workflow_config, year)
         self.color_map = {
             process: color for process, color in zip(processes, self.style["colors"])
         }

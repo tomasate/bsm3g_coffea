@@ -98,9 +98,7 @@ def parse_arguments():
         choices=["coffea", "root"],
         help="Format of output histograms",
     )
-    parser.add_argument(
-        "--blind", action="store_true", help="Blind data"
-    )
+    parser.add_argument("--blind", action="store_true", help="Blind data")
     return parser.parse_args()
 
 
@@ -229,7 +227,7 @@ if __name__ == "__main__":
             )
 
     if args.postprocess:
-        
+
         logging.info(workflow_config.to_yaml())
         print_header(f"Reading outputs from: {output_dir}")
 
@@ -241,7 +239,7 @@ if __name__ == "__main__":
         ]
 
         process_samples_map = defaultdict(list)
-        
+
         samples_in_out = [
             str(p).split("/")[-1] for p in output_dir.iterdir() if p.is_dir()
         ]
@@ -311,10 +309,10 @@ if __name__ == "__main__":
                 signal_keys = [k for k in workflow_config.datasets["signal"]]
                 signals = [key_process_map[key] for key in signal_keys]
                 columns_to_drop += signals
-        
+
             if not args.blind:
                 columns_to_drop += ["Data"]
-                
+
             total_background = cutflow_df.drop(columns=columns_to_drop).sum(axis=1)
             cutflow_df["Total Background"] = total_background
 
@@ -340,7 +338,13 @@ if __name__ == "__main__":
             logging.info("\n")
 
             print_header(f"Results")
-            results_df = get_results_report(processed_histograms, workflow_config, category, columns_to_drop, args.blind)
+            results_df = get_results_report(
+                processed_histograms,
+                workflow_config,
+                category,
+                columns_to_drop,
+                args.blind,
+            )
             logging.info(
                 results_df.applymap(lambda x: f"{x:.5f}" if pd.notnull(x) else "")
             )
@@ -349,7 +353,9 @@ if __name__ == "__main__":
 
             if not args.blind:
                 latex_table_asymmetric = df_to_latex_asymmetric(results_df)
-                with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
+                with open(
+                    category_dir / f"results_{category}_asymmetric.txt", "w"
+                ) as f:
                     f.write(latex_table_asymmetric)
                 latex_table_average = df_to_latex_average(results_df)
                 with open(category_dir / f"results_{category}_average.txt", "w") as f:
@@ -386,7 +392,7 @@ if __name__ == "__main__":
                     log=args.log,
                     extension=args.extension,
                     add_ratio=not args.no_ratio,
-                    blind=args.blind
+                    blind=args.blind,
                 )
             subprocess.run(
                 f"tar -zcvf {output_dir}/{category}/{args.workflow}_{args.year}_plots.tar.gz {output_dir}/{category}/*.{args.extension}",
