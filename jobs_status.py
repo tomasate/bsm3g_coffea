@@ -198,7 +198,7 @@ def update_input_filesets(
     samples_str = (
         " ".join(datasets_with_missing_jobs) if datasets_with_missing_jobs else ""
     )
-    subprocess.run(["python3", "fetch.py", "--year", year, "--samples", samples_str])
+    subprocess.run(["python3", "fetch.py", "--year", year, "--samples", samples_str, "--skip_site"])
 
     fileset_path = fileset_dir / f"fileset_{year}_NANO_lxplus.json"
     all_filesets = json.loads(fileset_path.read_text())
