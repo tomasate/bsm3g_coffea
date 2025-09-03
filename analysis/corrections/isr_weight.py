@@ -1,0 +1,32 @@
+import copy
+import correctionlib
+import awkward as ak
+from pathlib import Path
+
+
+def add_isr_weight(events, weights, year, variation, dataset, fit):
+    if dataset.startswith("DYJetsToLL"):
+        # get input values
+        dimuon_pt = ak.firsts(events.selected_dimuons.pt)
+        njet = ak.num(events.selected_jets)
+
+        in_binning = (dimuon_pt > 0.0) & (dimuon_pt < 1000.0) & (njet > 0) & (njet < 5)
+        selected_dimuon_pt = dimuon_pt.mask[in_binning]
+        selected_njet = njet.mask[in_binning]
+        selected_dimuon_pt = ak.fill_none(selected_dimuon_pt, 500.0)
+        selected_njet = ak.fill_none(selected_njet, 2.0)
+
+        # load correction set
+        fname = f"{Path.cwd()}/analysis/data/{year}_isr_weight"
+        if fit:
+            fname += "_fit"
+        fname += ".json.gz"
+        cset = correctionlib.CorrectionSet.from_file(fname)
+
+        # compute weight
+        sf = cset["isr_weight"].evaluate(selected_dimuon_pt, selected_njet)
+        weight = ak.where(in_binning, sf, ak.ones_like(sf))
+        weights.add(
+            name="isr_weight",
+            weight=weight,
+        )
