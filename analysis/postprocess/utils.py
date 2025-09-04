@@ -42,7 +42,7 @@ def clear_output_directory(output_dir, ext):
         os.remove(file)
 
 
-def combine_event_tables(df1, df2):
+def combine_event_tables(df1, df2, blind):
     df1 = df1.sort_index()
     df2 = df2.sort_index()
     assert all(df1.index == df2.index), "index does not match!"
@@ -53,16 +53,18 @@ def combine_event_tables(df1, df2):
     combined["syst err down"] = np.sqrt(
         df1["syst err down"] ** 2 + df2["syst err down"] ** 2
     )
-    data = combined.loc["Data", "events"]
     total_bkg = combined.loc["Total background", "events"]
-    combined.loc[
-        "Data/Total background", ["events", "stat err", "syst err up", "syst err down"]
-    ] = [
-        data / total_bkg,
-        np.nan,
-        np.nan,
-        np.nan,
-    ]
+    if not blind:
+        data = combined.loc["Data", "events"]
+        combined.loc[
+            "Data/Total background",
+            ["events", "stat err", "syst err up", "syst err down"],
+        ] = [
+            data / total_bkg,
+            np.nan,
+            np.nan,
+            np.nan,
+        ]
     return combined
 
 
@@ -198,7 +200,10 @@ def uncertainty_table(processed_histograms, workflow):
         if process != "Data":
             to_accumulate.append(processed_histograms[process])
     helper_histo = accumulate(to_accumulate)
-    var = "electron_met_mass" if workflow in ["2b1e", "1b1e1mu"] else "muon_met_mass"
+    if workflow in ["2b1e", "1b1e1mu", "1b1e"]:
+        var = "electron_met_mass"
+    elif workflow in ["2b1mu", "1b1mu1e", "1b1mu"]:
+        var = "muon_met_mass"
     helper_histo = helper_histo["mass"].project(var, "variation")
 
     # get histogram per variation

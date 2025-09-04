@@ -150,11 +150,14 @@ if __name__ == "__main__":
     if args.year in ["2016", "2022", "2023"]:
         # load and accumulate processed 2016preVFP and 2016postVFP histograms
         processed_histograms = load_year_histograms(args.workflow, args.year)
-        save(processed_histograms, f"{output_dir}/{args.year}_processed_histograms.coffea")
+        save(
+            processed_histograms,
+            f"{output_dir}/{args.year}_processed_histograms.coffea",
+        )
         identifier_map = {"2016": "VFP", "2022": "EE", "2023": "BPix"}
         identifier = identifier_map[args.year]
 
-        if args.workflow in ["2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
+        if args.workflow in ["2b1e", "2b1mu", "1b1mu1e", "1b1e1mu", "1b1e", "1b1mu"]:
             print_header(f"Systematic uncertainty impact")
             syst_df = uncertainty_table(processed_histograms, args.workflow)
             syst_df.to_csv(
@@ -182,7 +185,9 @@ if __name__ == "__main__":
                 / f"results_{category}.csv",
                 index_col=0,
             )
-            combined_results = combine_event_tables(results_pre, results_post)
+            combined_results = combine_event_tables(
+                results_pre, results_post, args.blind
+            )
 
             print_header(f"Results")
             logging.info(
@@ -195,13 +200,16 @@ if __name__ == "__main__":
                 category_dir.mkdir(parents=True, exist_ok=True)
             combined_results.to_csv(category_dir / f"results_{category}.csv")
 
-            # save latex table
-            latex_table_asymmetric = df_to_latex_asymmetric(combined_results)
-            with open(category_dir / f"results_{category}_asymmetric.txt", "w") as f:
-                f.write(latex_table_asymmetric)
-            latex_table_average = df_to_latex_average(combined_results)
-            with open(category_dir / f"results_{category}_average.txt", "w") as f:
-                f.write(latex_table_average)
+            if not args.blind:
+                # save latex table
+                latex_table_asymmetric = df_to_latex_asymmetric(combined_results)
+                with open(
+                    category_dir / f"results_{category}_asymmetric.txt", "w"
+                ) as f:
+                    f.write(latex_table_asymmetric)
+                latex_table_average = df_to_latex_average(combined_results)
+                with open(category_dir / f"results_{category}_average.txt", "w") as f:
+                    f.write(latex_table_average)
 
             # load and combine cutflow tables
             print_header(f"Cutflow")
