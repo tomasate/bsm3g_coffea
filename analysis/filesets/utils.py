@@ -202,4 +202,4 @@ def get_process_maps(workflow_config, year):
                 processes.append(sample_process)
                 process_name_map[sample_process] = sample
                 key_process_map[sample_key] = sample_process
-    return processes, process_name_map, key_process_map
+    return sorted(processes), process_name_map, key_process_map
