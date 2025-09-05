@@ -41,10 +41,11 @@ class CoffeaPlotter:
         self.histogram_config = workflow_config.histogram_config
         self.datasets = workflow_config.datasets
 
-        # load luminosities and style
+        # load luminosities, style and colors
         postprocess_dir = Path.cwd() / "analysis" / "postprocess"
         style_file = postprocess_dir / "style.yaml"
         luminosity_file = postprocess_dir / "luminosity.yaml"
+        color_map_file = postprocess_dir / "color_map.yaml"
 
         with open(style_file, "r") as f:
             self.style = yaml.safe_load(f)
@@ -53,9 +54,10 @@ class CoffeaPlotter:
 
         # set processes -> color and processes -> sample name maps
         processes, self.process_name_map, _ = get_process_maps(workflow_config, year)
-        self.color_map = {
-            process: color for process, color in zip(processes, self.style["colors"])
-        }
+        with open(color_map_file, "r") as f:
+            color_map = yaml.safe_load(f)
+        self.color_map = {p: c for p, c in color_map.items() if p in processes}
+        
 
     def get_histogram(
         self,

@@ -44,24 +44,3 @@ uncert_band_kwargs:
   hatch: ////
   linewidth: 0
   label: Stat + Syst unc.
-colors:
-  - "#3f90da"
-  - "#ffa90e"
-  - "#bd1f01"
-  - "#94a4a2"
-  - "#832db6"
-  - "#a96b59"
-  - "#e76300"
-  - "#b9ac70"
-  - "#717581"
-  - "#92dadd"
-  - "red"
-  - "blue"
-  - "yellow"
-  - "green"
-  - "orange"
-  - "cyan"
-  - "purple"
-  - "olive"
-  - "brown"
-  - "gray"

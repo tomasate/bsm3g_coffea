@@ -371,6 +371,8 @@ if __name__ == "__main__":
                     f.write(latex_table_average)
 
     if args.plot:
+        subprocess.run("python3 analysis/postprocess/color_map.py", shell=True)
+        
         if not args.postprocess and args.year not in ["2016", "2022", "2023"]:
             postprocess_file = (
                 output_dir / f"{args.year}_processed_histograms.{FILE_EXTENSION}"
@@ -381,7 +383,7 @@ if __name__ == "__main__":
                 raise ValueError(
                     f"Postprocess file not found. Please run:\n  '{cmd}' first"
                 )
-
+        
         print_header("Plots")
         plotter = CoffeaPlotter(
             workflow=args.workflow,
