@@ -309,82 +309,83 @@ class MuonCorrector:
             "2023preBPix": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
             "2023postBPix": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
         }
-        if kind == "single":
-            # for single muon events, compute SF from POG SF
-            single_sf = self.cset[sfs_keys[self.year]].evaluate(
-                muon_eta, muon_pt, "nominal"
-            )
-            nominal_sf = unflat_sf(
-                single_sf,
-                in_muon_mask,
-                self.muons_counts,
-            )
-        if kind == "double":
-            # for double muon events, compute SF from muons' efficiencies
-            double_cset = correctionlib.CorrectionSet.from_file(
-                get_muon_hlt_json(year=self.year)
-            )
-
-            data_eff = double_cset["Muon-HLT-DataEff"].evaluate(
-                self.variation,
-                sfs_keys[self.year],
-                muon_eta,
-                muon_pt,
-            )
-            data_eff = ak.where(in_muon_mask, data_eff, ak.ones_like(data_eff))
-            data_eff = ak.unflatten(data_eff, self.muons_counts)
-            data_eff_1 = ak.firsts(data_eff)
-            data_eff_2 = ak.pad_none(data_eff, target=2)[:, 1]
-            full_data_eff = data_eff_1 + data_eff_2 - data_eff_1 * data_eff_2
-
-            mc_eff = double_cset["Muon-HLT-McEff"].evaluate(
-                self.variation,
-                sfs_keys[self.year],
-                muon_eta,
-                muon_pt,
-            )
-            mc_eff = ak.where(in_muon_mask, mc_eff, ak.ones_like(mc_eff))
-            mc_eff = ak.unflatten(mc_eff, self.muons_counts)
-            mc_eff_1 = ak.firsts(mc_eff)
-            mc_eff_2 = ak.pad_none(mc_eff, target=2)[:, 1]
-            full_mc_eff = mc_eff_1 + mc_eff_2 - mc_eff_1 * mc_eff_2
-
-            nominal_sf = full_data_eff / full_mc_eff
-
         if self.variation == "nominal":
-            # get 'up' and 'down' scale factors
             if kind == "single":
-                up_sf = self.cset[sfs_keys[self.year]].evaluate(
-                    muon_eta, muon_pt, "systup"
+                # for single muon events, compute SF from POG SF
+                single_sf = self.cset[sfs_keys[self.year]].evaluate(
+                    muon_eta, muon_pt, "nominal"
                 )
-                up_sf = unflat_sf(
-                    up_sf,
+                nominal_sf = unflat_sf(
+                    single_sf,
                     in_muon_mask,
                     self.muons_counts,
                 )
-                down_sf = self.cset[sfs_keys[self.year]].evaluate(
-                    muon_eta, muon_pt, "systdown"
+            if kind == "double":
+                # for double muon events, compute SF from muons' efficiencies
+                double_cset = correctionlib.CorrectionSet.from_file(
+                    get_muon_hlt_json(year=self.year)
                 )
-                down_sf = unflat_sf(
-                    down_sf,
-                    in_muon_mask,
-                    self.muons_counts,
+    
+                data_eff = double_cset["Muon-HLT-DataEff"].evaluate(
+                    self.variation,
+                    sfs_keys[self.year],
+                    muon_eta,
+                    muon_pt,
                 )
+                data_eff = ak.where(in_muon_mask, data_eff, ak.ones_like(data_eff))
+                data_eff = ak.unflatten(data_eff, self.muons_counts)
+                data_eff_1 = ak.firsts(data_eff)
+                data_eff_2 = ak.pad_none(data_eff, target=2)[:, 1]
+                full_data_eff = data_eff_1 + data_eff_2 - data_eff_1 * data_eff_2
+    
+                mc_eff = double_cset["Muon-HLT-McEff"].evaluate(
+                    self.variation,
+                    sfs_keys[self.year],
+                    muon_eta,
+                    muon_pt,
+                )
+                mc_eff = ak.where(in_muon_mask, mc_eff, ak.ones_like(mc_eff))
+                mc_eff = ak.unflatten(mc_eff, self.muons_counts)
+                mc_eff_1 = ak.firsts(mc_eff)
+                mc_eff_2 = ak.pad_none(mc_eff, target=2)[:, 1]
+                full_mc_eff = mc_eff_1 + mc_eff_2 - mc_eff_1 * mc_eff_2
+    
+                nominal_sf = full_data_eff / full_mc_eff
+    
+            if self.variation == "nominal":
+                # get 'up' and 'down' scale factors
+                if kind == "single":
+                    up_sf = self.cset[sfs_keys[self.year]].evaluate(
+                        muon_eta, muon_pt, "systup"
+                    )
+                    up_sf = unflat_sf(
+                        up_sf,
+                        in_muon_mask,
+                        self.muons_counts,
+                    )
+                    down_sf = self.cset[sfs_keys[self.year]].evaluate(
+                        muon_eta, muon_pt, "systdown"
+                    )
+                    down_sf = unflat_sf(
+                        down_sf,
+                        in_muon_mask,
+                        self.muons_counts,
+                    )
+                    self.weights.add(
+                        name=f"CMS_eff_m_trigger_{self.year_key}",
+                        weight=nominal_sf,
+                        weightUp=up_sf,
+                        weightDown=down_sf,
+                    )
+                elif kind == "double":
+                    self.weights.add(
+                        name=f"CMS_eff_m_trigger_{self.year_key}",
+                        weight=nominal_sf,
+                        weightUp=np.ones_like(nominal_sf),
+                        weightDown=np.ones_like(nominal_sf),
+                    )
+            else:
                 self.weights.add(
                     name=f"CMS_eff_m_trigger_{self.year_key}",
                     weight=nominal_sf,
-                    weightUp=up_sf,
-                    weightDown=down_sf,
                 )
-            elif kind == "double":
-                self.weights.add(
-                    name=f"CMS_eff_m_trigger_{self.year_key}",
-                    weight=nominal_sf,
-                    weightUp=np.ones_like(nominal_sf),
-                    weightDown=np.ones_like(nominal_sf),
-                )
-        else:
-            self.weights.add(
-                name=f"CMS_eff_m_trigger_{self.year_key}",
-                weight=nominal_sf,
-            )
