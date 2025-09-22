@@ -7,12 +7,10 @@ from analysis.selections import delta_r_mask, select_dileptons
 
 class ObjectSelector:
 
-    def __init__(self, object_selection_config, year):
+    def __init__(self, object_selection_config, year, run):
         self.object_selection_config = object_selection_config
         self.year = year
-        self.run_key = (
-            "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
-        )
+        self.run = run
 
     def select_objects(self, events):
         self.objects = {}
@@ -66,7 +64,7 @@ class ObjectSelector:
         self.objects[obj_name] = select_dileptons(self.objects, "electrons")
 
     def select_met(self, obj_name):
-        if self.run_key == "Run2":
+        if self.run == "2":
             met = self.events.MET
         else:
             met = self.events.PuppiMET
@@ -105,7 +103,7 @@ class ObjectSelector:
             with_name="Momentum2D",
             behavior=vector.backends.awkward.behavior,
         )
-        if self.run_key == "Run2":
+        if self.run== "2":
             met = self.events.MET
         else:
             met = self.events.PuppiMET

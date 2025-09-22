@@ -36,31 +36,21 @@ class BaseProcessor(processor.ProcessorABC):
         workflow: str,
         year: str = "2017",
     ):
-        year_key_map = {
-            "2016preVFP": "2016",
-            "2016postVFP": "2016",
-            "2022preEE": "2022",
-            "2022postEE": "2022",
-            "2023preBPix": "2023",
-            "2023postBPix": "2023",
-        }
         self.year = year
-        self.year_key = year_key_map.get(year, year)
-        self.run_key = "Run3" if self.year_key in ["2022", "2023"] else "Run2"
+        self.year_key = year[:4]
+        self.run = "2" if year.startswith("201") else "3"
 
         config_builder = WorkflowConfigBuilder(workflow=workflow)
         self.workflow_config = config_builder.build_workflow_config()
         self.histogram_config = self.workflow_config.histogram_config
         self.histograms = HistBuilder(self.workflow_config).build_histogram()
 
-        self.flow = self.histogram_config.flow
-        self.apply_obj_syst = self.workflow_config.corrections_config["apply_obj_syst"]
-
     def process(self, events):
         # correct objects
         object_corrector_manager(
             events=events,
             year=self.year,
+            run=self.run,
             workflow_config=self.workflow_config,
             dataset=events.metadata["dataset"],
         )
@@ -71,8 +61,8 @@ class BaseProcessor(processor.ProcessorABC):
 
         # define object-level shifts
         shifts = [({"Jet": events.Jet, "MET": events.MET, "Muon": events.Muon, "Tau": events.Tau}, "nominal")]
-        if self.apply_obj_syst:
-            if self.run_key == "Run2":
+        if self.workflow_config.corrections_config["apply_obj_syst"]:
+            if self.run == "2":
                 shifts.extend(
                     [
                         ({"Jet": events.Jet, "MET": events.MET.rochester.up, "Muon": events.Muon.rochester.up, "Tau": events.Tau}, f"CMS_rochester_{self.year_key}Up"),
@@ -112,7 +102,7 @@ class BaseProcessor(processor.ProcessorABC):
             # apply jet veto maps and update missing energy
             apply_jetvetomaps(events, year)
 
-        object_selector = ObjectSelector(self.workflow_config.object_selection, year)
+        object_selector = ObjectSelector(self.workflow_config.object_selection, year, self.run)
         objects = object_selector.select_objects(events)
         # ----------------------------------------------------------------------------------
         # event selection
@@ -123,6 +113,7 @@ class BaseProcessor(processor.ProcessorABC):
         event_selection = self.workflow_config.event_selection
         if "hlt_paths" in event_selection:
             hlt_paths = event_selection["hlt_paths"]
+
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
         # -----------------------------------------------------------------------------------
@@ -143,6 +134,7 @@ class BaseProcessor(processor.ProcessorABC):
                 weights_container = weight_manager(
                     pruned_ev=pruned_ev,
                     year=year,
+                    run=self.run,
                     workflow_config=self.workflow_config,
                     variation=shift_name,
                     dataset=dataset,
@@ -162,6 +154,7 @@ class BaseProcessor(processor.ProcessorABC):
                         weights_container_cutflow = weight_manager(
                             pruned_ev=pruned_ev_cutflow,
                             year=year,
+                            run=self.run,
                             workflow_config=self.workflow_config,
                             variation="nominal",
                             dataset=dataset,
@@ -186,7 +179,7 @@ class BaseProcessor(processor.ProcessorABC):
                     shift_name=shift_name,
                     category=category,
                     is_mc=is_mc,
-                    flow=self.flow,
+                    flow=self.histogram_config.flow,
                 )
         # define output dictionary accumulator
         output["histograms"] = histograms
