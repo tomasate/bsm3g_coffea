@@ -17,7 +17,7 @@ def add_isr_weight(events, weights, year, variation, dataset, fit):
         selected_njet = ak.fill_none(selected_njet, 2.0)
 
         # load correction set
-        fname = f"{Path.cwd()}/analysis/data/{year}_isr_weight"
+        fname = f"{Path.cwd()}/analysis/data/{year}_ztojets_isr_weight"
         if fit:
             fname += "_fit"
         fname += ".json.gz"
