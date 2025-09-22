@@ -156,7 +156,7 @@ corrections:
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
-    ISRWeight: false
+    ISRWeight: true
     pujetid:
       - id: tight
     btagging:
@@ -356,14 +356,14 @@ histogram_config:
   layout:
     vertex_multiplicity:
       - vertex_multiplicity
-    jet_multiplicity:
+    isr:
+      - dimuon_pt
       - jet_multiplicity
     muons:
       - muon_pt
       - muon_eta
       - muon_phi
     dimuons:
-      - dimuon_pt
       - dimuon_mass
     jets:
       - jet_pt
