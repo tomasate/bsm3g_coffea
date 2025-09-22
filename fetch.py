@@ -31,6 +31,10 @@ if __name__ == "__main__":
         "--image",
         dest="image",
         type=str,
+        choices=[
+            "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest-py3.10",
+            "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask-almalinux8:latest",
+        ],
         default="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest-py3.10",
     )
     parser.add_argument(
