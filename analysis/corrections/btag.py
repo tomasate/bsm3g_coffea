@@ -8,10 +8,10 @@ import awkward as ak
 import importlib.resources
 from coffea import util
 from typing import Type
-from analysis.utils import load_btag_wps
 from coffea.analysis_tools import Weights
 from analysis.working_points import working_points
 from analysis.corrections.utils import get_pog_json
+from analysis.working_points.utils import load_btag_wps
 
 
 class BTagCorrector:

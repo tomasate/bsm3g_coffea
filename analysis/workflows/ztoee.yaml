@@ -46,7 +46,7 @@ object_selection:
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.5
-      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_id(events, year, 'tightlepveto')
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
   met:

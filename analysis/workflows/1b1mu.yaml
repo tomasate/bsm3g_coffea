@@ -46,7 +46,7 @@ object_selection:
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.4
-      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
@@ -56,7 +56,7 @@ object_selection:
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.4
-      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
       - ~working_points.jets_deepjet_b(events, 'loose', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
@@ -67,7 +67,7 @@ object_selection:
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.4
-      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
       - working_points.jets_deepjet_b(events, 'medium', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)

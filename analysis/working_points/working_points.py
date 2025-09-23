@@ -1,6 +1,6 @@
 import numpy as np
 import awkward as ak
-from analysis.utils import load_btag_wps
+from analysis.working_points.utils import load_btag_wps
 
 
 class WorkingPoints:
@@ -174,11 +174,75 @@ class WorkingPoints:
     # -------------------------------------------
     # Jets
     # -------------------------------------------
-    def jets_id(self, events, wp):
+    def jets_id(self, events, year, wp):
+        # Run 3 NanoAODs have a bug in jetId
+        # Implement fix from:
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
+        if year == "2024":
+            # NanoV15
+            barrel = (
+                (events.Jet.neHEF < 0.99)
+                & (events.Jet.neEmEF < 0.9)
+                & (events.Jet.chMultiplicity + events.Jet.neMultiplicity > 1)
+                & (events.Jet.chHEF > 0.01)
+                & (events.Jet.chMultiplicity > 0)
+            )
+            t1 = (events.Jet.neHEF < 0.9) & (events.Jet.neEmEF < 0.99)
+            t2 = events.Jet.neHEF < 0.99
+            endcap = (events.Jet.neMultiplicity >= 2) & (events.Jet.neEmEF < 0.4)
+
+            jetid_tight = ak.where(
+                abs(events.Jet.eta) <= 2.6,
+                barrel,
+                ak.where(
+                    (abs(events.Jet.eta) > 2.6) & (abs(events.Jet.eta) <= 2.7),
+                    t1,
+                    ak.where(
+                        (abs(events.Jet.eta) > 2.7) & (abs(events.Jet.eta) <= 3.0),
+                        t2,
+                        ak.where(
+                            (abs(events.Jet.eta) > 3.0),
+                            endcap,
+                            ak.zeros_like(events.Jet.pt, dtype=bool),
+                        ),
+                    ),
+                ),
+            )
+            jetid_tightlepveto = ak.where(
+                np.abs(events.Jet.eta) <= 2.7,
+                jetid_tight & (events.Jet.muEF < 0.8) & (events.Jet.chEmEF < 0.8),
+                jetid_tight,
+            )
+        elif year.startswith("202"):
+            # NanoV12
+            jetid_tight = ak.where(
+                np.abs(events.Jet.eta) <= 2.7,
+                (events.Jet.jetId >= 2)
+                & (events.Jet.muEF < 0.8)
+                & (events.Jet.chEmEF < 0.8),
+                ak.where(
+                    (abs(events.Jet.eta) > 2.7) & (abs(events.Jet.eta) <= 3.0),
+                    (events.Jet.jetId >= 2) & (events.Jet.neHEF < 0.99),
+                    ak.where(
+                        (abs(events.Jet.eta) > 3.0),
+                        (events.Jet.jetId & (1 << 1)) & (events.Jet.neEmEF < 0.4),
+                        ak.zeros_like(events.Jet.pt, dtype=bool),
+                    ),
+                ),
+            )
+            jetid_tightlepveto = ak.where(
+                np.abs(events.Jet.eta) <= 2.7,
+                jetid_tight & (events.Jet.muEF < 0.8) & (events.Jet.chEmEF < 0.8),
+                jetid_tight,
+            )
+        else:
+            # NanoV9
+            jetid_tight = events.Jet.jetId == 2
+            jetid_tightlepveto = events.Jet.jetId == 6
+
         wps = {
-            "loose": events.Jet.jetId == 0,
-            "tight": events.Jet.jetId == 2,
-            "tightlepveto": events.Jet.jetId == 6,
+            "tight": ak.values_astype(jetid_tight, bool),
+            "tightlepveto": ak.values_astype(jetid_tightlepveto, bool),
         }
         if wp not in wps:
             raise ValueError(
@@ -186,11 +250,10 @@ class WorkingPoints:
             )
         return wps[wp]
 
+    
     def jets_pileup_id(self, events, wp, year):
-        run_key = (
-            "Run3" if (year.startswith("2022") or year.startswith("2023")) else "Run2"
-        )
-        if run_key == "Run2":
+        if year.startswith("201"):
+            # Run2
             wps = {
                 "2016preVFP": {
                     "loose": events.Jet.puId == 1,
@@ -225,8 +288,10 @@ class WorkingPoints:
                 events.Jet.pt >= 50,
             )
         else:
+            # Run3
             return np.ones_like(events.Jet.pt, dtype=bool)
 
+    
     def jets_deepjet_b(self, events, wp, year):
         btag_wps = load_btag_wps(tagger="deepJet")
 

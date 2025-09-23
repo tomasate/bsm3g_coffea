@@ -14,7 +14,7 @@ object_selection:
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.4
-      - working_points.jets_id(events, 'tightlepveto')
+      - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
 event_selection:
   selections:
