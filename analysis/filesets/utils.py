@@ -49,10 +49,16 @@ def divide_list(lst: list, nfiles: int = 20) -> list:
 
 
 def get_dataset_config(year):
+    aux_year_map = {
+        "2016": "2016preVFP",
+        "2022": "2022preEE",
+        "2023": "2023preBPix",
+    }
+    aux_year = aux_year_map.get(year, year)
     fileset_path = Path(f"{Path.cwd()}/analysis/filesets")
     run_key = "Run3" if year.startswith("2022") or year.startswith("2023") else "Run2"
     nano_version = "nanov9" if run_key == "Run2" else "nanov12"
-    with open(f"{fileset_path}/{year}_{nano_version}.yaml", "r") as f:
+    with open(f"{fileset_path}/{aux_year}_{nano_version}.yaml", "r") as f:
         dataset_config = yaml.safe_load(f)
     return dataset_config
 
@@ -182,14 +188,8 @@ def fileset_checker(samples: list, year: str):
 
 
 def get_process_maps(workflow_config, year):
-    aux_year_map = {
-        "2016": "2016preVFP",
-        "2022": "2022preEE",
-        "2023": "2023preBPix",
-    }
-    aux_year = aux_year_map.get(year, year)
     datasets = workflow_config.datasets
-    dataset_configs = get_dataset_config(aux_year)
+    dataset_configs = get_dataset_config(year)
     sample_keys = np.concatenate(list(datasets.values())).tolist()
     processes = []
     process_name_map = {}
