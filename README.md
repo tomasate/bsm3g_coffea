@@ -62,6 +62,27 @@ Each workflow YAML is organized into the following main sections:
 
 Together, these sections control the full behavior of the analysis pipeline.
 
+The available workflows are:
+
+* [ztomumu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztomumu.yaml)
+* [ztoee](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztoee.yaml)
+* W'+b
+    * $t\bar{t}$ estimation
+        * [2b1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1mu.yaml)
+        * [2b1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1e.yaml)
+        * [1b1mu1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1mu1e.yaml)
+        * [1b1e1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1e1mu.yaml)
+    * QCD estimation
+        * [qcd_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_mu.yaml)
+        * [qcd_cr1T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_mu.yaml)
+        * [qcd_cr2T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_mu.yaml)
+        * [qcd_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_ele.yaml)
+        * [qcd_cr1T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_ele.yaml)
+        * [qcd_cr2T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_ele.yaml)
+* VBF SUSY
+    * [ztojets](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztojets.yaml)
+
+
 <details>
   <summary><b>Click here to display Workflow documentation</b></summary>
 
@@ -210,20 +231,17 @@ event_selection:
 #### `corrections`
 
 This section specifies which **object-level corrections** and **event-level weights** should be applied.  
-Corrections are implemented through a set of utilities in `analysis/corrections/` and managed by two functions:
-
-- [`object_corrector_manager`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/corrections/corrections_manager.py#L28): applies corrections directly to physics objects (jets and muons scale/smearing corrections, rochester correctiones etc.).  
-- [`weight_manager`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/corrections/corrections_manager.py#L72): applies event-level weights (pileup, identification efficiencies, etc.).
 
 ```yaml
 corrections:
   objects:
-    - jets         # JEC/JER
-    - jets_veto    # Jets veto maps
-    - muons        # Muon scale and resolution
-    - electrons    # Electron scale and resolution 
-    - taus         # Tau energy scale
-    - met          # MET phi modulation
+    - jets                 # JEC/JER
+    - jets_veto            # Jets veto maps
+    - muons                # Muon scale and resolution
+    - electrons            # Electron scale and resolution 
+    - taus                 # Tau energy scale
+    - met                  # MET phi modulation
+  apply_obj_syst: true     # Apply object-level systematic variations
   event_weights:
     genWeight: true
     pileupWeight: true
@@ -239,6 +257,11 @@ corrections:
       - trigger: false
 ```
 <br>
+
+- [`apply_obj_syst`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/processors/base.py#L64): If true, object-level systematic variations (e.g., JEC/JER, MET, tau energy scale, muon rochester corrections) are automatically applied and propagated to downstream event-level calculations.
+- Corrections are implemented through a set of utilities managed by two functions:
+    - [`object_corrector_manager`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/corrections/corrections_manager.py#L28): applies object-level corrections (jets scale and smearing corrections, rochester correctiones etc.).  
+    - [`weight_manager`](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/corrections/corrections_manager.py#L72): applies event-level weights (pileup, lepton identification efficiencies, etc.).
 
 **Note**: Ensure that the working points used for object selection and event-level corrections (ID, isolation, etc.) are consistent!
 
@@ -524,28 +547,6 @@ More info on Hist histograms [here](https://hist.readthedocs.io/en/latest/)
 
 </details>
 <br>
-
-
-The available workflows are:
-
-* [ztomumu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztomumu.yaml)
-* [ztoee](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztoee.yaml)
-* W'+b
-    * $t\bar{t}$ estimation
-        * [2b1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1mu.yaml)
-        * [2b1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/2b1e.yaml)
-        * [1b1mu1e](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1mu1e.yaml)
-        * [1b1e1mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/1b1e1mu.yaml)
-    * QCD estimation
-        * [qcd_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_mu.yaml)
-        * [qcd_cr1T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_mu.yaml)
-        * [qcd_cr2T_mu](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_mu.yaml)
-        * [qcd_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_ele.yaml)
-        * [qcd_cr1T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr1T_ele.yaml)
-        * [qcd_cr2T_ele](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/qcd_cr2T_ele.yaml)
-* VBF SUSY
-    * [ztojets](https://github.com/deoache/bsm3g_coffea/blob/main/analysis/workflows/ztojets.yaml)
-
 
 ### Local run
 
