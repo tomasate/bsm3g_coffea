@@ -85,7 +85,7 @@ The available workflows are:
 
 <details>
   <summary><b>Click here to display Workflow documentation</b></summary>
-
+    
 #### `datasets`
 
 This section specifies which datasets will be processed by the workflow. Instead of repeating full dataset definitions, it simply lists the **keys** defined in the fileset YAML files.  
@@ -550,7 +550,13 @@ More info on Hist histograms [here](https://hist.readthedocs.io/en/latest/)
 
 ### Local run
 
-To run locally, you can use the Coffea-Casa tool, which you can accessd [here](https://coffea.casa/hub/login?next=%2Fhub%2F) (**make sure to select the coffea 0.7.26 image**) (more info on coffea-casa [here](https://coffea-casa.readthedocs.io/en/latest/)). You can use the `tester.ipynb` notebook to test a workflow. There, you can select the year, dataset, and executor (`iterative` or `futures`). Feel free to add more datasets in case you need to run a particular workflow (and don't forget to use `root://xcache//` in order to be able to access the dataset).
+To run locally, you can use the Coffea-Casa tool, which you can accessd [here](https://coffea.casa/hub/login?next=%2Fhub%2F) (**make sure to select the coffea 0.7.26 image**) (more info on coffea-casa [here](https://coffea-casa.readthedocs.io/en/latest/)). 
+
+Log in and clone the repository
+```bash
+git clone https://github.com/deoache/bsm3g_coffea.git
+```
+Then, you can use the `tester.ipynb` notebook to test a workflow. There, you can select the year, dataset, and executor (`iterative` or `futures`). Feel free to add more datasets in case you need to run a particular workflow (and don't forget to use `root://xcache//` in order to be able to access the dataset).
 
 This way, you can check that the workflow is running without issues before submitting batch jobs. It also allows you to interact with the output to check that it makes sense and contains the expected information.
 
