@@ -26,3 +26,26 @@ def select_dileptons(objects, key):
     dileptons["p4"] = dileptons.l1 + dileptons.l2
     dileptons["pt"] = dileptons.p4.pt
     return dileptons
+
+
+def select_dileptons_qcd(objects, key):
+    leptons = ak.zip(
+        {
+            "pt": objects[key].pt,
+            "eta": objects[key].eta,
+            "phi": objects[key].phi,
+            "mass": objects[key].mass,
+            "charge": objects[key].charge,
+            "genPartFlav": objects[key].genPartFlav,
+            "is_tight": objects[key].is_tight
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
+    # create pair combinations with all muons
+    dileptons = ak.combinations(leptons, 2, fields=["l1", "l2"])
+    dileptons = dileptons[ak.argsort(dileptons.l1.pt, axis=1)]
+    # add dimuon 4-momentum field
+    dileptons["p4"] = dileptons.l1 + dileptons.l2
+    dileptons["pt"] = dileptons.p4.pt
+    return dileptons

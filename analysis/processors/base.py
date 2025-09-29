@@ -57,6 +57,11 @@ class BaseProcessor(processor.ProcessorABC):
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
+            # add genPartFlav fields to leptons (QCD Estimation)
+            events["Muon", "genPartFlav"] = ak.zeros_like(events.Muon.pt)
+            events["Electron", "genPartFlav"] = ak.zeros_like(events.Electron.pt)
+            
+        if not self.is_mc:
             return self.process_shift(events, shift_name="nominal")
 
         # define object-level shifts
@@ -116,6 +121,7 @@ class BaseProcessor(processor.ProcessorABC):
 
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
+
         # -----------------------------------------------------------------------------------
         # Histogram filling
         # -----------------------------------------------------------------------------------

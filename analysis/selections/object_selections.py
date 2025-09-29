@@ -2,7 +2,7 @@ import vector
 import numpy as np
 import awkward as ak
 from analysis.working_points import working_points
-from analysis.selections import delta_r_mask, select_dileptons
+from analysis.selections import delta_r_mask, select_dileptons, select_dileptons_qcd
 
 
 class ObjectSelector:
@@ -70,6 +70,15 @@ class ObjectSelector:
             met = self.events.PuppiMET
         self.objects[obj_name] = met
 
+    def select_dimuons_qcd(self, obj_name):
+        if "muons" not in self.objects:
+            raise ValueError(f"'muons' object has not been defined!")
+        self.objects[obj_name] = select_dileptons_qcd(self.objects, "muons")
+
+    def select_dielectrons_qcd(self, obj_name):
+        if "electrons" not in self.objects:
+            raise ValueError(f"'electrons' object has not been defined!")
+        self.objects[obj_name] = select_dileptons_qcd(self.objects, "electrons")
     # --------------------------------------------------------------------------------
     # SUSY VBF
     # --------------------------------------------------------------------------------
