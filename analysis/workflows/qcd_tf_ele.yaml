@@ -1,30 +1,29 @@
 datasets:
   data: 
-    - muon
+    - electron
   mc:
     - dy_inclusive
     - singletop
     - tt
     - diboson
 object_selection:
-  muons:
-    field: events.Muon
-    add_cut:
-      is_tight:
-        - working_points.muons_id(events, 'tight')
-        - working_points.muons_iso(events, 'tight')
-    cuts:
-      - working_points.muons_id(events, 'loose')
-      - working_points.muons_iso(events, 'loose')
-      - events.Muon.pt > 30
-      - np.abs(events.Muon.eta) < 2.4
   electrons:
     field: events.Electron
+    add_cut:
+      is_tight:
+        - working_points.electrons_id(events, 'wp80iso')
     cuts:
       - events.Electron.pt > 30
       - (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-      - working_points.electrons_id(events, 'wp90iso')
-      - delta_r_mask(events.Electron, objects['muons'], 0.4)
+      - working_points.electrons_id(events, 'wpLiso')
+  muons:
+    field: events.Muon
+    cuts:
+      - events.Muon.pt > 30
+      - np.abs(events.Muon.eta) < 2.4
+      - working_points.muons_iso(events, 'tight')
+      - working_points.muons_id(events, 'tight')
+      - delta_r_mask(events.Muon, objects['electrons'], 0.4)
   taus:
     field: events.Tau
     cuts:
@@ -60,32 +59,32 @@ object_selection:
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
   met:
     field: select_met
-  dimuons:
-    field: select_dimuons_qcd
+  dielectrons:
+    field: select_dielectrons_qcd
     add_cut:
       one_tight:
-         - (1*objects['dimuons'].l1.is_tight + 1*objects['dimuons'].l2.is_tight) == 1
+         - (1*objects['dielectrons'].l1.is_tight + 1*objects['dielectrons'].l2.is_tight) == 1
       two_tight:
-         - (1*objects['dimuons'].l1.is_tight + 1*objects['dimuons'].l2.is_tight) == 2
+         - (1*objects['dielectrons'].l1.is_tight + 1*objects['dielectrons'].l2.is_tight) == 2
     cuts:
-      - objects['dimuons'].l1.is_tight
-      - (objects['dimuons'].p4.mass < 60.0) | (objects['dimuons'].p4.mass > 120.0)
-      - np.sqrt(2 * objects['dimuons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dimuons'].l1.delta_phi(objects['met'])))) > 60
+      - objects['dielectrons'].l1.is_tight
+      - (objects['dielectrons'].p4.mass < 60.0) | (objects['dielectrons'].p4.mass > 120.0)
+      - np.sqrt(2 * objects['dielectrons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dielectrons'].l1.delta_phi(objects['met'])))) > 60
 event_selection:
   hlt_paths:
-    muon:
-      - SingleMu
+    electron:
+      - SingleEle
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
-    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Muon)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
     metfilters: get_metfilters_mask(events, year)
     met_30: objects['met'].pt > 30
     hemcleaning: get_hemcleaning_mask(events, year)
-    two_muon: ak.num(objects['muons']) == 2
-    one_dimuon: ak.num(objects['dimuons']) == 1
-    electron_veto: ak.num(objects['electrons']) == 0
+    two_electrons: ak.num(objects['electrons']) == 2
+    one_dielectron: ak.num(objects['dielectrons']) == 1
+    muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
   categories:
     central:
@@ -96,9 +95,9 @@ event_selection:
       - metfilters
       - met_30
       - hemcleaning
-      - two_muon
-      - one_dimuon
-      - electron_veto
+      - two_electrons
+      - one_dielectron
+      - muon_veto
       - tau_veto
 corrections:
   objects:
@@ -135,7 +134,7 @@ histogram_config:
   add_weight: true
   add_syst_axis: true
   axes:
-    leading_muon_pt:
+    leading_electron_pt:
       type: Variable
       edges:
         - 50
@@ -148,36 +147,36 @@ histogram_config:
         - 270
         - 300
         - 500
-      label: $p_T(\mu_1)$ [GeV]
-      expression: objects['dimuons'].l1.pt
-    leading_muon_eta:
+      label: $p_T(e_1)$ [GeV]
+      expression: objects['dielectrons'].l1.pt
+    leading_electron_eta:
       type: Regular
       bins: 50
       start: -2.4
       stop: 2.4
-      label: $\eta(\mu_1)$
-      expression: objects['dimuons'].l1.eta
-    leading_muon_phi:
+      label: $\eta(e_1)$
+      expression: objects['dielectrons'].l1.eta
+    leading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(\mu_1)$
-      expression: objects['dimuons'].l1.phi
-    leading_muon_flav: 
+      label: $\phi(e_1)$
+      expression: objects['dielectrons'].l1.phi
+    leading_electron_flav: 
       type: Integer
       start: 0
       stop: 15
-      label: genPartFlav($\mu_1$)
-      expression: objects['dimuons'].l1.genPartFlav
-    leading_muon_tightid_wp:
+      label: genPartFlav($e_1$)
+      expression: objects['dielectrons'].l1.genPartFlav
+    leading_electron_tightid_wp:
       type: Regular
       bins: 2
       start: 0
       stop: 2
-      label: $\mu_1$ Pass Tight Selection
-      expression: objects['dimuons'].l1.is_tight
-    subleading_muon_pt:
+      label: $e_1$ Pass Tight Selection
+      expression: objects['dielectrons'].l1.is_tight
+    subleading_electron_pt:
       type: Variable
       edges:
         - 50
@@ -190,35 +189,35 @@ histogram_config:
         - 270
         - 300
         - 500
-      label: $p_T(\mu_2)$ [GeV]
-      expression: objects['dimuons'].l2.pt
-    subleading_muon_eta:
+      label: $p_T(e_2)$ [GeV]
+      expression: objects['dielectrons'].l2.pt
+    subleading_electron_eta:
       type: Regular
       bins: 50
       start: -2.4
       stop: 2.4
-      label: $\eta(\mu_2)$
-      expression: objects['dimuons'].l2.eta
-    subleading_muon_phi:
+      label: $\eta(e_2)$
+      expression: objects['dielectrons'].l2.eta
+    subleading_electron_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
-      label: $\phi(\mu_2)$
-      expression: objects['dimuons'].l2.phi
-    subleading_muon_flav: 
+      label: $\phi(e_2)$
+      expression: objects['dielectrons'].l2.phi
+    subleading_electron_flav: 
       type: Integer
       start: 0
       stop: 15
-      label: genPartFlav($\mu_2$)
-      expression: objects['dimuons'].l2.genPartFlav
-    subleading_muon_tightid_wp:
+      label: genPartFlav($e_2$)
+      expression: objects['dielectrons'].l2.genPartFlav
+    subleading_electron_tightid_wp:
       type: Regular
       bins: 2
       start: 0
       stop: 2
-      label: $\mu_2$ Pass Tight Selection
-      expression: objects['dimuons'].l2.is_tight
+      label: $e_2$ Pass Tight Selection
+      expression: objects['dielectrons'].l2.is_tight
     jet_multiplicity:
       type: Integer
       start: 0
@@ -258,7 +257,7 @@ histogram_config:
       stop: 100
       label: NPVS
       expression: events.PV.npvsGood
-    muon_met_mass:
+    electron_met_mass:
       type: Variable
       edges:
         - 40
@@ -271,26 +270,26 @@ histogram_config:
         - 300
         - 500
         - 800
-      label: $m_T(\mu, p_T^{\text{miss}})$ [GeV]
-      expression: np.sqrt(2 * objects['dimuons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dimuons'].l1.delta_phi(objects['met']))))
+      label: $m_T(e, p_T^{\text{miss}})$ [GeV]
+      expression: np.sqrt(2 * objects['dielectrons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dielectrons'].l1.delta_phi(objects['met']))))
   layout:
     multiplicity:
       - jet_multiplicity
     transverse_mass:
-      - muon_met_mass
-      - subleading_muon_tightid_wp
+      - electron_met_mass
+      - subleading_electron_tightid_wp
     met:
       - met_pt
-      - subleading_muon_tightid_wp
-    leading_muon:
-      - leading_muon_tightid_wp
-      - leading_muon_pt
-      - leading_muon_eta
-      #- leading_muon_flav
-    subleading_muon:
-      - subleading_muon_tightid_wp
-      - subleading_muon_pt
-      - subleading_muon_eta
-      #- subleading_muon_flav
+      - subleading_electron_tightid_wp
+    leading_electron:
+      - leading_electron_tightid_wp
+      - leading_electron_pt
+      - leading_electron_eta
+      #- leading_electron_flav
+    subleading_electron:
+      - subleading_electron_tightid_wp
+      - subleading_electron_pt
+      - subleading_electron_eta
+      #- subleading_electron_flav
     vertex:
       - npvs
