@@ -294,7 +294,7 @@ if __name__ == "__main__":
             process_samples_map=process_samples_map,
         )
 
-        if args.workflow in ["2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
+        if args.workflow in ["1b1mu", "1b1e", "2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
             print_header(f"Systematic uncertainty impact")
             syst_df = uncertainty_table(processed_histograms, args.workflow)
             syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
@@ -372,7 +372,7 @@ if __name__ == "__main__":
 
     if args.plot:
         subprocess.run("python3 analysis/postprocess/color_map.py", shell=True)
-        
+
         if not args.postprocess and args.year not in ["2016", "2022", "2023"]:
             postprocess_file = (
                 output_dir / f"{args.year}_processed_histograms.{FILE_EXTENSION}"
@@ -383,7 +383,7 @@ if __name__ == "__main__":
                 raise ValueError(
                     f"Postprocess file not found. Please run:\n  '{cmd}' first"
                 )
-        
+
         print_header("Plots")
         plotter = CoffeaPlotter(
             workflow=args.workflow,
