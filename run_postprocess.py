@@ -29,6 +29,7 @@ from analysis.postprocess.utils import (
     df_to_latex_average,
     df_to_latex_asymmetric,
     uncertainty_table,
+    build_systematic_summary,
 )
 
 
@@ -294,13 +295,6 @@ if __name__ == "__main__":
             process_samples_map=process_samples_map,
         )
 
-        if args.workflow in ["1b1mu", "1b1e", "2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
-            print_header(f"Systematic uncertainty impact")
-            syst_df = uncertainty_table(processed_histograms, args.workflow)
-            syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
-            logging.info(syst_df)
-            logging.info("\n")
-
         for category in categories:
             logging.info(f"category: {category}")
             category_dir = Path(f"{output_dir}/{category}")
@@ -369,6 +363,21 @@ if __name__ == "__main__":
                 latex_table_average = df_to_latex_average(results_df)
                 with open(category_dir / f"results_{category}_average.txt", "w") as f:
                     f.write(latex_table_average)
+
+        if args.workflow in ["1b1mu", "1b1e", "2b1e", "2b1mu", "1b1mu1e", "1b1e1mu"]:
+            print_header(f"Systematic uncertainty impact")
+            syst_df = uncertainty_table(processed_histograms, args.workflow)
+            syst_df.to_csv(f"{output_dir}/uncertainty_table.csv")
+            logging.info(syst_df)
+            logging.info("\n")
+
+            print_header(f"Systematic uncertainty impact by process")
+            summary_table = build_systematic_summary(
+                processed_histograms, args.workflow
+            )
+            summary_table.to_csv(f"{output_dir}/uncertainty_table_by_process.csv")
+            logging.info(summary_table)
+            logging.info("\n")
 
     if args.plot:
         subprocess.run("python3 analysis/postprocess/color_map.py", shell=True)

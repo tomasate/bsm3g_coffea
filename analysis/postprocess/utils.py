@@ -245,3 +245,74 @@ def uncertainty_table(processed_histograms, workflow):
     syst_df = pd.DataFrame(variation_impact).T * 100
     syst_df = syst_df.rename({0: "Up", 1: "Down"}, axis=1)
     return syst_df
+
+
+def build_systematic_summary(processed_histograms, workflow="1b1mu"):
+    """Compute systematic uncertainties for all processes and build a summary table"""
+    summary_dict = {}
+
+    for process_name, process_hist in processed_histograms.items():
+        if process_name == "Data":
+            continue
+
+        if workflow in ["2b1e", "1b1e1mu", "1b1e"]:
+            mass_variable = "electron_met_mass"
+        elif workflow in ["2b1mu", "1b1mu1e", "1b1mu"]:
+            mass_variable = "muon_met_mass"
+        else:
+            raise ValueError(f"Unknown workflow: {workflow}")
+
+        # Project the histogram onto the transverse mass variable and variation axis
+        projected_hist = process_hist["mass"].project(mass_variable, "variation")
+
+        # Separate nominal and systematic variations
+        variation_histograms = {}
+        for variation_label in projected_hist.axes["variation"]:
+            if variation_label == "nominal":
+                nominal_hist = projected_hist[{"variation": variation_label}]
+            else:
+                variation_histograms[variation_label] = projected_hist[
+                    {"variation": variation_label}
+                ]
+
+        # Collect systematic names (without Up/Down)
+        systematic_names = []
+        for variation_label in variation_histograms:
+            sys_name = variation_label.replace("Up", "").replace("Down", "")
+            if sys_name not in systematic_names:
+                systematic_names.append(sys_name)
+
+        # Compute relative Up/Down uncertainties
+        nominal_values = nominal_hist.values()
+        systematic_scales = {}
+        for sys_name in systematic_names:
+            values_up = variation_histograms[f"{sys_name}Up"].values()
+            values_down = variation_histograms[f"{sys_name}Down"].values()
+
+            # Compute deviations relative to nominal
+            diffs = np.stack(
+                [
+                    values_up - nominal_values,
+                    values_down - nominal_values,
+                    np.zeros_like(nominal_values),
+                ],
+                axis=0,
+            )
+
+            max_dev = np.max(diffs, axis=0) / (nominal_values + 1e-5)
+            min_dev = np.min(diffs, axis=0) / (nominal_values + 1e-5)
+
+            # Quadrature sum across bins
+            unc_up = np.sqrt(np.sum(max_dev**2))
+            unc_down = np.sqrt(np.sum(min_dev**2))
+
+            # Scale factor = 1 + max(%)/100
+            scale_factor = 1 + max(unc_up, unc_down)
+            systematic_scales[sys_name] = scale_factor
+
+        summary_dict[process_name] = pd.Series(systematic_scales)
+
+    # Build final DataFrame with systematics as rows, processes as columns
+    summary_table = pd.DataFrame(summary_dict).fillna(1.0)
+
+    return summary_table
