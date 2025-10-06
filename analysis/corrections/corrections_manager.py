@@ -170,7 +170,8 @@ def weight_manager(pruned_ev, year, run, workflow_config, variation, dataset):
                     year=year,
                     variation=variation,
                     dataset=dataset,
-                    fit=False
+                    fit=False,
+                    one_dim=False
                 )
 
         if "electron" in weights_config:
