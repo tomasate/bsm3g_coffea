@@ -31,6 +31,9 @@ class ObjectSelector:
                         cuts=obj_config["add_cut"][field_to_add],
                     )
                     self.objects[obj_name][field_to_add] = selection_mask
+            if "add_field" in obj_config:
+                for field_name, field_to_add in obj_config["add_field"].items():
+                    self.objects[obj_name][field_name] = eval(field_to_add)
             if "cuts" in obj_config:
                 selection_mask = self.get_selection_mask(
                     events=events, obj_name=obj_name, cuts=obj_config["cuts"]
@@ -79,6 +82,7 @@ class ObjectSelector:
         if "electrons" not in self.objects:
             raise ValueError(f"'electrons' object has not been defined!")
         self.objects[obj_name] = select_dileptons_qcd(self.objects, "electrons")
+
     # --------------------------------------------------------------------------------
     # SUSY VBF
     # --------------------------------------------------------------------------------
@@ -112,7 +116,7 @@ class ObjectSelector:
             with_name="Momentum2D",
             behavior=vector.backends.awkward.behavior,
         )
-        if self.run== "2":
+        if self.run == "2":
             met = self.events.MET
         else:
             met = self.events.PuppiMET

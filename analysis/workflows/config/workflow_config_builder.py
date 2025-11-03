@@ -36,6 +36,13 @@ class WorkflowConfigBuilder:
                 object_selection[object_name]["add_cut"] = {}
                 for cut_name, cuts in cuts_to_add.items():
                     object_selection[object_name]["add_cut"][cut_name] = cuts
+            if "add_field" in self.config["object_selection"][object_name]:
+                fields_to_add = self.config["object_selection"][object_name][
+                    "add_field"
+                ]
+                object_selection[object_name]["add_field"] = {}
+                for field_name, fields in fields_to_add.items():
+                    object_selection[object_name]["add_field"][field_name] = fields
         return object_selection
 
     def parse_event_selection(self):
