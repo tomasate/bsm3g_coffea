@@ -61,11 +61,6 @@ object_selection:
     field: select_met
   dielectrons:
     field: select_dielectrons_qcd
-    add_cut:
-      one_tight:
-         - (1*objects['dielectrons'].l1.is_tight + 1*objects['dielectrons'].l2.is_tight) == 1
-      two_tight:
-         - (1*objects['dielectrons'].l1.is_tight + 1*objects['dielectrons'].l2.is_tight) == 2
     cuts:
       - objects['dielectrons'].l1.is_tight
       - (objects['dielectrons'].p4.mass < 60.0) | (objects['dielectrons'].p4.mass > 120.0)
@@ -80,7 +75,7 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
     trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
     metfilters: get_metfilters_mask(events, year)
-    met_30: objects['met'].pt > 30
+    met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
     two_electrons: ak.num(objects['electrons']) == 2
     one_dielectron: ak.num(objects['dielectrons']) == 1
@@ -93,7 +88,7 @@ event_selection:
       - trigger
       - trigger_match
       - metfilters
-      - met_30
+      - met_50
       - hemcleaning
       - two_electrons
       - one_dielectron
@@ -285,11 +280,9 @@ histogram_config:
       - leading_electron_tightid_wp
       - leading_electron_pt
       - leading_electron_eta
-      #- leading_electron_flav
     subleading_electron:
       - subleading_electron_tightid_wp
       - subleading_electron_pt
       - subleading_electron_eta
-      #- subleading_electron_flav
     vertex:
       - npvs
