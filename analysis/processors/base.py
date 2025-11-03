@@ -21,7 +21,6 @@ from analysis.selections import (
 )
 
 
-
 def update(events, collections):
     """Return a shallow copy of events array with some collections swapped out"""
     out = events
@@ -45,6 +44,38 @@ class BaseProcessor(processor.ProcessorABC):
         self.histogram_config = self.workflow_config.histogram_config
         self.histograms = HistBuilder(self.workflow_config).build_histogram()
 
+    def add_cutflow(
+        self, events, output, objects, selection_manager, weight_manager, dataset
+    ):
+        sumw = ak.sum(events.genWeight) if hasattr(events, "genWeight") else len(events)
+        for category, category_cuts in self.workflow_config.event_selection[
+            "categories"
+        ].items():
+            output["metadata"].update({category: {"cutflow": {"initial": sumw}}})
+            selections = []
+            for cut_name in category_cuts:
+                selections.append(cut_name)
+                current_selection = selection_manager.all(*selections)
+                if ak.sum(current_selection) != 0:
+                    pruned_ev_cutflow = events[current_selection]
+                    for obj in objects:
+                        pruned_ev_cutflow[f"selected_{obj}"] = objects[obj][
+                            current_selection
+                        ]
+                    weights_container_cutflow = weight_manager(
+                        pruned_ev=pruned_ev_cutflow,
+                        year=self.year,
+                        run=self.run,
+                        workflow_config=self.workflow_config,
+                        variation="nominal",
+                        dataset=dataset,
+                    )
+                    output["metadata"][category]["cutflow"][cut_name] = ak.sum(
+                        weights_container_cutflow.weight()
+                    )
+                else:
+                    output["metadata"][category]["cutflow"][cut_name] = 0
+
     def process(self, events):
         # correct objects
         object_corrector_manager(
@@ -60,7 +91,7 @@ class BaseProcessor(processor.ProcessorABC):
             # add genPartFlav fields to leptons (QCD Estimation)
             events["Muon", "genPartFlav"] = ak.zeros_like(events.Muon.pt)
             events["Electron", "genPartFlav"] = ak.zeros_like(events.Electron.pt)
-            
+
         if not self.is_mc:
             return self.process_shift(events, shift_name="nominal")
 
@@ -100,6 +131,10 @@ class BaseProcessor(processor.ProcessorABC):
             sumw = ak.sum(events.genWeight) if is_mc else len(events)
             output["metadata"].update({"sumw": sumw})
 
+            for category in self.workflow_config.event_selection["categories"]:
+
+                output["metadata"].update({category: {"cutflow": {"initial": sumw}}})
+
         # ----------------------------------------------------------------------------------
         # object selection
         # ----------------------------------------------------------------------------------
@@ -107,7 +142,9 @@ class BaseProcessor(processor.ProcessorABC):
             # apply jet veto maps and update missing energy
             apply_jetvetomaps(events, year)
 
-        object_selector = ObjectSelector(self.workflow_config.object_selection, year, self.run)
+        object_selector = ObjectSelector(
+            self.workflow_config.object_selection, year, self.run
+        )
         objects = object_selector.select_objects(events)
         # ----------------------------------------------------------------------------------
         # event selection
@@ -121,6 +158,11 @@ class BaseProcessor(processor.ProcessorABC):
 
         for selection, mask in event_selection["selections"].items():
             selection_manager.add(selection, eval(mask))
+
+        # add cutflow to metadata
+        self.add_cutflow(
+            events, output, objects, selection_manager, weight_manager, dataset
+        )
 
         # -----------------------------------------------------------------------------------
         # Histogram filling
@@ -146,28 +188,6 @@ class BaseProcessor(processor.ProcessorABC):
                     dataset=dataset,
                 )
                 if shift_name == "nominal":
-                    # save cutflow to metadata
-                    output["metadata"][category] = {"cutflow": {"initial": sumw}}
-                    selections = []
-                    for cut_name in category_cuts:
-                        selections.append(cut_name)
-                        current_selection = selection_manager.all(*selections)
-                        pruned_ev_cutflow = events[current_selection]
-                        for obj in objects:
-                            pruned_ev_cutflow[f"selected_{obj}"] = objects[obj][
-                                current_selection
-                            ]
-                        weights_container_cutflow = weight_manager(
-                            pruned_ev=pruned_ev_cutflow,
-                            year=year,
-                            run=self.run,
-                            workflow_config=self.workflow_config,
-                            variation="nominal",
-                            dataset=dataset,
-                        )
-                        output["metadata"][category]["cutflow"][cut_name] = ak.sum(
-                            weights_container_cutflow.weight()
-                        )
                     # save number of events after selection to metadata
                     weighted_final_nevents = ak.sum(weights_container.weight())
                     output["metadata"][category].update(
