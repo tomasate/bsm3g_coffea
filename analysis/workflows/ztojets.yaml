@@ -9,7 +9,6 @@ datasets:
     - wjets_ht
     - wjets_inclusive
     - diboson
-    - ewk
     - higgs
 object_selection:
   muons:
