@@ -448,3 +448,51 @@ QCD_Pt-80To120_MuEnriched:
   key: qcd_mu
   query: QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
   xsec: 106033.7
+signal_Wpb_MuNu_M300:
+  era: MC
+  process: Wpb_MuNu_M300
+  key: Wpb_MuNu_M300
+  query: Wpb_MuNu_M300/crendonh-RunIISummer20UL16_NanoAODv9_WpM300b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M400:
+  era: MC
+  process: Wpb_MuNu_M400
+  key: Wpb_MuNu_M400
+  query: Wpb_MuNu_M400/crendonh-RunIISummer20UL16_NanoAODv9_WpM400b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M600:
+  era: MC
+  process: Wpb_MuNu_M600
+  key: Wpb_MuNu_M600
+  query: Wpb_MuNu_M600/crendonh-RunIISummer20UL16_NanoAODv9_WpM600b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M750:
+  era: MC
+  process: Wpb_MuNu_M750
+  key: Wpb_MuNu_M750
+  query: Wpb_MuNu_M750/crendonh-RunIISummer20UL16_NanoAODv9_WpM750b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M1000:
+  era: MC
+  process: Wpb_MuNu_M1000
+  key: Wpb_MuNu_M1000
+  query: Wpb_MuNu_M1000/crendonh-RunIISummer20UL16_NanoAODv9_WpM1000b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M1500:
+  era: MC
+  process: Wpb_MuNu_M1500
+  key: Wpb_MuNu_M1500
+  query: Wpb_MuNu_M1500/crendonh-RunIISummer20UL16_NanoAODv9_WpM1500b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M2000:
+  era: MC
+  process: Wpb_MuNu_M2000
+  key: Wpb_MuNu_M2000
+  query: Wpb_MuNu_M2000/crendonh-RunIISummer20UL16_NanoAODv9_WpM2000b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
+signal_Wpb_MuNu_M3000:
+  era: MC
+  process: Wpb_MuNu_M3000
+  key: Wpb_MuNu_M3000
+  query: Wpb_MuNu_M3000/crendonh-RunIISummer20UL16_NanoAODv9_WpM3000b_MuNu-00000000000000000000000000000000/USER
+  xsec: 1.0
