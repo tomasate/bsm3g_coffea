@@ -6,7 +6,6 @@ datasets:
     - singletop
     - tt
     - wjets_ht
-    - wjets_inclusive
     - diboson
 object_selection:
   electrons:
@@ -71,7 +70,6 @@ event_selection:
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
-    w_stitching: get_stitching_mask(events, dataset, 'WJetsToLNu_inclusive', 100)
     exactly_one_bjet: ak.num(objects['bjets']) == 1
     exactly_one_electron: ak.num(objects['electrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
@@ -84,7 +82,6 @@ event_selection:
       - trigger_match
       - metfilters
       - hemcleaning
-      - w_stitching
       - met_50
       - exactly_one_bjet
       - exactly_one_electron
