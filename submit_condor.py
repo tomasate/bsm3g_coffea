@@ -30,15 +30,27 @@ def submit_condor(args):
     """Build condor files. Optionally submit condor job"""
     print(f"Creating {args.workflow}-{args.year}-{args.dataset} condor file")
     
-    jobname = f"{args.workflow}_{args.dataset}"
+
+    if args.label:
+        jobname = f"{args.workflow}_{args.label}_{args.dataset}"
+    else:
+        jobname = f"{args.workflow}_{args.dataset}"
 
     # make condor and log directories
     condor_dir = Path.cwd() / "condor"
-    job_dir = condor_dir / args.workflow / args.year / args.dataset
+    job_dir = condor_dir / args.workflow
+    if args.label:
+        job_dir = job_dir / args.label
+    job_dir = job_dir / args.year / args.dataset
+    
     if not job_dir.exists():
         job_dir.mkdir(parents=True, exist_ok=True)
 
-    log_dir = condor_dir / "logs" / args.workflow / args.year / args.dataset
+    log_dir = condor_dir / "logs" / args.workflow
+    if args.label:
+        log_dir = log_dir / args.label
+    log_dir = log_dir / args.year / args.dataset
+    
     if not log_dir.exists():
         log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -152,6 +164,13 @@ if __name__ == "__main__":
         default="coffea",
         choices=["coffea", "root"],
         help="format of output histogram",
+    )
+    parser.add_argument(
+        "-l",
+        "--label",
+        type=str,
+        default="",
+        help="label for the output directory",
     )
     args = parser.parse_args()
     submit_condor(args)

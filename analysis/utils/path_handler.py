@@ -16,6 +16,7 @@ class Paths:
     def workflow_path(
         self,
         workflow: str,
+        label: str,
         year: str,
         dataset: str
     ) -> pathlib.Path:
@@ -35,6 +36,7 @@ class Paths:
                 elem
                 for elem in [
                     workflow,
+                    label,
                     year,
                     dataset
                 ]

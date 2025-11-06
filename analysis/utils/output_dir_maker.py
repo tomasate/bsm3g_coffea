@@ -5,7 +5,7 @@ def make_output_directory(args) -> str:
     """builds output directories. Returns output path"""
     paths = Paths(eos=args.eos)
     path_args = {}
-    for arg in ["workflow", "year", "dataset"]:
+    for arg in ["workflow", "label", "year", "dataset"]:
         if arg in args:
             path_args[arg] = vars(args)[arg]
         else:
