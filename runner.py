@@ -58,6 +58,13 @@ if __name__ == "__main__":
         choices=["coffea"],
         help="format of output histogram",
     )
+    parser.add_argument(
+        "-l",
+        "--label",
+        type=str,
+        default="",
+        help="label for the output directory",
+    )
     args = parser.parse_args()
 
     # submit (or prepare) a job for each dataset using the given arguments

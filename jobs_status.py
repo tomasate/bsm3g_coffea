@@ -58,6 +58,13 @@ def parse_args():
         default=3,
         help="use .err files that have been modified less than 'hours_ago' hours ago",
     )
+    parser.add_argument(
+        "-l",
+        "--label",
+        type=str,
+        default="",
+        help="label for the output directory",
+    )
     parser.add_argument("--reset", action="store_true", help="descp")
     return parser.parse_args()
 
@@ -263,14 +270,22 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = parse_args()
 
+    if args.label != "":
+        workflow_dir = f"{args.workflow}_{args.label}"
+    else:
+        workflow_dir = args.workflow
+
     if args.reset:
-        subprocess.run(f"rm -rf condor/{args.workflow}/{args.year}", shell=True)
-        subprocess.run(f"rm -rf condor/logs/{args.workflow}/{args.year}", shell=True)
+        subprocess.run(f"rm -rf condor/{workflow_dir}/{args.year}", shell=True)
+        subprocess.run(f"rm -rf condor/logs/{workflow_dir}/{args.year}", shell=True)
         subprocess.run(f"rm -rf analysis/filesets/{args.year}_sites.yaml", shell=True)
         subprocess.run(
             f"rm -rf analysis/filesets/fileset_{args.year}_NANO_lxplus.json", shell=True
         )
-        reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
+        if args.label != "":
+            reset_cmd = f"python3 runner.py -w {args.workflow} -l {args.label} -y {args.year}"
+        else:
+            reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
         if args.eos:
             reset_cmd += " --eos"
         subprocess.run(reset_cmd, shell=True)
@@ -280,8 +295,8 @@ if __name__ == "__main__":
 
     base_dir = Path.cwd()
     condor_dir = base_dir / "condor"
-    job_dir = condor_dir / args.workflow / args.year
-    log_dir = condor_dir / "logs" / args.workflow / args.year
+    job_dir = condor_dir / workflow_dir / args.year
+    log_dir = condor_dir / "logs" / workflow_dir / args.year
     fileset_dir = base_dir / "analysis" / "filesets"
 
     jobnum, jobnum_done, error_file = get_jobs_info(
