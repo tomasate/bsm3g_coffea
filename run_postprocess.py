@@ -11,6 +11,7 @@ from pathlib import Path
 from collections import defaultdict
 from coffea.util import save, load
 from coffea.processor import accumulate
+from analysis.utils import make_output_directory
 from analysis.filesets.utils import get_dataset_config, get_process_maps
 from analysis.workflows.config import WorkflowConfigBuilder
 from analysis.postprocess.coffea_plotter import CoffeaPlotter
@@ -99,6 +100,13 @@ def parse_arguments():
         choices=["coffea", "root"],
         help="Format of output histograms",
     )
+    parser.add_argument(
+        "-l",
+        "--label",
+        type=str,
+        default="",
+        help="label for the output directory",
+    )
     parser.add_argument("--blind", action="store_true", help="Blind data")
     return parser.parse_args()
 
@@ -130,7 +138,7 @@ def load_histogram_file(path: Path):
 if __name__ == "__main__":
     args = parse_arguments()
 
-    output_dir = OUTPUT_DIR / args.workflow / args.year
+    output_dir = make_output_directory(args)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
 

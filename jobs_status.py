@@ -270,8 +270,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     args = parse_args()
 
-    if args.label != "":
-        workflow_dir = f"{args.workflow}_{args.label}"
+    if args.label:
+        workflow_dir = f"{args.workflow}/{args.label}"
     else:
         workflow_dir = args.workflow
 
@@ -282,10 +282,9 @@ if __name__ == "__main__":
         subprocess.run(
             f"rm -rf analysis/filesets/fileset_{args.year}_NANO_lxplus.json", shell=True
         )
-        if args.label != "":
-            reset_cmd = f"python3 runner.py -w {args.workflow} -l {args.label} -y {args.year}"
-        else:
-            reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
+        reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
+        if args.label:
+            reset_cmd += f" -l {args.label}"
         if args.eos:
             reset_cmd += " --eos"
         subprocess.run(reset_cmd, shell=True)

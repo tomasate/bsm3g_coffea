@@ -31,24 +31,25 @@ def submit_condor(args):
     print(f"Creating {args.workflow}-{args.year}-{args.dataset} condor file")
     
 
-    if args.label != "":
-        workflow_dir = f"{args.workflow}_{args.label}"
+    if args.label:
+        jobname = f"{args.workflow}_{args.label}_{args.dataset}"
     else:
-        workflow_dir = args.workflow
-
-    jobname = f"{workflow_dir}_{args.dataset}"
-    #print(f"{jobname=}")
+        jobname = f"{args.workflow}_{args.dataset}"
 
     # make condor and log directories
     condor_dir = Path.cwd() / "condor"
-    job_dir = condor_dir / workflow_dir / args.year / args.dataset
-    #print(f"{job_dir=}")
+    job_dir = condor_dir / args.workflow
+    if args.label:
+        job_dir = job_dir / args.label
+    job_dir = job_dir / args.year / args.dataset
     
     if not job_dir.exists():
         job_dir.mkdir(parents=True, exist_ok=True)
 
-    log_dir = condor_dir / "logs" / workflow_dir / args.year / args.dataset
-    #print(f"{log_dir=}")
+    log_dir = condor_dir / "logs" / args.workflow
+    if args.label:
+        log_dir = log_dir / args.label
+    log_dir = log_dir / args.year / args.dataset
     
     if not log_dir.exists():
         log_dir.mkdir(parents=True, exist_ok=True)
@@ -79,7 +80,6 @@ def submit_condor(args):
 
     # build and save arguments json
     args.output_path = make_output_directory(args)
-    #print(f"{args.output_path=}")
     args_file = job_dir / "arguments.json"
     with open(args_file, "w") as json_file:
         json.dump(vars(args), json_file, indent=4)
@@ -173,5 +173,4 @@ if __name__ == "__main__":
         help="label for the output directory",
     )
     args = parser.parse_args()
-    #print(f"{args.label=}, {type(args.label)=}, {args.workflow=}, {type(args.workflow)=}" )
     submit_condor(args)

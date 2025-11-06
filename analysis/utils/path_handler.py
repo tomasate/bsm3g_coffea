@@ -29,17 +29,14 @@ class Paths:
             mkdir: If True, creates the parent directories. If False, it has no effect.
 
         Returns:
-            Input path.#
+            Input path.
         """
-        if label != "" and  workflow != None:
-            workflow = f"{workflow}_{label}"
-        else:
-            pass
         workflow_path = "/".join(
             [
                 elem
                 for elem in [
                     workflow,
+                    label,
                     year,
                     dataset
                 ]
