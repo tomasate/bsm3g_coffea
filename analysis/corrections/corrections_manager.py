@@ -27,9 +27,9 @@ from analysis.corrections import (
 
 def object_corrector_manager(events, year, run, dataset, workflow_config):
     """apply object level corrections"""
-    
+
     objcorr_config = workflow_config.corrections_config["objects"]
-    
+
     if "jets" in objcorr_config:
         if run == "2":
             apply_jet_corrections(events, year)
@@ -131,7 +131,6 @@ def weight_manager(pruned_ev, year, run, workflow_config, variation, dataset):
                 btag_corrector = BTagCorrector(
                     events=pruned_ev,
                     weights=weights_container,
-                    sf_type="comb",
                     worging_point=weights_config["btagging"]["id"],
                     year=year,
                     full_run=weights_config["btagging"]["full_run"],
@@ -171,7 +170,7 @@ def weight_manager(pruned_ev, year, run, workflow_config, variation, dataset):
                     variation=variation,
                     dataset=dataset,
                     fit=False,
-                    one_dim=False
+                    one_dim=False,
                 )
 
         if "electron" in weights_config:

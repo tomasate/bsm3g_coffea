@@ -1,6 +1,6 @@
 import numpy as np
 import awkward as ak
-from analysis.working_points.utils import load_btag_wps
+from analysis.working_points.utils import get_btag_mask
 
 
 class WorkingPoints:
@@ -250,7 +250,6 @@ class WorkingPoints:
             )
         return wps[wp]
 
-    
     def jets_pileup_id(self, events, wp, year):
         if year.startswith("201"):
             # Run2
@@ -291,18 +290,5 @@ class WorkingPoints:
             # Run3
             return np.ones_like(events.Jet.pt, dtype=bool)
 
-    
-    def jets_deepjet_b(self, events, wp, year):
-        btag_wps = load_btag_wps(tagger="deepJet")
-
-        wps = {}
-        for y in btag_wps:
-            wps[y] = {}
-            for wp_str in btag_wps[y]:
-                wps[y][wp_str] = events.Jet.btagDeepFlavB > btag_wps[y][wp_str]
-
-        if wp not in wps[year]:
-            raise ValueError(
-                f"Invalid value {wp} for DeepJet b-tag working point. Please specify {list(wps[year].keys())}"
-            )
-        return wps[year][wp]
+    def jets_btagging(self, events, wp, year):
+        return get_btag_mask(events.Jet, year, wp)
