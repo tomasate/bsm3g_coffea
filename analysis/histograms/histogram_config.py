@@ -93,6 +93,18 @@ class StrCategoryAxis:
 
 
 @dataclass
+class BooleanAxis:
+    name: str
+    label: str
+    expression: str
+    type_: str = field(default="Boolean", metadata={"alias": "type"})
+
+    def __post_init__(self):
+        self.__dict__["type"] = self.type_
+        self.build_args = {"name": self.name, "label": self.label}
+        
+
+@dataclass
 class HistogramConfig:
     """
     config class for a Histogram
@@ -165,6 +177,7 @@ class HistogramConfig:
             "IntCategory": IntCategoryAxis,
             "StrCategory": StrCategoryAxis,
             "Integer": IntegerAxis,
+            "Boolean": BooleanAxis,
         }
         for name, axis_dict in self.axes.items():
             axis_type = axis_dict.pop("type")
