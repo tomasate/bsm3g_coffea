@@ -157,7 +157,11 @@ corrections:
     partonshowerWeight: true
     pujetid:
       - id: tight
-    btagging: false
+    btagging:
+      - id: medium
+      - full_run: false
+      - bc: true
+      - light: true
     electron: false
     muon:
       - id: tight
