@@ -1,0 +1,164 @@
+datasets:
+  mc:
+    - dy_inclusive
+    - singletop
+    - tt
+    - wjets_ht
+    - diboson
+object_selection:
+  electrons:
+    field: events.Electron
+    cuts:
+      - events.Electron.pt > 55
+      - (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+      - working_points.electrons_id(events, 'wp80iso')
+  muons:
+    field: events.Muon
+    cuts:
+      - events.Muon.pt > 35
+      - np.abs(events.Muon.eta) < 2.4
+      - working_points.muons_id(events, 'tight')
+      - working_points.muons_iso(events, 'tight')
+      - delta_r_mask(events.Muon, objects['electrons'], 0.4)
+  taus:
+    field: events.Tau
+    cuts:
+      - events.Tau.pt > 20
+      - np.abs(events.Tau.eta) < 2.3
+      - np.abs(events.Tau.dz) < 0.2
+      - working_points.taus_vs_jet(events, 'loose')
+      - working_points.taus_vs_ele(events, 'vvloose')
+      - working_points.taus_vs_mu(events, 'loose')
+      - working_points.taus_decaymode(events, '13')
+      - delta_r_mask(events.Tau, objects['electrons'], 0.4)
+      - delta_r_mask(events.Tau, objects['muons'], 0.4)
+  jets:
+    field: events.Jet
+    add_cut:
+      pass_loose_wp:
+        - working_points.jets_btagging(events, 'loose', year)
+      pass_medium_wp:
+        - working_points.jets_btagging(events, 'medium', year)
+      pass_tight_wp:
+        - working_points.jets_btagging(events, 'tight', year)
+    cuts:
+      - events.Jet.pt > 20
+      - np.abs(events.Jet.eta) < 2.4
+      - working_points.jets_id(events, year, 'tightlepveto')
+      - working_points.jets_pileup_id(events, 'tight', year)
+      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
+      - delta_r_mask(events.Jet, objects['muons'], 0.4)
+      - delta_r_mask(events.Jet, objects['taus'], 0.4)
+  met:
+    field: select_met
+event_selection:
+  hlt_paths:
+    electron:
+      - SingleEle
+  selections:
+    goodvertex: events.PV.npvsGood > 0
+    lumi: get_lumi_mask(events, year)
+    trigger: get_trigger_mask(events, hlt_paths, dataset, year)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
+    metfilters: get_metfilters_mask(events, year)
+    met_50: objects['met'].pt > 50
+    hemcleaning: get_hemcleaning_mask(events, year)
+    exactly_one_electron: ak.num(objects['electrons']) == 1
+    muon_veto: ak.num(objects['muons']) == 0
+    tau_veto: ak.num(objects['taus']) == 0
+  categories:
+    central:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - hemcleaning
+      - met_50
+      - tau_veto
+      - muon_veto
+      - exactly_one_electron
+corrections:
+  objects:
+    - jets
+    - jets_veto
+    - muons
+    - taus
+    - met
+  apply_obj_syst: false
+  event_weights:
+    genWeight: true
+    pileupWeight: true
+    l1prefiringWeight: true
+    lhepdfWeight: false
+    lhescaleWeight: false
+    partonshowerWeight: true
+    pujetid: 
+      - id: tight
+    btagging: false
+    electron:
+      - id: wp80iso
+      - reco: true
+      - trigger: true
+    muon: false
+    tau: false
+histogram_config:
+  flow: true
+  add_weight: false
+  add_syst_axis: false
+  axes:
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(\text{jet})$ [GeV]
+      expression: objects['jets'].pt
+    jet_abseta:
+      type: Regular
+      bins: 25
+      start: 0
+      stop: 2.4
+      label: $|\eta(\text{jet})|$
+      expression: np.abs(objects['jets'].eta)
+    jet_flavor:
+      type: IntCategory
+      categories: [0, 4, 5]
+      label: hadronFlavour${jet}$
+      expression: objects['jets'].hadronFlavour
+    jet_pass_loose_wp:
+      type: Boolean
+      label: pass loose WP
+      expression: objects['jets'].pass_loose_wp
+    jet_pass_medium_wp:
+      type: Boolean
+      label: pass medium WP
+      expression: objects['jets'].pass_medium_wp
+    jet_pass_tight_wp:
+      type: Boolean
+      label: pass tight WP
+      expression: objects['jets'].pass_tight_wp
+  layout:
+    eff_loose:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_loose_wp
+    eff_medium:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_medium_wp
+    eff_tight:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_tight_wp

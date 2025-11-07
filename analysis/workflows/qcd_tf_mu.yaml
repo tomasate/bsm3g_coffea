@@ -6,16 +6,22 @@ datasets:
     - singletop
     - tt
     - diboson
+    - wjets_ht
 object_selection:
   muons:
     field: events.Muon
     add_cut:
+      is_loose:
+        - working_points.muons_id(events, 'loose')
+        - working_points.muons_iso(events, 'loose') 
       is_tight:
         - working_points.muons_id(events, 'tight')
         - working_points.muons_iso(events, 'tight')
+      is_loose_not_tight:
+        - working_points.muons_iso(events, 'loose')
+        - working_points.muons_id(events, 'loose')
+        - ~working_points.muons_id(events, 'tight')
     cuts:
-      - working_points.muons_id(events, 'loose')
-      - working_points.muons_iso(events, 'loose')
       - events.Muon.pt > 30
       - np.abs(events.Muon.eta) < 2.4
   electrons:
@@ -54,7 +60,7 @@ object_selection:
       - np.abs(events.Jet.eta) < 2.4
       - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
-      - working_points.jets_deepjet_b(events, 'medium', year)
+      - working_points.jets_btagging(events, 'medium', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
@@ -63,7 +69,6 @@ object_selection:
   dimuons:
     field: select_dimuons_qcd
     cuts:
-      - objects['dimuons'].l1.is_tight
       - (objects['dimuons'].p4.mass < 60.0) | (objects['dimuons'].p4.mass > 120.0)
       - np.sqrt(2 * objects['dimuons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dimuons'].l1.delta_phi(objects['met'])))) > 60
 event_selection:
@@ -76,25 +81,41 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
     trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Muon)
     metfilters: get_metfilters_mask(events, year)
-    met_50: objects['met'].pt > 50
+    met_30: objects['met'].pt > 30
     hemcleaning: get_hemcleaning_mask(events, year)
     two_muon: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
+    two_tight: (ak.sum(objects['dimuons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_tight, axis=1) == 1)
+    one_loose_one_loose_not_tight: ( (ak.sum(objects['dimuons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l2.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l1.is_loose_not_tight, axis=1) == 1) )
   categories:
-    central:
+    two_tight:
       - goodvertex
       - lumi
       - trigger
       - trigger_match
       - metfilters
-      - met_50
+      - met_30
       - hemcleaning
       - two_muon
       - one_dimuon
       - electron_veto
       - tau_veto
+      - two_tight
+    one_loose_one_loose_not_tight:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - met_30
+      - hemcleaning
+      - two_muon
+      - one_dimuon
+      - electron_veto
+      - tau_veto
+      - one_loose_one_loose_not_tight
 corrections:
   objects:
     - jets
@@ -159,19 +180,6 @@ histogram_config:
       stop: 3.14159
       label: $\phi(\mu_1)$
       expression: objects['dimuons'].l1.phi
-    leading_muon_flav: 
-      type: Integer
-      start: 0
-      stop: 15
-      label: genPartFlav($\mu_1$)
-      expression: objects['dimuons'].l1.genPartFlav
-    leading_muon_tightid_wp:
-      type: Regular
-      bins: 2
-      start: 0
-      stop: 2
-      label: $\mu_1$ Pass Tight Selection
-      expression: objects['dimuons'].l1.is_tight
     subleading_muon_pt:
       type: Variable
       edges:
@@ -201,31 +209,12 @@ histogram_config:
       stop: 3.14159
       label: $\phi(\mu_2)$
       expression: objects['dimuons'].l2.phi
-    subleading_muon_flav: 
-      type: Integer
-      start: 0
-      stop: 15
-      label: genPartFlav($\mu_2$)
-      expression: objects['dimuons'].l2.genPartFlav
-    subleading_muon_tightid_wp:
-      type: Regular
-      bins: 2
-      start: 0
-      stop: 2
-      label: $\mu_2$ Pass Tight Selection
-      expression: objects['dimuons'].l2.is_tight
     jet_multiplicity:
       type: Integer
       start: 0
       stop: 14
       label: Jet multiplicity
       expression: ak.num(objects['jets'])
-    bjet_multiplicity:
-      type: Integer
-      start: 0
-      stop: 14
-      label: b-Jet multiplicity
-      expression: ak.num(objects['bjets'])
     met_pt:
       type: Variable
       edges:
@@ -240,19 +229,6 @@ histogram_config:
         - 500
       label: $p_T^{miss}$ [GeV]
       expression: objects['met'].pt
-    met_phi:
-      type: Regular
-      bins: 50
-      start: -3.14159
-      stop: 3.14159
-      label: $\phi(p_T^{miss})$ [GeV]
-      expression: objects['met'].phi
-    npvs:
-      type: Integer
-      start: 0
-      stop: 100
-      label: NPVS
-      expression: events.PV.npvsGood
     muon_met_mass:
       type: Variable
       edges:
@@ -273,17 +249,11 @@ histogram_config:
       - jet_multiplicity
     transverse_mass:
       - muon_met_mass
-      - subleading_muon_tightid_wp
     met:
       - met_pt
-      - subleading_muon_tightid_wp
     leading_muon:
-      - leading_muon_tightid_wp
       - leading_muon_pt
       - leading_muon_eta
     subleading_muon:
-      - subleading_muon_tightid_wp
       - subleading_muon_pt
       - subleading_muon_eta
-    vertex:
-      - npvs

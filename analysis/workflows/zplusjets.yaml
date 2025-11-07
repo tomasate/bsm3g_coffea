@@ -61,7 +61,7 @@ object_selection:
       - events.Jet.pt > 30
       - np.abs(events.Jet.eta) < 2.4
       - working_points.jets_id(events, year, 'tightlepveto')
-      - working_points.jets_deepjet_b(events, 'medium', year)
+      - working_points.jets_btagging(events, 'medium', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
@@ -158,11 +158,7 @@ corrections:
     ISRWeight: false
     pujetid:
       - id: tight
-    btagging:
-      - id: medium
-      - full_run: false
-      - bc: true
-      - light: true
+    btagging: false
     electron: false
     muon:
       - id: tight

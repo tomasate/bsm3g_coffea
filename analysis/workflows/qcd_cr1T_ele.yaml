@@ -1,7 +1,11 @@
 datasets:
+  data: 
+    - electron
   mc:
-    - wjets_ht
-    - wjets_inclusive
+    - dy_inclusive
+    - singletop
+    - tt
+    - diboson
 object_selection:
   electrons:
     field: events.Electron
@@ -46,7 +50,7 @@ object_selection:
       - np.abs(events.Jet.eta) < 2.4
       - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
-      - working_points.jets_deepjet_b(events, 'medium', year)
+      - working_points.jets_btagging(events, 'medium', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
@@ -60,11 +64,10 @@ event_selection:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
     trigger: get_trigger_mask(events, hlt_paths, dataset, year)
-    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Muon)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Electron)
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
-    w_stitching: get_stitching_mask(events, dataset, 'WJetsToLNu_inclusive', 100)
     exactly_two_loose_electrons: ak.num(objects['electrons']) == 2
     one_or_two_tight_electrons: (ak.sum(objects['electrons'].mvaFall17V2Iso_WP80, axis=1) == 1) | (ak.sum(objects['electrons'].mvaFall17V2Iso_WP80, axis=1) == 2)
     muon_veto: ak.num(objects['muons']) == 0
@@ -79,7 +82,6 @@ event_selection:
       - trigger_match
       - metfilters
       - hemcleaning
-      - w_stitching
       - exactly_two_loose_electrons
       - one_or_two_tight_electrons
       - muon_veto
@@ -231,6 +233,36 @@ histogram_config:
         - 500
       label: $p_T^{miss}$ [GeV]
       expression: objects['met'].pt
+    electron_leading_met_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+        - 800
+      label: $m_T(\mu, p_T^{\text{miss}})$ [GeV]
+      expression: np.sqrt(2.0 * ak.firsts(objects['electrons'].pt) * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(ak.firsts(objects['electrons']).delta_phi(objects['met'])))) #primer electron sin importar si es loose or tight
+#    electron_tight_met_mass:
+#      type: Variable
+#      edges:
+#        - 40
+#        - 75
+#        - 100
+#        - 125
+#        - 150
+#        - 175
+#        - 200
+#        - 300
+#        - 500
+#        - 800
+#      label: $m_T(\mu, p_T^{\text{miss}})$ [GeV]
+#      expression: np.sqrt(2.0 * ak.firsts(objects['electrons'][objects['electrons'].tightId]).pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(ak.firsts(objects['electrons'][objects['electrons'].tightId]).delta_phi(objects['met'])))) #primer electron tight de los dos dentro del evento
     met_phi:
       type: Regular
       bins: 50
@@ -251,17 +283,21 @@ histogram_config:
     met:
       - met_pt
       - met_phi
-    leading_electron:
+      #- electron_tight_met_mass
+    mass:
+      - electron_leading_met_mass
+      - met_pt
+    leading_muon:
       - leading_electron_pt
       - leading_electron_eta
-      - leading_electron_phi
+#      - leading_electron_phi
       - leading_electron_flav
-      - leading_electron_passTight
-    subleading_electron:
+#      - leading_electron_passTight
+    subleading_muon:
       - subleading_electron_pt
       - subleading_electron_eta
-      - subleading_electron_phi
+#      - subleading_electron_phi
       - subleading_electron_flav
-      - subleading_electron_passTight
+#      - subleading_electron_passTight
     vertex:
       - npvs
