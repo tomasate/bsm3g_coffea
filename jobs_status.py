@@ -289,7 +289,7 @@ if __name__ == "__main__":
             reset_cmd += " --eos"
         subprocess.run(reset_cmd, shell=True)
 
-    output_dir = Path(make_output_directory(args))
+    output_dir = make_output_directory(args)
     logging.info(f"Reading outputs from: {output_dir}\n")
 
     base_dir = Path.cwd()
