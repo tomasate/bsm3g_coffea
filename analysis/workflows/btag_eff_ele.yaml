@@ -63,7 +63,6 @@ event_selection:
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
-    exactly_two_jets: ak.num(objects['jets']) == 1
     exactly_one_electron: ak.num(objects['electrons']) == 1
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
@@ -76,7 +75,6 @@ event_selection:
       - metfilters
       - hemcleaning
       - met_50
-      - exactly_two_jets
       - tau_veto
       - muon_veto
       - exactly_one_electron
