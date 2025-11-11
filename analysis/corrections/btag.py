@@ -29,6 +29,8 @@ class BTagCorrector:
             worging point {loose, medium, tight}
         year:
             dataset year {2016preVFP, 2016postVFP, 2017, 2018, 2022preEE, 2022postEE, 2023preBPix, 2023postBPix}
+        workflow:
+            workflow name
         variation:
             if 'nominal' (default) add 'nominal', 'up' and 'down' variations to weights container. else, add only 'nominal' weights.
         full_run:
@@ -45,9 +47,10 @@ class BTagCorrector:
         self,
         events,
         weights: Type[Weights],
-        year: str = "2017",
-        worging_point: str = "medium",
-        variation: str = "nominal",
+        year: str,
+        workflow: str,
+        worging_point: str,
+        variation: str,
         full_run: bool = False,
     ) -> None:
         self._year = year
@@ -65,16 +68,23 @@ class BTagCorrector:
             raise ValueError(
                 f"There are no available b-tag SFs for the working point. Please specify {list(self._working_point_map.keys())}"
             )
-
         # check available btag efficiencies (btag_eff_<tagger>_<wp>_<year>.coffea)
-        btag_eff_name = f"btag_eff_{self._tagger}_{self._wp}_{self._year}.coffea"
-        btag_eff_file = pathlib.Path().cwd() / "analysis" / "data" / btag_eff_name
+        btag_eff_name = f"btag_eff_{workflow}_{self._wp}_{self._year}.coffea"
+        btag_eff_file = (
+            pathlib.Path().cwd()
+            / "analysis"
+            / "data"
+            / "btag_efficiencies"
+            / btag_eff_name
+        )
         if not btag_eff_file.exists():
             raise ValueError(f"There is no b-tagging efficiency file '{btag_eff_name}'")
 
         # load efficiency lookup table (only for deepJet)
         # efflookup(pt, |eta|, flavor)
-        with importlib.resources.path("analysis.data", btag_eff_name) as filename:
+        with importlib.resources.path(
+            "analysis.data.btag_efficiencies", btag_eff_name
+        ) as filename:
             self._efflookup = util.load(str(filename))
 
         # define correction set

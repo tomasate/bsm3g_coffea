@@ -69,7 +69,7 @@ def object_corrector_manager(events, year, run, dataset, workflow_config):
         apply_met_phi_corrections(events, year)
 
 
-def weight_manager(pruned_ev, year, run, workflow_config, variation, dataset):
+def weight_manager(pruned_ev, year, run, workflow, workflow_config, variation, dataset):
     """apply event level corrections (weights)"""
     nevents = len(pruned_ev)
     # get weights config info
@@ -131,6 +131,7 @@ def weight_manager(pruned_ev, year, run, workflow_config, variation, dataset):
                 btag_corrector = BTagCorrector(
                     events=pruned_ev,
                     weights=weights_container,
+                    workflow=workflow,
                     worging_point=weights_config["btagging"]["id"],
                     year=year,
                     full_run=weights_config["btagging"]["full_run"],

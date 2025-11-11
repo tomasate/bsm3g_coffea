@@ -36,6 +36,7 @@ class BaseProcessor(processor.ProcessorABC):
         year: str = "2017",
     ):
         self.year = year
+        self.workflow = workflow
         self.year_key = year[:4]
         self.run = "2" if year.startswith("201") else "3"
 
@@ -66,6 +67,7 @@ class BaseProcessor(processor.ProcessorABC):
                         pruned_ev=pruned_ev_cutflow,
                         year=self.year,
                         run=self.run,
+                        workflow=self.workflow,
                         workflow_config=self.workflow_config,
                         variation="nominal",
                         dataset=dataset,
@@ -182,6 +184,7 @@ class BaseProcessor(processor.ProcessorABC):
                 weights_container = weight_manager(
                     pruned_ev=pruned_ev,
                     year=year,
+                    workflow=self.workflow,
                     run=self.run,
                     workflow_config=self.workflow_config,
                     variation=shift_name,
