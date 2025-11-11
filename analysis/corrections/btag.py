@@ -69,7 +69,16 @@ class BTagCorrector:
                 f"There are no available b-tag SFs for the working point. Please specify {list(self._working_point_map.keys())}"
             )
         # check available btag efficiencies (btag_eff_<tagger>_<wp>_<year>.coffea)
-        btag_eff_name = f"btag_eff_{workflow}_{self._wp}_{self._year}.coffea"
+        btag_eff_name_map = {
+            "2b1mu": "btag_eff_mu",
+            "1b1mu": "btag_eff_mu",
+            "2b1e": "btag_eff_ele",
+            "1b1e": "btag_eff_ele",
+        }
+        btag_eff_name = (
+            btag_eff_name_map.get(workflow, f"btag_eff_{workflow}")
+            + f"_{self._wp}_{self._year}.coffea"
+        )
         btag_eff_file = (
             pathlib.Path().cwd()
             / "analysis"
