@@ -92,7 +92,7 @@ event_selection:
     one_loose_one_loose_not_tight: ( (ak.sum(objects['dimuons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose, axis=1) == 1) )
     one_loose_one_tight: ( (ak.sum(objects['dimuons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose, axis=1) == 1) )
   categories:
-    two_tight:
+    2T:
       - goodvertex
       - lumi
       - trigger
@@ -106,21 +106,7 @@ event_selection:
       - electron_veto
       - tau_veto
       - two_tight
-    one_loose_one_loose_not_tight:
-      - goodvertex
-      - lumi
-      - trigger
-      - trigger_match
-      - metfilters
-      - met_50
-      - hemcleaning
-      - two_muon
-      - one_dimuon
-      - one_bjet
-      - electron_veto
-      - tau_veto
-      - one_loose_one_loose_not_tight
-    one_loose_one_tight:
+    1L1T:
       - goodvertex
       - lumi
       - trigger
@@ -134,6 +120,20 @@ event_selection:
       - electron_veto
       - tau_veto
       - one_loose_one_tight
+    1L1LnT:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - met_50
+      - hemcleaning
+      - two_muon
+      - one_dimuon
+      - one_bjet
+      - electron_veto
+      - tau_veto
+      - one_loose_one_loose_not_tight
 corrections:
   objects:
     - jets
@@ -152,7 +152,11 @@ corrections:
     MuBoostWeight: false
     pujetid: 
       - id: tight
-    btagging: false
+    btagging: 
+      - id: medium
+      - bc: true
+      - light: true
+      - full_run: false
     muon:
       - id: false
       - iso: false

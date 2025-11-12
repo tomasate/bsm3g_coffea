@@ -88,7 +88,7 @@ event_selection:
     one_loose_one_tight_dielectron: ( (ak.sum(objects['dielectrons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_tight, axis=1) == 1) ) | ( (ak.sum(objects['dielectrons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose, axis=1) == 1) )
     one_loose_one_loose_not_tight_dielectron: ( (ak.sum(objects['dielectrons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dielectrons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose, axis=1) == 1) )
   categories:
-    two_tight:
+    2T:
       - goodvertex
       - lumi
       - trigger
@@ -101,7 +101,7 @@ event_selection:
       - muon_veto
       - tau_veto
       - two_tight_dielectron
-    one_loose_one_tight:
+    1L1T:
       - goodvertex
       - lumi
       - trigger
@@ -114,7 +114,7 @@ event_selection:
       - muon_veto
       - tau_veto
       - one_loose_one_tight_dielectron
-    one_loose_one_loose_not_tight:
+    1L1LnT:
       - goodvertex
       - lumi
       - trigger
@@ -145,7 +145,11 @@ corrections:
     MuBoostWeight: false
     pujetid: 
       - id: tight
-    btagging: false
+    btagging: 
+      - id: medium
+      - bc: true
+      - light: true
+      - full_run: false
     muon:
       - id: false
       - iso: false

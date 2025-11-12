@@ -31,6 +31,8 @@ class BTagCorrector:
             dataset year {2016preVFP, 2016postVFP, 2017, 2018, 2022preEE, 2022postEE, 2023preBPix, 2023postBPix}
         workflow:
             workflow name
+        category:
+            category name
         variation:
             if 'nominal' (default) add 'nominal', 'up' and 'down' variations to weights container. else, add only 'nominal' weights.
         full_run:
@@ -49,6 +51,7 @@ class BTagCorrector:
         weights: Type[Weights],
         year: str,
         workflow: str,
+        category: str,
         worging_point: str,
         variation: str,
         full_run: bool = False,
@@ -77,7 +80,7 @@ class BTagCorrector:
         }
         btag_eff_name = (
             btag_eff_name_map.get(workflow, f"btag_eff_{workflow}")
-            + f"_{self._wp}_{self._year}.coffea"
+            + f"_{self._wp}_{category}_{self._year}.coffea"
         )
         btag_eff_file = (
             pathlib.Path().cwd()

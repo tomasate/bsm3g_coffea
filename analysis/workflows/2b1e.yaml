@@ -85,7 +85,7 @@ event_selection:
     muon_veto: ak.num(objects['muons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
   categories:
-    central:
+    base:
       - goodvertex
       - lumi
       - trigger
