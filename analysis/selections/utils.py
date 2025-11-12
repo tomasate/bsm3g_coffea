@@ -36,8 +36,9 @@ def select_dileptons_qcd(objects, key):
             "phi": objects[key].phi,
             "mass": objects[key].mass,
             "charge": objects[key].charge,
-            "genPartFlav": objects[key].genPartFlav,
-            "is_tight": objects[key].is_tight
+            "is_loose": objects[key].is_loose,
+            "is_tight": objects[key].is_tight,
+            "is_loose_not_tight": objects[key].is_loose_not_tight
         },
         with_name="PtEtaPhiMCandidate",
         behavior=candidate.behavior,

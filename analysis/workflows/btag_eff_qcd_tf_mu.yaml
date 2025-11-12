@@ -1,6 +1,4 @@
 datasets:
-  data: 
-    - muon
   mc:
     - dy_inclusive
     - singletop
@@ -45,22 +43,18 @@ object_selection:
       - delta_r_mask(events.Tau, objects['muons'], 0.3)
   jets:
     field: events.Jet
+    add_cut:
+      pass_loose_wp:
+        - working_points.jets_btagging(events, 'loose', year)
+      pass_medium_wp:
+        - working_points.jets_btagging(events, 'medium', year)
+      pass_tight_wp:
+        - working_points.jets_btagging(events, 'tight', year)
     cuts:
       - events.Jet.pt > 20
       - np.abs(events.Jet.eta) < 2.4
       - working_points.jets_id(events, year, 'tightlepveto')
       - working_points.jets_pileup_id(events, 'tight', year)
-      - delta_r_mask(events.Jet, objects['electrons'], 0.4)
-      - delta_r_mask(events.Jet, objects['muons'], 0.4)
-      - delta_r_mask(events.Jet, objects['taus'], 0.4)
-  bjets:
-    field: events.Jet
-    cuts:
-      - events.Jet.pt > 20
-      - np.abs(events.Jet.eta) < 2.4
-      - working_points.jets_id(events, year, 'tightlepveto')
-      - working_points.jets_pileup_id(events, 'tight', year)
-      - working_points.jets_btagging(events, 'medium', year)
       - delta_r_mask(events.Jet, objects['electrons'], 0.4)
       - delta_r_mask(events.Jet, objects['muons'], 0.4)
       - delta_r_mask(events.Jet, objects['taus'], 0.4)
@@ -83,7 +77,6 @@ event_selection:
     metfilters: get_metfilters_mask(events, year)
     met_50: objects['met'].pt > 50
     hemcleaning: get_hemcleaning_mask(events, year)
-    one_bjet: ak.num(objects['bjets']) == 1
     two_muon: ak.num(objects['muons']) == 2
     one_dimuon: ak.num(objects['dimuons']) == 1
     electron_veto: ak.num(objects['electrons']) == 0
@@ -102,7 +95,6 @@ event_selection:
       - hemcleaning
       - two_muon
       - one_dimuon
-      - one_bjet
       - electron_veto
       - tau_veto
       - two_tight
@@ -116,7 +108,6 @@ event_selection:
       - hemcleaning
       - two_muon
       - one_dimuon
-      - one_bjet
       - electron_veto
       - tau_veto
       - one_loose_one_loose_not_tight
@@ -130,7 +121,6 @@ event_selection:
       - hemcleaning
       - two_muon
       - one_dimuon
-      - one_bjet
       - electron_veto
       - tau_veto
       - one_loose_one_tight
@@ -162,112 +152,62 @@ corrections:
     tau: false
 histogram_config:
   flow: true
-  add_weight: true
-  add_syst_axis: true
+  add_weight: false
+  add_syst_axis: false
   axes:
-    leading_muon_pt:
+    jet_pt:
       type: Variable
       edges:
+        - 20
+        - 30
         - 50
-        - 80
-        - 110
-        - 140
-        - 180
-        - 210
-        - 240
-        - 270
-        - 300
-        - 500
-      label: $p_T(\mu_1)$ [GeV]
-      expression: objects['dimuons'].l1.pt
-    leading_muon_eta:
-      type: Regular
-      bins: 50
-      start: -2.4
-      stop: 2.4
-      label: $\eta(\mu_1)$
-      expression: objects['dimuons'].l1.eta
-    leading_muon_phi:
-      type: Regular
-      bins: 50
-      start: -3.14159
-      stop: 3.14159
-      label: $\phi(\mu_1)$
-      expression: objects['dimuons'].l1.phi
-    subleading_muon_pt:
-      type: Variable
-      edges:
-        - 50
-        - 80
-        - 110
-        - 140
-        - 180
-        - 210
-        - 240
-        - 270
-        - 300
-        - 500
-      label: $p_T(\mu_2)$ [GeV]
-      expression: objects['dimuons'].l2.pt
-    subleading_muon_eta:
-      type: Regular
-      bins: 50
-      start: -2.4
-      stop: 2.4
-      label: $\eta(\mu_2)$
-      expression: objects['dimuons'].l2.eta
-    subleading_muon_phi:
-      type: Regular
-      bins: 50
-      start: -3.14159
-      stop: 3.14159
-      label: $\phi(\mu_2)$
-      expression: objects['dimuons'].l2.phi
-    jet_multiplicity:
-      type: Integer
-      start: 0
-      stop: 14
-      label: Jet multiplicity
-      expression: ak.num(objects['jets'])
-    met_pt:
-      type: Variable
-      edges:
-        - 50
-        - 75
+        - 70
         - 100
-        - 125
-        - 150
-        - 175
+        - 140
         - 200
         - 300
-        - 500
-      label: $p_T^{miss}$ [GeV]
-      expression: objects['met'].pt
-    muon_met_mass:
+        - 600
+        - 1000
+      label: Jet $p_T$ [GeV]
+      expression: objects['jets'].pt
+    jet_abseta:
       type: Variable
-      edges:
-        - 40
-        - 75
-        - 100
-        - 125
-        - 150
-        - 175
-        - 200
-        - 300
-        - 500
-        - 800
-      label: $m_T(\mu, p_T^{\text{miss}})$ [GeV]
-      expression: np.sqrt(2 * objects['dimuons'].l1.pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['dimuons'].l1.delta_phi(objects['met']))))
+      edges: 
+        - 0
+        - 1.3
+        - 2.5
+      label: Jet $|\eta|$
+      expression: np.abs(objects['jets'].eta)
+    jet_flavor:
+      type: IntCategory
+      categories: [0, 4, 5]
+      label: Jet hadronFlavour
+      expression: objects['jets'].hadronFlavour
+    jet_pass_loose_wp:
+      type: Boolean
+      label: pass loose WP
+      expression: objects['jets'].pass_loose_wp
+    jet_pass_medium_wp:
+      type: Boolean
+      label: pass medium WP
+      expression: objects['jets'].pass_medium_wp
+    jet_pass_tight_wp:
+      type: Boolean
+      label: pass tight WP
+      expression: objects['jets'].pass_tight_wp
   layout:
-    multiplicity:
-      - jet_multiplicity
-    transverse_mass:
-      - muon_met_mass
-    met:
-      - met_pt
-    leading_muon:
-      - leading_muon_pt
-      - leading_muon_eta
-    subleading_muon:
-      - subleading_muon_pt
-      - subleading_muon_eta
+    eff_loose:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_loose_wp
+    eff_medium:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_medium_wp
+    eff_tight:
+      - jet_pt
+      - jet_abseta
+      - jet_flavor
+      - jet_pass_tight_wp
