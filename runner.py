@@ -65,6 +65,13 @@ if __name__ == "__main__":
         default="",
         help="label for the output directory",
     )
+    parser.add_argument(
+        "-m",
+        "--memory",
+        type=str,
+        default="2000",
+        help="Requested memory (in MB) for the condor job",
+    )
     args = parser.parse_args()
 
     # submit (or prepare) a job for each dataset using the given arguments
@@ -83,6 +90,8 @@ if __name__ == "__main__":
             str(args.nfiles),
             "--output_format",
             args.output_format,
+            "--memory",
+            args.memory
         ]
         if args.submit:
             cmd_args.append("--submit")

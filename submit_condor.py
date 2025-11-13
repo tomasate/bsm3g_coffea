@@ -99,6 +99,7 @@ def submit_condor(args):
                 "INPUTFILES", f"{partition_file},{jobnum_file},{args_file}"
             )
             line = line.replace("JOBNUM_FILE", str(jobnum_file))
+            line = line.replace("MEMORY", args.memory)
             condor_file.write(line)
 
     if args.submit:
@@ -171,6 +172,13 @@ if __name__ == "__main__":
         type=str,
         default="",
         help="label for the output directory",
+    )
+    parser.add_argument(
+        "-m",
+        "--memory",
+        type=str,
+        default="2000",
+        help="Requested memory (in MB) for the condor job",
     )
     args = parser.parse_args()
     submit_condor(args)
