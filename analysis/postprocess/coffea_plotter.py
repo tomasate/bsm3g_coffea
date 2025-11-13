@@ -57,7 +57,6 @@ class CoffeaPlotter:
         with open(color_map_file, "r") as f:
             color_map = yaml.safe_load(f)
         self.color_map = {p: c for p, c in color_map.items() if p in processes}
-        
 
     def get_histogram(
         self,
@@ -68,7 +67,9 @@ class CoffeaPlotter:
     ):
         """returns histogram by processes/variable/category"""
         # get variable histogram for nominal variation and category
-        selector = {"variation": variation}
+        selector = {}
+        if "variation" in histogram.axes.name:
+            selector.update({"variation": variation})
         if "category" in histogram.axes.name:
             selector["category"] = category
         histogram = histogram[selector].project(variable)
@@ -136,7 +137,7 @@ class CoffeaPlotter:
                     histogram=aux_histogram,
                 )
                 # save variations histograms
-                if key == "mc":
+                if (key == "mc") and ("variation" in aux_histogram.axes.name):
                     for variation in get_variations_keys(self.processed_histograms):
                         var_cats = [v for v in aux_histogram.axes["variation"]]
                         if not f"{variation}Up" in var_cats:
@@ -157,35 +158,44 @@ class CoffeaPlotter:
         return histogram_info
 
     def plot_uncert_band(self, histogram_info, ax):
-        # initialize up/down errors with statisticall error
-        mcstat_err2 = self.nominal_variances
-        err2_up = mcstat_err2
-        err2_down = mcstat_err2
-        for variation in get_variations_keys(self.processed_histograms):
-            # Up/down variations for a single MC sample
-            var_up = histogram_info["mc"]["variations"][f"{variation}Up"].values()
-            var_down = histogram_info["mc"]["variations"][f"{variation}Down"].values()
-            # Compute the uncertainties corresponding to the up/down variations
-            err_up = var_up - self.nominal_values
-            err_down = var_down - self.nominal_values
-            # Compute the flags to check which of the two variations (up and down) are pushing the nominal value up and down
-            up_is_up = err_up > 0
-            down_is_down = err_down < 0
-            # Compute the flag to check if the uncertainty is one-sided, i.e. when both variations are up or down
-            is_onesided = up_is_up ^ down_is_down
-            # Sum in quadrature of the systematic uncertainties taking into account if the uncertainty is one- or double-sided
-            err2_up_twosided = np.where(up_is_up, err_up**2, err_down**2)
-            err2_down_twosided = np.where(up_is_up, err_down**2, err_up**2)
-            err2_max = np.maximum(err2_up_twosided, err2_down_twosided)
-            err2_up_onesided = np.where(is_onesided & up_is_up, err2_max, 0)
-            err2_down_onesided = np.where(is_onesided & down_is_down, err2_max, 0)
-            err2_up_combined = np.where(is_onesided, err2_up_onesided, err2_up_twosided)
-            err2_down_combined = np.where(
-                is_onesided, err2_down_onesided, err2_down_twosided
-            )
-            # Sum in quadrature of the systematic uncertainty corresponding to a MC sample
-            err2_up += err2_up_combined
-            err2_down += err2_down_combined
+        if histogram_info["mc"]["variations"]:
+            # initialize up/down errors with statisticall error
+            mcstat_err2 = self.nominal_variances
+            err2_up = mcstat_err2
+            err2_down = mcstat_err2
+            for variation in get_variations_keys(self.processed_histograms):
+                # Up/down variations for a single MC sample
+                var_up = histogram_info["mc"]["variations"][f"{variation}Up"].values()
+                var_down = histogram_info["mc"]["variations"][
+                    f"{variation}Down"
+                ].values()
+                # Compute the uncertainties corresponding to the up/down variations
+                err_up = var_up - self.nominal_values
+                err_down = var_down - self.nominal_values
+                # Compute the flags to check which of the two variations (up and down) are pushing the nominal value up and down
+                up_is_up = err_up > 0
+                down_is_down = err_down < 0
+                # Compute the flag to check if the uncertainty is one-sided, i.e. when both variations are up or down
+                is_onesided = up_is_up ^ down_is_down
+                # Sum in quadrature of the systematic uncertainties taking into account if the uncertainty is one- or double-sided
+                err2_up_twosided = np.where(up_is_up, err_up**2, err_down**2)
+                err2_down_twosided = np.where(up_is_up, err_down**2, err_up**2)
+                err2_max = np.maximum(err2_up_twosided, err2_down_twosided)
+                err2_up_onesided = np.where(is_onesided & up_is_up, err2_max, 0)
+                err2_down_onesided = np.where(is_onesided & down_is_down, err2_max, 0)
+                err2_up_combined = np.where(
+                    is_onesided, err2_up_onesided, err2_up_twosided
+                )
+                err2_down_combined = np.where(
+                    is_onesided, err2_down_onesided, err2_down_twosided
+                )
+                # Sum in quadrature of the systematic uncertainty corresponding to a MC sample
+                err2_up += err2_up_combined
+                err2_down += err2_down_combined
+        else:
+            err2_up = np.sqrt(self.nominal_values)
+            err2_down = np.sqrt(self.nominal_values)
+            self.style["uncert_band_kwargs"]["label"] = "Stat unc"
 
         self.band_up = self.nominal_values + np.sqrt(err2_up)
         self.band_down = self.nominal_values - np.sqrt(err2_down)

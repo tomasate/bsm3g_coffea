@@ -153,7 +153,7 @@ if __name__ == "__main__":
     _, process_name_map, key_process_map = get_process_maps(workflow_config, args.year)
 
     if args.postprocess and (args.year not in ["2016", "2022", "2023"]):
-        logging.info(workflow_config.to_yaml())
+        # logging.info(workflow_config.to_yaml())
         print_header(f"Reading outputs from: {output_dir}")
 
         output_files = [
@@ -166,9 +166,17 @@ if __name__ == "__main__":
         samples_in_out = [
             str(p).split("/")[-1] for p in output_dir.iterdir() if p.is_dir()
         ]
+
+        dataset_keys = [
+            key
+            for dataset_keys in workflow_config.datasets.values()
+            for key in dataset_keys
+        ]
+
         for sample, config in get_dataset_config(args.year).items():
             if sample in samples_in_out:
-                process_samples_map[config["process"]].append(sample)
+                if config["key"] in dataset_keys:
+                    process_samples_map[config["process"]].append(sample)
 
         # group output file paths by sample name
         grouped_outputs = {}
