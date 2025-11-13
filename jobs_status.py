@@ -66,6 +66,13 @@ def parse_args():
         help="label for the output directory",
     )
     parser.add_argument("--reset", action="store_true", help="descp")
+    parser.add_argument(
+        "-m",
+        "--memory",
+        type=str,
+        default="2000",
+        help="Requested memory (in MB) for the condor job",
+    )
     return parser.parse_args()
 
 
@@ -282,7 +289,7 @@ if __name__ == "__main__":
         subprocess.run(
             f"rm -rf analysis/filesets/fileset_{args.year}_NANO_lxplus.json", shell=True
         )
-        reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year}"
+        reset_cmd = f"python3 runner.py -w {args.workflow} -y {args.year} -m {args.memory}"
         if args.label:
             reset_cmd += f" -l {args.label}"
         if args.eos:
