@@ -615,7 +615,7 @@ It can also regenerate filesets and resubmit jobs if needed.
 
 Once the Condor jobs are completed and all outputs are saved under the `outputs/` directory, you can run `run_postprocess.py` to aggregate results, compute cutflows, and generate plots
 ```bash
-python3 run_postprocess.py --workflow <workflow> --year <year> --postprocess --plot --log
+python3 run_postprocess.py --workflow <workflow> --year <year> --postprocess --plot --log --eos
 ``` 
 
 After running post-processing for the two campaigns of a particular year, you can use the same command (e.g. `--year 2016`) to automatically combine both campaigns and compute joint results and plots.
