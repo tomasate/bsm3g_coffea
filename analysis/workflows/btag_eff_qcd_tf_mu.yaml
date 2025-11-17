@@ -82,7 +82,7 @@ event_selection:
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
     two_tight: (ak.sum(objects['dimuons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_tight, axis=1) == 1)
-    one_loose_one_loose_not_tight: ( (ak.sum(objects['dimuons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose, axis=1) == 1) )
+    one_tight_one_loose_not_tight: ( (ak.sum(objects['dimuons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_tight, axis=1) == 1) )
     one_loose_one_tight: ( (ak.sum(objects['dimuons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_tight, axis=1) == 1) ) | ( (ak.sum(objects['dimuons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dimuons'].l2.is_loose, axis=1) == 1) )
   categories:
     2T:
@@ -111,7 +111,7 @@ event_selection:
       - electron_veto
       - tau_veto
       - one_loose_one_tight
-    1L1LnT:
+    1T1LnT:
       - goodvertex
       - lumi
       - trigger
@@ -123,7 +123,7 @@ event_selection:
       - one_dimuon
       - electron_veto
       - tau_veto
-      - one_loose_one_loose_not_tight
+      - one_tight_one_loose_not_tight
 corrections:
   objects:
     - jets

@@ -86,7 +86,7 @@ event_selection:
     tau_veto: ak.num(objects['taus']) == 0
     two_tight_dielectron: (ak.sum(objects['dielectrons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_tight, axis=1) == 1)
     one_loose_one_tight_dielectron: ( (ak.sum(objects['dielectrons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_tight, axis=1) == 1) ) | ( (ak.sum(objects['dielectrons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose, axis=1) == 1) )
-    one_loose_one_loose_not_tight_dielectron: ( (ak.sum(objects['dielectrons'].l1.is_loose, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dielectrons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose, axis=1) == 1) )
+    one_tight_one_loose_not_tight_dielectron: ( (ak.sum(objects['dielectrons'].l1.is_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_loose_not_tight, axis=1) == 1) ) | ( (ak.sum(objects['dielectrons'].l1.is_loose_not_tight, axis=1) == 1) & (ak.sum(objects['dielectrons'].l2.is_tight, axis=1) == 1) )
   categories:
     2T:
       - goodvertex
@@ -114,7 +114,7 @@ event_selection:
       - muon_veto
       - tau_veto
       - one_loose_one_tight_dielectron
-    1L1LnT:
+    1T1LnT:
       - goodvertex
       - lumi
       - trigger
@@ -126,7 +126,7 @@ event_selection:
       - two_electrons
       - muon_veto
       - tau_veto
-      - one_loose_one_loose_not_tight_dielectron
+      - one_tight_one_loose_not_tight_dielectron
 corrections:
   objects:
     - jets
