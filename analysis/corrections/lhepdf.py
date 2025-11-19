@@ -80,6 +80,7 @@ def add_lhepdf_weight(events, weights_container, variation):
 
         else:
             print("No LHEPdf Weights in dataset, skiping PDF/AlphaS systematic Weight")
+            delta_pdf = np.ones(len(events))
             w_up_pdf = np.ones(len(events))
             w_down_pdf = np.ones(len(events))
             w_up_alpha = np.ones(len(events))
