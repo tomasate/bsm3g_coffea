@@ -109,13 +109,21 @@ class CoffeaPlotter:
             histogram_info["signal"] = {"nominal": {}}
 
         for process, histogram_dict in self.processed_histograms.items():
+            axis_exists = False
             if variable in histogram_dict:
                 aux_histogram = histogram_dict[variable]
+                axis_exists = True
             else:
                 for key in histogram_dict:
                     if variable in histogram_dict[key].axes.name:
                         aux_histogram = histogram_dict[key]
+                        axis_exists = True
                         break
+
+            if not axis_exists:
+                raise ValueError(
+                    f"'{variable}' axis not found in workflow's output histogram"
+                )
 
             if process == "Data":
                 histogram_info["data"] = self.get_histogram(
