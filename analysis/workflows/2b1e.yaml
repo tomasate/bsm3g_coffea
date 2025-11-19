@@ -109,10 +109,11 @@ corrections:
     genWeight: true
     pileupWeight: true
     l1prefiringWeight: true
-    lhepdfWeight: false
-    lhescaleWeight: false
+    lhepdfWeight: true
+    lhescaleWeight: true
     partonshowerWeight: true
-    EleBoostWeight: false
+    topPtWeight: true
+    topBoostWeight: false
     pujetid: 
       - id: tight
     btagging: 

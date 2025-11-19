@@ -7,16 +7,16 @@ from analysis.corrections import (
     ElectronCorrector,
     MuonHighPtCorrector,
     add_isr_weight,
+    add_top_pt_weight,
     add_lhepdf_weight,
     add_pileup_weight,
     add_pujetid_weight,
     add_scalevar_weight,
+    add_top_boost_weight,
     apply_jet_corrections,
     apply_jerc_corrections,
     add_l1prefiring_weight,
     add_partonshower_weight,
-    add_muon_boost_weight,
-    add_electron_boost_weight,
     apply_met_phi_corrections,
     apply_electron_ss_corrections,
     apply_rochester_corrections_run2,
@@ -69,7 +69,9 @@ def object_corrector_manager(events, year, run, dataset, workflow_config):
         apply_met_phi_corrections(events, year)
 
 
-def weight_manager(pruned_ev, year, run, workflow, workflow_config, variation, dataset, category):
+def weight_manager(
+    pruned_ev, year, run, workflow, workflow_config, variation, dataset, category
+):
     """apply event level corrections (weights)"""
     nevents = len(pruned_ev)
     # get weights config info
@@ -100,21 +102,40 @@ def weight_manager(pruned_ev, year, run, workflow, workflow_config, variation, d
                     )
         if "lhepdfWeight" in weights_config:
             if weights_config["lhepdfWeight"]:
-                if "LHEPdfWeight" in pruned_ev.fields:
-                    add_lhepdf_weight(
-                        events=pruned_ev,
-                        weights_container=weights_container,
-                        variation=variation,
-                    )
+                add_lhepdf_weight(
+                    events=pruned_ev,
+                    weights_container=weights_container,
+                    variation=variation,
+                )
 
         if "lhescaleWeight" in weights_config:
             if weights_config["lhescaleWeight"]:
-                if "LHEScaleWeight" in pruned_ev.fields:
-                    add_scalevar_weight(
+                add_scalevar_weight(
+                    events=pruned_ev,
+                    weights_container=weights_container,
+                    variation=variation,
+                )
+
+        if "topPtWeight" in weights_config:
+            if weights_config["topPtWeight"]:
+                if dataset.startswith("TTTo"):
+                    add_top_pt_weight(
                         events=pruned_ev,
                         weights_container=weights_container,
+                        dataset=dataset,
                         variation=variation,
                     )
+
+        if "topBoostWeight" in weights_config:
+            if weights_config["topBoostWeight"]:
+                add_top_boost_weight(
+                    events=pruned_ev,
+                    weights_container=weights_container,
+                    year=year,
+                    variation=variation,
+                    workflow=workflow,
+                    dataset=dataset,
+                )
 
         if "pujetid" in weights_config:
             if weights_config["pujetid"]:
@@ -142,26 +163,6 @@ def weight_manager(pruned_ev, year, run, workflow, workflow_config, variation, d
                     btag_corrector.add_btag_weights(flavor="bc")
                 if weights_config["btagging"]["light"]:
                     btag_corrector.add_btag_weights(flavor="light")
-
-        if "EleBoostWeight" in weights_config:
-            if weights_config["EleBoostWeight"]:
-                add_electron_boost_weight(
-                    events=pruned_ev,
-                    weights=weights_container,
-                    year=year,
-                    variation=variation,
-                    dataset=dataset,
-                )
-
-        if "MuBoostWeight" in weights_config:
-            if weights_config["MuBoostWeight"]:
-                add_muon_boost_weight(
-                    events=pruned_ev,
-                    weights=weights_container,
-                    year=year,
-                    variation=variation,
-                    dataset=dataset,
-                )
 
         if "ISRWeight" in weights_config:
             if weights_config["ISRWeight"]:

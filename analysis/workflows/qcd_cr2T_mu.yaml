@@ -104,7 +104,8 @@ corrections:
     lhepdfWeight: false
     lhescaleWeight: false
     partonshowerWeight: true
-    MuBoostWeight: false
+    topPtWeight: true
+    topBoostWeight: false
     pujetid: 
       - id: tight
     btagging: 
