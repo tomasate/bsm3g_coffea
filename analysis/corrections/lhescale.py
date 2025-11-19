@@ -17,10 +17,10 @@ def add_scalevar_weight(events, weights_container, variation):
     ' [7] is renscfact=2d0 facscfact=1d0 ',
     ' [8] is renscfact=2d0 facscfact=2d0 ']
     """
-    lhe_weights = events.LHEScaleWeight
     nom = np.ones(len(weights_container.weight()))
     if variation == "nominal":
         if "LHEScaleWeight" in events.fields:
+            lhe_weights = events.LHEScaleWeight
             if len(lhe_weights) > 0:
                 if len(lhe_weights[0]) == 9:
                     nom = lhe_weights[:, 4]
@@ -48,6 +48,5 @@ def add_scalevar_weight(events, weights_container, variation):
                 weights_container.add("scalevar_muR", nom, nom, nom)
                 weights_container.add("scalevar_muF", nom, nom, nom)
                 weights_container.add("scalevar_muR_muF", nom, nom, nom)
-
     else:
         weights_container.add("scalevar_3pt", nom)
